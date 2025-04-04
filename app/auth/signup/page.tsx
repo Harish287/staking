@@ -1,15 +1,15 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "@/store/slices/store";
-import { registerUser } from "../../../store/slices/index";
+import { registerUser,resendConfirmationEmail  } from "../../../store/slices/index";
 import { Spinner } from "@/components/ui/spinner";
 import Image from "next/image";
 import Logo from "../../../assets/logo2x.png";
 import { useRouter, useSearchParams } from "next/navigation";
-import ReSendEmail from "../signup/resendemail"
+
 
 type FormData = {
   name: string;
@@ -41,12 +41,13 @@ const RegisterPage: React.FC = () => {
   const router = useRouter();
 
   const [loading, setLoading] = useState(false);
-  const [showResend, setShowResend] = useState(false);
+  const [showResend, setShowResend] = useState(true);
+  const [email, setEmail] = useState("");
 
   const onSubmit = async (data: FormData) => {
     setLoading(true);
-    setShowResend(false);
-
+    setShowResend(true); // Keep the Resend button visible
+  
     if (data.password !== data.confirm_password) {
       setError("confirm_password", {
         type: "manual",
@@ -55,30 +56,47 @@ const RegisterPage: React.FC = () => {
       setLoading(false);
       return;
     }
-
+  
     const finalData = {
       ...data,
       referral_token: params.referral_token,
     };
-
+  
     try {
       await dispatch(registerUser(finalData)).unwrap();
+      setEmail(data.email); // Store email for later use
       alert("A verification email has been sent. Please check your inbox and verify your email to complete registration.");
-      router.push("");
+      router.push(""); // Redirect to another page
     } catch (error: any) {
       console.error("Registration error:", error);
-      if (error.detail?.includes("verify your email")) {
+  
+      // Show Resend button only if the backend says email verification is needed
+      if (error.detail?.toLowerCase().includes("verify your email")) {
         setShowResend(true);
       }
+  
       alert(error.detail || "An unexpected error occurred. Please try again.");
     } finally {
       setLoading(false);
     }
   };
+  
 
-  const handleResendEmail = async () => {
-    alert("Verification email resent! Please check your inbox.");
-    setShowResend(false);
+  const [resendLoading, setResendLoading] = useState(false);
+
+  const handleResendEmail = async (email: string) => {
+    setResendLoading(true); // Show loading spinner
+
+    try {
+      await dispatch(resendConfirmationEmail({ email })).unwrap();
+      alert("A new verification email has been sent.");
+    } catch (error: any) {
+      console.error("Error resending email:", error);
+      alert(error || "Failed to resend email. Please try again later.");
+    } finally {
+      setResendLoading(false); // Hide loading spinner
+    }
+
   };
   
   return (
@@ -167,17 +185,23 @@ const RegisterPage: React.FC = () => {
               {errors.mobile && <p className="text-red-500 text-sm">{errors.mobile.message}</p>}
             </div>
        
-            <div>  <ReSendEmail/></div>
+   
             <button type="submit" className="w-full bg-gradient-to-r from-pink-700 to-gray-800 text-white font-semibold py-2 rounded-md mt-4 hover:scale-105" disabled={loading}>
               {loading ? <Spinner /> : "Sign Up"}
             </button>
           </form>
-        
-          {/* {showResend && (
-            <button onClick={handleResendEmail} className="mt-4 text-pink-400 underline hover:text-pink-600">
-              Resend Verification Email
-            </button>
-          )} */}
+         {showResend && (
+            <div className="mt-4">
+              <button
+                 className="w-full bg-red-500 text-white font-semibold py-2 rounded-md mt-4"
+                onClick={() => handleResendEmail(email)}
+                disabled={resendLoading}
+              >
+                {resendLoading ? <Spinner /> : "Resend Confirmation Email"}
+              </button>
+            </div>
+          )}
+       
           <p className="text-white text-sm mt-4">
             Already have an account?{" "}
             <a href="/auth/signin" className="text-pink-700 font-semibold hover:underline">

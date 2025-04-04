@@ -210,11 +210,20 @@ export const resendConfirmationEmail = createAsyncThunk(
   "auth/resendConfirmationEmail",
   async ({ email }: { email: string }, { rejectWithValue }) => {
     try {
-      const response = await axios.post(`${baseURL}user/email_resend`, {
-        email,
-      });
-      return response.data; // Assuming success response
+      const response = await axios.post(
+        `${baseURL}user/email_resend`,
+        { email }, // API might not need this
+        {
+          headers: {
+            Authorization: `Basic ${btoa(`${email}:your_password`)}`, // Fix authentication
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      return response.data;
     } catch (error: any) {
+      console.error("API Error:", error.response?.data || error.message);
       return rejectWithValue(
         error.response?.data || "Failed to resend confirmation email"
       );
