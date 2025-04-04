@@ -1,7 +1,7 @@
 import { useRouter } from "next/navigation";
 import { useDispatch } from "react-redux";
-import { AppDispatch } from "../../redux/auth-slice/store"; // Ensure correct store path
-import { logoutUser } from "../../redux/auth-slice/index"; 
+import { AppDispatch } from "../../store/slices/store"; // Ensure correct store path
+import { logoutUser } from "../../store/slices/index"; 
 import Cookies from "js-cookie";
 
 const useLogout = () => {

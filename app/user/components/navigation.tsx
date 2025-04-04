@@ -27,6 +27,8 @@ import {
 import { Button } from "../../../components/ui/button";
 import { NotebookText } from "lucide-react";
 import useLogout from "../../../components/hooks/userLogout";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store/slices/store";
 
 function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
@@ -38,6 +40,7 @@ function Navigation() {
   //   localStorage.removeItem("token");
   //   router.push("/auth/signin");
   // };
+  const { user,user_id ,name } = useSelector((state: RootState) => state.auth);
 
   return (
     <div>
@@ -58,7 +61,7 @@ function Navigation() {
             <h2>KAIT Staking - User Panel</h2>
           </div>
           <div className="flex items-center text-gray-100">
-            <p className=" items-center flex  ">
+            <div className=" items-center flex  ">
               {" "}
               Hello! /user
               <DropdownMenu>
@@ -71,7 +74,8 @@ function Navigation() {
                 </DropdownMenuTrigger>
 
                 <DropdownMenuContent className="w-40 mr-20 bg-white">
-                  <DropdownMenuLabel>Hello! </DropdownMenuLabel>
+                  <DropdownMenuLabel>Hello!    <h2>Welcome, {name}!</h2>
+                  <p>Your User ID: {user_id}</p></DropdownMenuLabel>
                   <DropdownMenuSeparator className=" bg-black" />
                   <DropdownMenuGroup>
                     <DropdownMenuItem>
@@ -97,7 +101,7 @@ function Navigation() {
                   </DropdownMenuGroup>
                 </DropdownMenuContent>
               </DropdownMenu>
-            </p>
+            </div>
           </div>
 
           <button
@@ -140,14 +144,16 @@ function Navigation() {
       </nav>
 
       <nav
-        className={`flex flex-col lg:flex-row md:flex-col sm:flex-col justify-center items-center
-           gap-6  bg-white box-border shadow-xl ${isOpen ? "block" : "hidden"} lg:flex transition-all duration-300`}
+        className={`flex flex-col lg:flex-row md:flex-col sm:flex-col container m-auto justify-center items-center
+           gap-6  bg-white box-border shadow-xl ${
+             isOpen ? "block" : "hidden"
+           } lg:flex transition-all duration-300`}
       >
         <Link
           href="/user/dashboard"
-          className="flex justify-center items-center py-[12px] gap-[5px] text-pink-800"
+          className="flex justify-center text-[14px] items-center py-[12px] gap-[5px] text-pink-800"
         >
-          <MdOutlineDashboard className=" text-[23px]" /> Dashboard
+          <MdOutlineDashboard className=" text-[14px]" /> Dashboard
         </Link>
 
         <div className="flex">
@@ -155,9 +161,9 @@ function Navigation() {
             <div className="flex items-center justify-between py-[12px] text-pink-800">
               <Link
                 href="#"
-                className="menu-hover text-base font-medium  flex items-center justify-center  gap-[5px]"
+                className="menu-hover text-[14px] font-medium  flex items-center justify-center  gap-[5px]"
               >
-                <RiWallet3Line className=" text-[23px]" /> KAIT Wallet
+                <RiWallet3Line className=" text-[14px]" /> KAIT Wallet
               </Link>
               <span>
                 <svg
@@ -172,7 +178,7 @@ function Navigation() {
               </span>
             </div>
 
-            <div className="invisible absolute z-50 text-sm flex w-max h-auto flex-col bg-gray-100 py-1 px-4 text-pink-800 shadow-xl group-hover:visible">
+            <div className="invisible absolute z-50 text-[14px] flex w-max h-auto flex-col bg-gray-100 py-1 px-4 text-pink-800 shadow-xl group-hover:visible">
               <Link
                 href="/user/kaitwallet/summary "
                 className="my-2 flex items-center border-b border-gray-100 font-semibold text-pink-800 hover:text-pink-700 md:mx-2"
@@ -189,9 +195,9 @@ function Navigation() {
             <div className="flex items-center justify-between py-[12px] text-pink-800">
               <Link
                 href="#"
-                className="menu-hover text-base font-medium text-pink-800 flex items-center justify-center  gap-[5px]"
+                className="menu-hover text-[14px] font-medium text-pink-800 flex items-center justify-center  gap-[5px]"
               >
-                <GrShareOption className=" text-[23px]" /> Staking Contracts
+                <GrShareOption className=" text-[14px]" /> Staking Contracts
               </Link>
               <span>
                 <svg
@@ -206,53 +212,53 @@ function Navigation() {
               </span>
             </div>
 
-            <div className="invisible absolute z-50 text-sm flex w-max h-auto flex-col bg-gray-100 py-1 px-4 text-pink-800 shadow-xl group-hover:visible">
+            <div className="invisible text-[14px] absolute z-50 flex w-max h-auto flex-col bg-gray-100 py-1 px-4 text-pink-800 shadow-xl group-hover:visible">
               <Link
                 href="/user/stakingcontracts/newStaking"
-                className="my-2 block border-b border-gray-100 font-semibold text-pink-800 hover:text-pink-700 md:mx-2"
+                className="my-2 block border-b  border-gray-100  text-pink-800 hover:text-pink-700 md:mx-2"
               >
                 New Staking
               </Link>
               <Link
                 href="/user/stakingcontracts/yourstakingcontracts"
-                className="my-2 block border-b border-gray-100 font-semibold text-pink-800 hover:text-pink-700 md:mx-2"
+                className="my-2 block border-b border-gray-100  text-pink-800 hover:text-pink-700 md:mx-2"
               >
                 Your Staking Contracts
               </Link>
               <Link
                 href="/user/stakingcontracts/roswalletsummary"
-                className="my-2 block border-b border-gray-100 font-semibold text-pink-800 hover:text-pink-700 md:mx-2"
+                className="my-2 block border-b border-gray-100  text-pink-800 hover:text-pink-700 md:mx-2"
               >
                 ROS Wallet Summary
               </Link>
 
               <Link
                 href="/user/stakingcontracts/incomewalletsummary"
-                className="my-2 block border-b border-gray-100 font-semibold text-pink-800 hover:text-pink-700 md:mx-2"
+                className="my-2 block border-b border-gray-100  text-pink-800 hover:text-pink-700 md:mx-2"
               >
                 Income Wallet Summary
               </Link>
               <Link
                 href="/user/stakingcontracts/adhocwalletsummary"
-                className="my-2 block border-b border-gray-100 font-semibold text-pink-800 hover:text-pink-700 md:mx-2"
+                className="my-2 block border-b border-gray-100  text-pink-800 hover:text-pink-700 md:mx-2"
               >
                 Adhoc Wallet Summary
               </Link>
               <Link
                 href="/user/stakingcontracts/bonuswalletsummary"
-                className="my-2 block border-b border-gray-100 font-semibold text-pink-800 hover:text-pink-700 md:mx-2"
+                className="my-2 block border-b border-gray-100  text-pink-800 hover:text-pink-700 md:mx-2"
               >
                 Bonus Wallet Summary
               </Link>
               <Link
                 href="/user/stakingcontracts/incomewithdrawal"
-                className="my-2 block border-b border-gray-100 font-semibold text-pink-800 hover:text-pink-700 md:mx-2"
+                className="my-2 block border-b border-gray-100  text-pink-800 hover:text-pink-700 md:mx-2"
               >
                 Income-Widthrawal
               </Link>
               <Link
                 href="/user/stakingcontracts/roswithdrawal"
-                className="my-2 block border-b border-gray-100 font-semibold text-pink-800 hover:text-pink-700 md:mx-2"
+                className="my-2 block border-b border-gray-100  text-pink-800 hover:text-pink-700 md:mx-2"
               >
                 ROS-Widthrawal
               </Link>
@@ -262,9 +268,9 @@ function Navigation() {
 
         <Link
           href="/user/teamsummary"
-          className="flex justify-center items-center py-[12px]  gap-[5px] text-pink-800"
+          className="flex justify-center items-center py-[12px] text-[14px]  gap-[5px] text-pink-800"
         >
-          <FaUsers className=" text-[23px]" /> Team Summary
+          <FaUsers className=" text-[14px]" /> Team Summary
         </Link>
 
         <div className="flex">
@@ -272,9 +278,9 @@ function Navigation() {
             <div className="flex items-center justify-between py-[12px] text-pink-800">
               <Link
                 href="#"
-                className="menu-hover text-base font-medium text-pink-800 flex items-center justify-center  gap-[5px]"
+                className="menu-hover text-[14px] font-medium text-pink-800 flex items-center justify-center  gap-[5px]"
               >
-                <PiHandbagFill className=" text-[23px]" />
+                <PiHandbagFill className=" text-[14px]" />
                 Voucher
               </Link>
               <span>
@@ -290,22 +296,22 @@ function Navigation() {
               </span>
             </div>
 
-            <div className="invisible absolute z-50 text-sm flex w-max h-auto flex-col bg-gray-100 py-1 px-4 text-pink-800 shadow-xl group-hover:visible">
+            <div className="invisible text-[14px] absolute z-50 flex w-max h-auto flex-col bg-gray-100 py-1 px-4 text-pink-800 shadow-xl group-hover:visible">
               <Link
                 href="/user/voucher/generate-receipt"
-                className="my-2 block border-b border-gray-100 font-semibold text-pink-800 hover:text-pink-700 md:mx-2"
+                className="my-2 block border-b border-gray-100  text-pink-800 hover:text-pink-700 md:mx-2"
               >
                 Generate Recepit
               </Link>
               <Link
                 href="/user/voucher/voucher-wallet-summary"
-                className="my-2 block border-b border-gray-100 font-semibold text-pink-800 hover:text-pink-700 md:mx-2"
+                className="my-2 block border-b border-gray-100  text-pink-800 hover:text-pink-700 md:mx-2"
               >
                 Voucher Wallet Summary
               </Link>
               <Link
                 href="/user/voucher/receipt-summary"
-                className="my-2 block border-b border-gray-100 font-semibold text-pink-800 hover:text-pink-700 md:mx-2"
+                className="my-2 block border-b border-gray-100  text-pink-800 hover:text-pink-700 md:mx-2"
               >
                 Receipt Summary
               </Link>
@@ -318,9 +324,9 @@ function Navigation() {
             <div className="flex items-center justify-between py-[12px] text-pink-800">
               <Link
                 href="#"
-                className="menu-hover text-base font-medium text-pink-800 flex items-center justify-center  gap-[5px]"
+                className="menu-hover text-[14px] font-medium text-pink-800 flex items-center justify-center  gap-[5px]"
               >
-                <TbTransfer className=" text-[23px]" /> Transfers
+                <TbTransfer className=" text-[14px]" /> Transfers
               </Link>
               <span>
                 <svg
@@ -335,34 +341,34 @@ function Navigation() {
               </span>
             </div>
 
-            <div className="invisible absolute z-50 text-sm flex w-max h-auto flex-col bg-gray-100 py-1 px-4 text-pink-800 shadow-xl group-hover:visible">
+            <div className="invisible absolute z-50 text-[14px] flex w-max h-auto flex-col bg-gray-100 py-1 px-4 text-pink-800 shadow-xl group-hover:visible">
               <Link
                 href="/user/transfers/kait-wallet-transfer  "
-                className="my-2 block border-b border-gray-100 font-semibold text-pink-800 hover:text-pink-700 md:mx-2"
+                className="my-2 block border-b border-gray-100  text-pink-800 hover:text-pink-700 md:mx-2"
               >
                 Kait Wallet Transfer
               </Link>
               <Link
                 href="/user/transfers/income-wallet-transfer"
-                className="my-2 block border-b border-gray-100 font-semibold text-pink-800 hover:text-pink-700 md:mx-2"
+                className="my-2 block border-b border-gray-100 text-pink-800 hover:text-pink-700 md:mx-2"
               >
                 Income Wallet Transfer
               </Link>
               <Link
                 href="/user/transfers/restake-wallet-transfer"
-                className="my-2 block border-b border-gray-100 font-semibold text-pink-800 hover:text-pink-700 md:mx-2"
+                className="my-2 block border-b border-gray-100  text-pink-800 hover:text-pink-700 md:mx-2"
               >
                 Restake Wallet Transfer
               </Link>
               <Link
                 href="/user/transfers/ros-wallet-transfer"
-                className="my-2 block border-b border-gray-100 font-semibold text-pink-800 hover:text-pink-700 md:mx-2"
+                className="my-2 block border-b border-gray-100  text-pink-800 hover:text-pink-700 md:mx-2"
               >
                 ROS Wallet Transfer
               </Link>
               <Link
                 href="/user/transfers/adhoc-wallet-transfer"
-                className="my-2 block border-b border-gray-100 font-semibold text-pink-800 hover:text-pink-700 md:mx-2"
+                className="my-2 block border-b border-gray-100  text-pink-800 hover:text-pink-700 md:mx-2"
               >
                 Adhoc Wallet Transfer
               </Link>
@@ -372,13 +378,24 @@ function Navigation() {
 
         <Link
           href="/user/profile"
-          className="flex justify-center items-center py-[12px]  gap-[5px] text-pink-800"
+          className="flex justify-center items-center py-[12px]  text-[14px] gap-[5px] text-pink-800"
         >
-          <PiUserListBold className=" text-[23px]" /> Profile
+          <PiUserListBold className=" text-[14px]" /> Profile
         </Link>
 
-        <div className=" border-black border-4 lg:ml-5 ml-0">
-          <h2 className=" p-1">Kyc Approval</h2>
+        <div className="flex items-center">
+          {!user?.kycVerified ? (
+            <Link href="/user/kyc">
+              <p className="text-[12px] font-normal flex justify-center items-center border-2 bg-blue-200 p-0.5 ml-3">
+                {/* <span className="mr-2 text-red-500">Not Verified</span>  */}
+                Submit KYC
+              </p>
+            </Link>
+          ) : (
+            <span className="text-[12px] font-normal flex justify-center items-center border-2  p-0.5 ml-3 text-green-500 ">
+              KYC Approved
+            </span>
+          )}
         </div>
       </nav>
     </div>

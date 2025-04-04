@@ -1,7 +1,7 @@
 "use client";
 
 import { Provider } from "react-redux";
-import { store } from "./auth-slice/store";
+import { store } from "./slices/store";
 
 export default function ReduxProvider({
   children,

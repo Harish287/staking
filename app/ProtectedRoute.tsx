@@ -1,11 +1,16 @@
+import { ReactNode } from "react";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
-import { useAppSelector } from "../redux/hooks";
-import { decodeJWT } from "../lib/auth"; // Ensure you have a function to decode JWT
+import { useAppSelector } from "../store/hooks";
+import { decodeJWT } from "../lib/auth"; 
 
-const ProtectedRoute = ({ children }) => {
+interface ProtectedRouteProps {
+  children: ReactNode; 
+}
+
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   const router = useRouter();
-  const { isAuthenticated, user } = useAppSelector((state) => state.auth);
+  const { isAuthenticated } = useAppSelector((state) => state.auth);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -19,7 +24,7 @@ const ProtectedRoute = ({ children }) => {
     try {
       const decodedToken = decodeJWT(token);
 
-      if (decodedToken?.user_role === "Administrator") {
+      if (decodedToken?.role === "admin") {
         router.replace("/admin/dashboard");
       } else {
         router.replace("/user/dashboard");
@@ -32,7 +37,7 @@ const ProtectedRoute = ({ children }) => {
 
   if (!isAuthenticated) return null;
 
-  return children;
+  return <>{children}</>; // Wrap children inside fragment
 };
 
 export default ProtectedRoute;
