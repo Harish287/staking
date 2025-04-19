@@ -1,7 +1,7 @@
-import React from "react";
+import React from 'react'
 
 const KaitRejeted = () => {
-  return <div>KaitRejeted</div>;
-};
+  return <div>KaitRejeted</div>
+}
 
-export default KaitRejeted;
+export default KaitRejeted

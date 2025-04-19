@@ -1,7 +1,7 @@
-import React from "react";
+import React from 'react'
 
 const RosWithdrawal = () => {
-  return <div>Ros Withdrawal</div>;
-};
+  return <div>Ros Withdrawal</div>
+}
 
-export default RosWithdrawal;
+export default RosWithdrawal

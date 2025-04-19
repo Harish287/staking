@@ -1,7 +1,7 @@
-import React from "react";
+import React from 'react'
 
 const AllContracts = () => {
-  return <div>AllContracts</div>;
-};
+  return <div>AllContracts</div>
+}
 
-export default AllContracts;
+export default AllContracts

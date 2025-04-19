@@ -1,5 +1,5 @@
 function KaitWalletPendingApproval() {
-  return <div>kaitWalletPending</div>;
+  return <div>kaitWalletPending</div>
 }
 
-export default KaitWalletPendingApproval;
+export default KaitWalletPendingApproval

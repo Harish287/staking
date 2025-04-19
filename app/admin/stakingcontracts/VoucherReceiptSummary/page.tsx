@@ -1,5 +1,5 @@
 function VoucherReceiptSummary() {
-  return <div>VoucherReceiptSummary</div>;
+  return <div>VoucherReceiptSummary</div>
 }
 
-export default VoucherReceiptSummary;
+export default VoucherReceiptSummary

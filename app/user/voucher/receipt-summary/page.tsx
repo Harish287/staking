@@ -1,5 +1,5 @@
 function ReceiptSummary() {
-  return <div>ReceiptSummary</div>;
+  return <div>ReceiptSummary</div>
 }
 
-export default ReceiptSummary;
+export default ReceiptSummary

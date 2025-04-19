@@ -1,7 +1,7 @@
-import React from "react";
+import React from 'react'
 
 const KaitPendingApproval = () => {
-  return <div>PendingApproval</div>;
-};
+  return <div>PendingApproval</div>
+}
 
-export default KaitPendingApproval;
+export default KaitPendingApproval

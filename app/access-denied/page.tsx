@@ -1,18 +1,17 @@
-'use client';
+'use client'
 
-import React from "react";
-import { useRouter } from 'next/navigation';
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-
+import React from 'react'
+import { useRouter } from 'next/navigation'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
 
 const NoAccessPage = () => {
-  const router = useRouter();
+  const router = useRouter()
 
   // Handle redirect back to the homepage or other route
   const handleRedirect = () => {
-    router.push("/");  // Redirect to homepage or any other route
-  };
+    router.push('/') // Redirect to homepage or any other route
+  }
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100">
@@ -34,7 +33,7 @@ const NoAccessPage = () => {
         </CardContent>
       </Card>
     </div>
-  );
-};
+  )
+}
 
-export default NoAccessPage;
+export default NoAccessPage

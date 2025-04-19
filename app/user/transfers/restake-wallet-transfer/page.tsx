@@ -1,5 +1,5 @@
 function RestakeWalletTransfer() {
-  return <div>RestakeWalletTransfer</div>;
+  return <div>RestakeWalletTransfer</div>
 }
 
-export default RestakeWalletTransfer;
+export default RestakeWalletTransfer

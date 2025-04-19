@@ -1,104 +1,121 @@
-"use client";
+'use client'
 
-import React, { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
-import { useDispatch } from "react-redux";
-import { AppDispatch } from "@/store/slices/store";
-import { registerUser,resendConfirmationEmail  } from "../../../store/slices/index";
-import { Spinner } from "@/components/ui/spinner";
-import Image from "next/image";
-import Logo from "../../../assets/logo2x.png";
-import { useRouter, useSearchParams } from "next/navigation";
-
+import React, { useEffect, useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { useDispatch } from 'react-redux'
+import { AppDispatch } from '@/store/store'
+import {
+  registerUser,
+  resendConfirmationEmail,
+} from '../../../store/slices/index'
+import { Spinner } from '@/components/ui/spinner'
+import Image from 'next/image'
+import Logo from '../../../assets/logo2x.png'
+import { useRouter, useSearchParams } from 'next/navigation'
 
 type FormData = {
-  name: string;
-  email: string;
-  password: string;
-  confirm_password: string;
-  mobile: string;
-  referral_token?: string;
-};
+  name: string
+  email: string
+  password: string
+  confirm_password: string
+  mobile: string
+  referral_token?: string
+}
 
 const RegisterPage: React.FC = () => {
-  const searchParams = useSearchParams();
-  const params: { [key: string]: string } = {};
+  const searchParams = useSearchParams()
+  const params: { [key: string]: string } = {}
 
   searchParams.forEach((value, key) => {
-    if (key === "token") {
-      params["referral_token"] = value;
+    if (key === 'token') {
+      params['referral_token'] = value
     }
-  });
+  })
+
+  // Check if referral token exists
+  const hasReferralToken = !!params.referral_token
 
   const {
     register,
     handleSubmit,
     formState: { errors },
     setError,
-  } = useForm<FormData>();
+  } = useForm<FormData>()
 
-  const dispatch = useDispatch<AppDispatch>();
-  const router = useRouter();
+  const dispatch = useDispatch<AppDispatch>()
+  const router = useRouter()
 
-  const [loading, setLoading] = useState(false);
-  const [showResend, setShowResend] = useState(true);
-  const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false)
+  const [showResend, setShowResend] = useState(false) // Initially false
+  const [email, setEmail] = useState('')
+  const [resendLoading, setResendLoading] = useState(false)
+  const [timer, setTimer] = useState(0)
+
+  // Timer logic for the resend button
+  useEffect(() => {
+    let interval: NodeJS.Timeout | null = null
+
+    if (timer > 0) {
+      interval = setInterval(() => {
+        setTimer((prev) => prev - 1)
+      }, 1000)
+    } else if (interval) {
+      clearInterval(interval)
+    }
+
+    return () => {
+      if (interval) clearInterval(interval)
+    }
+  }, [timer])
 
   const onSubmit = async (data: FormData) => {
-    setLoading(true);
-    setShowResend(true); // Keep the Resend button visible
-  
+    setLoading(true)
+
     if (data.password !== data.confirm_password) {
-      setError("confirm_password", {
-        type: "manual",
-        message: "Passwords do not match",
-      });
-      setLoading(false);
-      return;
+      setError('confirm_password', {
+        type: 'manual',
+        message: 'Passwords do not match',
+      })
+      setLoading(false)
+      return
     }
-  
+
     const finalData = {
       ...data,
       referral_token: params.referral_token,
-    };
-  
-    try {
-      await dispatch(registerUser(finalData)).unwrap();
-      setEmail(data.email); // Store email for later use
-      alert("A verification email has been sent. Please check your inbox and verify your email to complete registration.");
-      router.push(""); // Redirect to another page
-    } catch (error: any) {
-      console.error("Registration error:", error);
-  
-      // Show Resend button only if the backend says email verification is needed
-      if (error.detail?.toLowerCase().includes("verify your email")) {
-        setShowResend(true);
-      }
-  
-      alert(error.detail || "An unexpected error occurred. Please try again.");
-    } finally {
-      setLoading(false);
     }
-  };
-  
 
-  const [resendLoading, setResendLoading] = useState(false);
+    try {
+      await dispatch(registerUser(finalData)).unwrap()
+      setEmail(data.email) // Store email for later use
+      alert(
+        'A verification email has been sent. Please check your inbox and verify your email to complete registration.',
+      )
+      setShowResend(true) // Show the resend email button after registration
+      setTimer(30) // Start the 30-second timer after successful registration
+    } catch (error: any) {
+      console.error('Registration error:', error)
+      alert(error.detail || 'An unexpected error occurred. Please try again.')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const handleResendEmail = async (email: string) => {
-    setResendLoading(true); // Show loading spinner
+    setResendLoading(true) // Show loading spinner
 
     try {
-      await dispatch(resendConfirmationEmail({ email })).unwrap();
-      alert("A new verification email has been sent.");
+      await dispatch(resendConfirmationEmail({ email })).unwrap()
+      alert('A new verification email has been sent.')
+      setTimer(30) // Start the 30-second timer after resending email
     } catch (error: any) {
-      console.error("Error resending email:", error);
-      alert(error || "Failed to resend email. Please try again later.");
+      console.error('Error resending email:', error)
+      alert(error || 'Failed to resend email. Please try again later.')
     } finally {
-      setResendLoading(false); // Hide loading spinner
+      setResendLoading(false) // Hide loading spinner
     }
+  }
 
-  };
-  
   return (
     <div className="flex justify-center items-center lg:px-[160px] p-0 lg:py-[50px]">
       <div className="text-white w-[auto] h-[auto] bg-gradient-to-r from-pink-700 to-gray-800 flex container justify-center rounded-2xl">
@@ -125,9 +142,12 @@ const RegisterPage: React.FC = () => {
               <input
                 className="w-full border text-white border-gray-300 rounded-md px-3 py-2 mt-1 focus:ring-2 focus:ring-pink-600"
                 type="text"
-                {...register("name", { required: "Name is required" })}
+                placeholder="Enter your Name"
+                {...register('name', { required: 'Name is required' })}
               />
-              {errors.name && <p className="text-red-500 text-sm">{errors.name.message}</p>}
+              {errors.name && (
+                <p className="text-red-500 text-sm">{errors.name.message}</p>
+              )}
             </div>
 
             <div className="mb-4">
@@ -137,39 +157,59 @@ const RegisterPage: React.FC = () => {
               <input
                 className="w-full border text-white border-gray-300 rounded-md px-3 py-2 mt-1 focus:ring-2 focus:ring-pink-600"
                 type="email"
-                {...register("email", { required: "Email is required" })}
+                placeholder="Enter your email"
+                {...register('email', { required: 'Email is required' })}
               />
-              {errors.email && <p className="text-red-500 text-sm">{errors.email.message}</p>}
+              {errors.email && (
+                <p className="text-red-500 text-sm">{errors.email.message}</p>
+              )}
             </div>
 
             <div className="mb-4">
-              <label htmlFor="password" className="block font-medium text-white">
+              <label
+                htmlFor="password"
+                className="block font-medium text-white"
+              >
                 Password
               </label>
               <input
                 className="w-full border text-white border-gray-300 rounded-md px-3 py-2 mt-1 focus:ring-2 focus:ring-pink-600"
                 type="password"
-                {...register("password", {
-                  required: "Password is required",
-                  minLength: { value: 6, message: "Password must be at least 6 characters long" },
+                placeholder="Enter your password"
+                {...register('password', {
+                  required: 'Password is required',
+                  minLength: {
+                    value: 6,
+                    message: 'Password must be at least 6 characters long',
+                  },
                 })}
               />
-              {errors.password && <p className="text-red-500 text-sm">{errors.password.message}</p>}
+              {errors.password && (
+                <p className="text-red-500 text-sm">
+                  {errors.password.message}
+                </p>
+              )}
             </div>
 
             <div className="mb-4">
-              <label htmlFor="confirm_password" className="block font-medium text-white">
+              <label
+                htmlFor="confirm_password"
+                className="block font-medium text-white"
+              >
                 Confirm Password
               </label>
               <input
                 className="w-full border text-white border-gray-300 rounded-md px-3 py-2 mt-1 focus:ring-2 focus:ring-pink-600"
                 type="password"
-                {...register("confirm_password", {
-                  required: "Please confirm your password",
+                placeholder="ReEnter your password"
+                {...register('confirm_password', {
+                  required: 'Please confirm your password',
                 })}
               />
               {errors.confirm_password && (
-                <p className="text-red-500 text-sm">{errors.confirm_password.message}</p>
+                <p className="text-red-500 text-sm">
+                  {errors.confirm_password.message}
+                </p>
               )}
             </div>
 
@@ -180,39 +220,62 @@ const RegisterPage: React.FC = () => {
               <input
                 className="w-full border text-white border-gray-300 rounded-md px-3 py-2 mt-1 focus:ring-2 focus:ring-pink-600"
                 type="tel"
-                {...register("mobile", { required: "Mobile number is required" })}
+                placeholder="Enter your Mobile "
+                {...register('mobile', {
+                  required: 'Mobile number is required',
+                })}
               />
-              {errors.mobile && <p className="text-red-500 text-sm">{errors.mobile.message}</p>}
+              {errors.mobile && (
+                <p className="text-red-500 text-sm">{errors.mobile.message}</p>
+              )}
             </div>
-       
-   
-            <button type="submit" className="w-full bg-gradient-to-r from-pink-700 to-gray-800 text-white font-semibold py-2 rounded-md mt-4 hover:scale-105" disabled={loading}>
-              {loading ? <Spinner /> : "Sign Up"}
-            </button>
-          </form>
-         {showResend && (
-            <div className="mt-4">
+
+            {hasReferralToken ? (
               <button
-                 className="w-full bg-red-500 text-white font-semibold py-2 rounded-md mt-4"
-                onClick={() => handleResendEmail(email)}
-                disabled={resendLoading}
+                type="submit"
+                className="w-full bg-gradient-to-r from-pink-700 to-gray-800 text-white font-semibold py-2 rounded-md mt-4 hover:scale-105"
+                disabled={loading}
               >
-                {resendLoading ? <Spinner /> : "Resend Confirmation Email"}
+                {loading ? <Spinner /> : 'Sign Up'}
+              </button>
+            ) : (
+              <div className="w-full bg-red-500 text-white font-semibold py-2 rounded-md mt-4 text-center">
+                Sorry, you are not supposed to register without Referral. Please
+                use the link properly to register.
+              </div>
+            )}
+          </form>
+
+          {showResend && (
+            <div className="mt-4">
+              {timer > 0 && (
+                <p className="text-yellow-500 text-sm mb-2">
+                  Resend available in {timer} seconds.
+                </p>
+              )}
+              <button
+                className="w-full bg-red-500 text-white font-semibold py-2 rounded-md mt-4"
+                onClick={() => handleResendEmail(email)}
+                disabled={timer > 0 || resendLoading}
+              >
+                {resendLoading ? <Spinner /> : 'Resend Confirmation Email'}
               </button>
             </div>
           )}
-       
+
           <p className="text-white text-sm mt-4">
-            Already have an account?{" "}
-            <a href="/auth/signin" className="text-pink-700 font-semibold hover:underline">
+            Already have an account?{' '}
+            <a
+              href="/auth/signin"
+              className="text-pink-700 font-semibold hover:underline"
+            >
               Sign in here
             </a>
           </p>
         </div>
       </div>
-             
     </div>
-  );
-};
+  )
+}
 
-export default RegisterPage;
+export default RegisterPage

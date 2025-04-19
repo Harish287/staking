@@ -1,5 +1,5 @@
 function NewStaking() {
-  return <div>NewStaking</div>;
+  return <div>NewStaking</div>
 }
 
-export default NewStaking;
+export default NewStaking

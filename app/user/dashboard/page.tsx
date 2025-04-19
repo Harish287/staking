@@ -1,43 +1,45 @@
-"use client";
+'use client'
 
-import React, { useRef } from "react";
-import Autoplay from "embla-carousel-autoplay";
-import { useSelector, useDispatch } from "react-redux";
-import { AppDispatch, RootState } from "../../../store/slices/store";
-import { verifyKYCStatus } from "../../../store/slices/index";
-import { BadgeCheck, CheckCheck, ChevronsRight } from "lucide-react";
-import ReferralComponent from "@/app/user/components/referralComponent";
+import React, { useRef } from 'react'
+import Autoplay from 'embla-carousel-autoplay'
+import { useSelector, useDispatch } from 'react-redux'
+import { AppDispatch, RootState } from '../../../store/store'
+import { verifyKYCStatus } from '../../../store/slices/index'
+import { BadgeCheck, CheckCheck, ChevronsRight } from 'lucide-react'
+import ReferralComponent from '@/app/user/components/referralComponent'
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from '@/components/ui/card'
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
-} from "@/components/ui/carousel";
-import Image from "next/image";
-import Bg1 from "../../../assets/new_s1.jpg";
-import Bg2 from "../../../assets/new_s2.jpg";
-import Bg3 from "../../../assets/new_s3.jpg";
-import Bg4 from "../../../assets/new_s4.jpg";
-import Wallets from "./wallet";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
+} from '@/components/ui/carousel'
+import Image from 'next/image'
+import Bg1 from '../../../assets/new_s1.jpg'
+import Bg2 from '../../../assets/new_s2.jpg'
+import Bg3 from '../../../assets/new_s3.jpg'
+import Bg4 from '../../../assets/new_s4.jpg'
+import Wallets from './wallet'
+import { Button } from '@/components/ui/button'
+import Link from 'next/link'
+import { useAppSelector } from '@/store/hooks'
 
 function UserDashboard() {
-  const dispatch = useDispatch<AppDispatch>();
-  const { user } = useSelector((state: RootState) => state.auth);
+  const dispatch = useDispatch<AppDispatch>()
+  const { user } = useSelector((state: RootState) => state.auth)
+  const { kycVerified } = useAppSelector((state) => state.auth)
 
-  const plugin = useRef(Autoplay({ delay: 2000, stopOnInteraction: true }));
-  const BgImage = [{ img: Bg1 }, { img: Bg2 }, { img: Bg3 }, { img: Bg4 }];
+  const plugin = useRef(Autoplay({ delay: 2000, stopOnInteraction: true }))
+  const BgImage = [{ img: Bg1 }, { img: Bg2 }, { img: Bg3 }, { img: Bg4 }]
 
   React.useEffect(() => {
-    dispatch(verifyKYCStatus());
-  }, [dispatch]);
+    dispatch(verifyKYCStatus())
+  }, [dispatch])
 
   return (
     <div className="pt-5 bg-[#F3EAD8] hover:bg-blue-50 transition-colors duration-2000">
@@ -60,7 +62,7 @@ function UserDashboard() {
                             src={image.img}
                             alt={`Background ${imgIndex + 1}`}
                             fill
-                            style={{ objectFit: "cover" }}
+                            style={{ objectFit: 'cover' }}
                             className="rounded-lg w-full h-full"
                             sizes="(max-width: 600px) 100vw, (max-width: 1024px) 50vw, 33vw"
                           />
@@ -80,24 +82,24 @@ function UserDashboard() {
               <CardTitle className="text-center flex justify-evenly">
                 <p className="flex justify-center items-center">
                   KYC Status <ChevronsRight />
-                </p>{" "}
+                </p>
                 <div className="flex justify-center items-center">
                   <span
                     className={`flex items-center text-[12px] ${
-                      user?.kycVerified ? "text-green-500" : "text-red-500"
+                      kycVerified ? 'text-green-500' : 'text-red-500'
                     }`}
                   >
-                    {user?.kycVerified ? (
+                    {kycVerified ? (
                       <>
                         <CheckCheck /> Verified
                       </>
                     ) : (
-                      "Not Verified"
+                      'Not Verified'
                     )}
                   </span>
-                  {!user?.kycVerified && (
+                  {!kycVerified && (
                     <Link href="/user/kyc">
-                      <p className=" text-[12px] font-normal flex justify-center item-center border-2 bg-blue-200 p-0.5 ml-3">
+                      <p className="text-[12px] font-normal flex justify-center items-center border-2 bg-blue-200 p-0.5 ml-3">
                         Submit KYC
                       </p>
                     </Link>
@@ -139,7 +141,7 @@ function UserDashboard() {
         </div>
       </div>
     </div>
-  );
+  )
 }
 
-export default UserDashboard;
+export default UserDashboard

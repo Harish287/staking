@@ -1,16 +1,16 @@
-"use client";
-import Image from "next/image";
-import Link from "next/link";
-import { RiWallet3Line } from "react-icons/ri";
-import { MdOutlineDashboard } from "react-icons/md";
-import { GrShareOption } from "react-icons/gr";
-import { MdOutlineListAlt } from "react-icons/md";
-import { PiUserListBold } from "react-icons/pi";
-import { LuSettings } from "react-icons/lu";
-import Logo from "../../../assets/logo2x.png";
-import { LuCircleUserRound } from "react-icons/lu";
-import { useState } from "react";
-import { GoArrowSwitch } from "react-icons/go";
+'use client'
+import Image from 'next/image'
+import Link from 'next/link'
+import { RiWallet3Line } from 'react-icons/ri'
+import { MdOutlineDashboard } from 'react-icons/md'
+import { GrShareOption } from 'react-icons/gr'
+import { MdOutlineListAlt } from 'react-icons/md'
+import { PiUserListBold } from 'react-icons/pi'
+import { LuSettings } from 'react-icons/lu'
+import Logo from '../../../assets/logo2x.png'
+import { LuCircleUserRound } from 'react-icons/lu'
+import { useState } from 'react'
+import { GoArrowSwitch } from 'react-icons/go'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,17 +19,17 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "../../../components/ui/dropdown-menu";
-import { Button } from "../../../components/ui/button";
-import Cookies from "js-cookie";
-import { usePathname, useRouter } from "next/navigation";
-import useLogout from "../../../components/hooks/userLogout";
+} from '../../../components/ui/dropdown-menu'
+import { Button } from '../../../components/ui/button'
+import Cookies from 'js-cookie'
+import { usePathname, useRouter } from 'next/navigation'
+import useLogout from '../../../components/hooks/userLogout'
 
 function Navigation() {
-  const [isOpen, setIsOpen] = useState(false);
-  const { handleLogout } = useLogout();
-  const router = useRouter();
-  const pathname = usePathname();
+  const [isOpen, setIsOpen] = useState(false)
+  const { handleLogout } = useLogout()
+  const router = useRouter()
+  const pathname = usePathname()
 
   return (
     <div>
@@ -42,7 +42,7 @@ function Navigation() {
               <DropdownMenuTrigger asChild>
                 <Button className="p-0 w-11 h-11">
                   <LuCircleUserRound
-                    style={{ width: "32px", height: "32px" }}
+                    style={{ width: '32px', height: '32px' }}
                   />
                 </Button>
               </DropdownMenuTrigger>
@@ -53,10 +53,10 @@ function Navigation() {
                 <DropdownMenuGroup>
                   <DropdownMenuItem>
                     <Link
-                      href="/signin"
+                      href="/admin/profile"
                       className="my-2 block border-b border-gray-100 font-semibold   text-[#7668fe] hover:duration-1000 hover:text-black md:mx-2"
                     >
-                      Login
+                      Profile
                     </Link>
                   </DropdownMenuItem>
                 </DropdownMenuGroup>
@@ -115,14 +115,15 @@ function Navigation() {
       </nav>
 
       <nav
-        className={`flex flex-col lg:flex-row md:flex-col sm:flex-col justify-center items-center gap-6 bg-white box-border shadow-xl ${isOpen ? "block" : "hidden"} md:flex transition-all duration-300`}
+        className={`flex flex-col lg:flex-row md:flex-col sm:flex-col justify-center items-center gap-6 bg-white box-border shadow-xl ${isOpen ? 'block' : 'hidden'} md:flex transition-all duration-300`}
       >
         <Link
           href="/admin/dashboard"
-          className={`flex justify-center items-center py-[12px] gap-1.5 ${pathname === "/admin/dashboard"
-            ? "border-b-2 border-blue-500 text-blue-600"
-            : "text-[#7668fe]"
-            }`}
+          className={`flex justify-center items-center py-[12px] gap-1.5 ${
+            pathname === '/admin/dashboard'
+              ? 'border-b-2 border-blue-500 text-blue-600'
+              : 'text-[#7668fe]'
+          }`}
         >
           <MdOutlineDashboard className=" text-[23px]" /> Dashboard
         </Link>
@@ -130,10 +131,11 @@ function Navigation() {
         <div className="flex">
           <div className="group relative cursor-pointer">
             <div
-              className={`flex justify-center items-center py-[12px] gap-1.5 ${pathname.startsWith("/admin/kaitwallet/")
-                ? "border-b-2 border-blue-500 text-blue-600"
-                : "text-[#7668fe]"
-                }`}
+              className={`flex justify-center items-center py-[12px] gap-1.5 ${
+                pathname.startsWith('/admin/kaitwallet/')
+                  ? 'border-b-2 border-blue-500 text-blue-600'
+                  : 'text-[#7668fe]'
+              }`}
             >
               <Link
                 href="#"
@@ -180,10 +182,11 @@ function Navigation() {
         <div className="flex">
           <div className="group relative cursor-pointer">
             <div
-              className={`flex justify-center items-center py-[12px] gap-1.5 ${pathname.startsWith("/admin/stakingcontracts/")
-                ? "border-b-2 border-blue-500 text-blue-600"
-                : "text-[#7668fe]"
-                }`}
+              className={`flex justify-center items-center py-[12px] gap-1.5 ${
+                pathname.startsWith('/admin/stakingcontracts/')
+                  ? 'border-b-2 border-blue-500 text-blue-600'
+                  : 'text-[#7668fe]'
+              }`}
             >
               <Link
                 href="#"
@@ -254,10 +257,11 @@ function Navigation() {
         <div className="flex">
           <div className="group relative cursor-pointer">
             <div
-              className={`flex justify-center items-center py-[12px] gap-1.5 ${pathname.startsWith("/admin/Withdrawal/")
-                ? "border-b-2 border-blue-500 text-blue-600"
-                : "text-[#7668fe]"
-                }`}
+              className={`flex justify-center items-center py-[12px] gap-1.5 ${
+                pathname.startsWith('/admin/Withdrawal/')
+                  ? 'border-b-2 border-blue-500 text-blue-600'
+                  : 'text-[#7668fe]'
+              }`}
             >
               <Link
                 href="#"
@@ -303,19 +307,21 @@ function Navigation() {
 
         <Link
           href="/admin/KYCList"
-          className={`flex justify-center items-center py-[12px] gap-1.5 ${pathname === "/admin/KYCList"
-            ? "border-b-2 border-blue-500 text-blue-600"
-            : "text-[#7668fe]"
-            }`}
+          className={`flex justify-center items-center py-[12px] gap-1.5 ${
+            pathname === '/admin/KYCList'
+              ? 'border-b-2 border-blue-500 text-blue-600'
+              : 'text-[#7668fe]'
+          }`}
         >
           <MdOutlineListAlt className=" text-[23px]" /> KYC List
         </Link>
         <Link
           href="/admin/UserList"
-          className={`flex justify-center items-center py-[12px] gap-1.5 ${pathname === "/admin/UserList"
-            ? "border-b-2 border-blue-500 text-blue-600"
-            : "text-[#7668fe]"
-            }`}
+          className={`flex justify-center items-center py-[12px] gap-1.5 ${
+            pathname === '/admin/UserList'
+              ? 'border-b-2 border-blue-500 text-blue-600'
+              : 'text-[#7668fe]'
+          }`}
         >
           <PiUserListBold className=" text-[23px]" /> User List
         </Link>
@@ -323,10 +329,11 @@ function Navigation() {
         <div className="flex">
           <div className="group relative cursor-pointer">
             <div
-              className={`flex justify-center items-center py-[12px] gap-1.5 ${pathname.startsWith("/admin/settings/.")
-                ? "border-b-2 border-blue-500 text-blue-600"
-                : "text-[#7668fe]"
-                }`}
+              className={`flex justify-center items-center py-[12px] gap-1.5 ${
+                pathname.startsWith('/admin/settings/.')
+                  ? 'border-b-2 border-blue-500 text-blue-600'
+                  : 'text-[#7668fe]'
+              }`}
             >
               <Link
                 href="#"
@@ -359,7 +366,7 @@ function Navigation() {
         </div>
       </nav>
     </div>
-  );
+  )
 }
 
-export default Navigation;
+export default Navigation

@@ -1,5 +1,5 @@
 function TeamSummary() {
-  return <div>TeamSummary</div>;
+  return <div>TeamSummary</div>
 }
 
-export default TeamSummary;
+export default TeamSummary

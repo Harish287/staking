@@ -1,7 +1,7 @@
-import React from "react";
+import React from 'react'
 
 const AboutPage = () => {
-  return <div>sfsds</div>;
-};
+  return <div>sfsds</div>
+}
 
-export default AboutPage;
+export default AboutPage

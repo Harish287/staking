@@ -1,5 +1,5 @@
 function RosWalletTransfer() {
-  return <div>RosWalletTransfer</div>;
+  return <div>RosWalletTransfer</div>
 }
 
-export default RosWalletTransfer;
+export default RosWalletTransfer

@@ -1,7 +1,7 @@
-import React from "react";
+import React from 'react'
 
 const IncomeWalletSummary = () => {
-  return <div>Income Withdrawal Summary</div>;
-};
+  return <div>Income Withdrawal Summary</div>
+}
 
-export default IncomeWalletSummary;
+export default IncomeWalletSummary

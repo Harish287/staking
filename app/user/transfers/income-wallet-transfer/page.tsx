@@ -1,5 +1,5 @@
 function IncomeWalletTransfer() {
-  return <div> Income Wallet Transfer</div>;
+  return <div> Income Wallet Transfer</div>
 }
 
-export default IncomeWalletTransfer;
+export default IncomeWalletTransfer

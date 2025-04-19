@@ -1,5 +1,5 @@
 function ClubVolume() {
-  return <div>ClubVolume</div>;
+  return <div>ClubVolume</div>
 }
 
-export default ClubVolume;
+export default ClubVolume

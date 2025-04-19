@@ -1,8 +1,22 @@
-'use client';
+'use client'
 
-import { Card } from '@/components/ui/card';
-import { CircleDollarSign, Users, Wallet, Eye, AlertCircle, CheckCircle } from 'lucide-react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from 'recharts';
+import { Card } from '@/components/ui/card'
+import {
+  CircleDollarSign,
+  Users,
+  Wallet,
+  Eye,
+  AlertCircle,
+  CheckCircle,
+} from 'lucide-react'
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  ResponsiveContainer,
+} from 'recharts'
 
 const registrationData = [
   { day: 'Thu', value: 45 },
@@ -20,7 +34,7 @@ const registrationData = [
   { day: 'Tue', value: 75 },
   { day: 'Wed', value: 20 },
   { day: 'Thu', value: 30 },
-];
+]
 
 export default function Dashboard() {
   return (
@@ -31,7 +45,9 @@ export default function Dashboard() {
           <Card className="p-6">
             <div className="space-y-4">
               <div className="flex justify-between items-center">
-                <h2 className="text-sm text-gray-500 dark:text-gray-400">TOTAL CONTRACTS</h2>
+                <h2 className="text-sm text-gray-500 dark:text-gray-400">
+                  TOTAL CONTRACTS
+                </h2>
                 <CircleDollarSign className="text-red-500 h-4 w-4" />
               </div>
               <div className="flex items-center gap-2">
@@ -45,18 +61,28 @@ export default function Dashboard() {
           <Card className="p-6">
             <div className="space-y-4">
               <div className="flex justify-between items-center">
-                <h2 className="text-sm text-gray-500 dark:text-gray-400">TOTAL USERS</h2>
+                <h2 className="text-sm text-gray-500 dark:text-gray-400">
+                  TOTAL USERS
+                </h2>
                 <div className="flex items-center gap-2">
-                  <span className="text-xs bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">KYC</span>
-                  <span className="text-xs bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">USER</span>
+                  <span className="text-xs bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">
+                    KYC
+                  </span>
+                  <span className="text-xs bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">
+                    USER
+                  </span>
                 </div>
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-3xl font-semibold">24,472</span>
-                <span className="text-sm bg-blue-100 dark:bg-blue-900/30 text-blue-600 px-2 py-0.5 rounded">90%</span>
+                <span className="text-sm bg-blue-100 dark:bg-blue-900/30 text-blue-600 px-2 py-0.5 rounded">
+                  90%
+                </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-500">181 since last week</span>
+                <span className="text-sm text-gray-500">
+                  181 since last week
+                </span>
                 <button className="text-violet-500 text-sm">VIEW</button>
               </div>
             </div>
@@ -66,11 +92,19 @@ export default function Dashboard() {
           <Card className="p-6">
             <div className="space-y-4">
               <div className="flex justify-between items-center">
-                <h2 className="text-sm text-gray-500 dark:text-gray-400">KAIT WALLET</h2>
+                <h2 className="text-sm text-gray-500 dark:text-gray-400">
+                  KAIT WALLET
+                </h2>
                 <div className="flex gap-2">
-                  <span className="text-xs bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">USDT</span>
-                  <span className="text-xs bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">OTHERS</span>
-                  <span className="text-xs bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">CORPORATE</span>
+                  <span className="text-xs bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">
+                    USDT
+                  </span>
+                  <span className="text-xs bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">
+                    OTHERS
+                  </span>
+                  <span className="text-xs bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">
+                    CORPORATE
+                  </span>
                 </div>
               </div>
               <div className="space-y-2">
@@ -100,14 +134,39 @@ export default function Dashboard() {
               </div>
               <div className="space-y-4">
                 {[
-                  { label: 'Total ROI', value: '118,079,430', status: 'success' },
-                  { label: 'Total Level', value: '86,319,651', status: 'success' },
-                  { label: 'Total Earnings', value: '204,399,082', status: 'success' },
-                  { label: 'Total Withdraw', value: '76,208,917', status: 'warning' },
-                  { label: 'Total Balance', value: '5,162,012', status: 'warning' },
+                  {
+                    label: 'Total ROI',
+                    value: '118,079,430',
+                    status: 'success',
+                  },
+                  {
+                    label: 'Total Level',
+                    value: '86,319,651',
+                    status: 'success',
+                  },
+                  {
+                    label: 'Total Earnings',
+                    value: '204,399,082',
+                    status: 'success',
+                  },
+                  {
+                    label: 'Total Withdraw',
+                    value: '76,208,917',
+                    status: 'warning',
+                  },
+                  {
+                    label: 'Total Balance',
+                    value: '5,162,012',
+                    status: 'warning',
+                  },
                 ].map((metric, index) => (
-                  <div key={index} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
-                    <span className="text-gray-600 dark:text-gray-300">{metric.label}</span>
+                  <div
+                    key={index}
+                    className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg"
+                  >
+                    <span className="text-gray-600 dark:text-gray-300">
+                      {metric.label}
+                    </span>
                     <div className="flex items-center gap-3">
                       <div className="flex items-center gap-1">
                         <CircleDollarSign className="text-red-500 h-4 w-4" />
@@ -157,5 +216,5 @@ export default function Dashboard() {
         </div>
       </div>
     </div>
-  );
+  )
 }

@@ -1,5 +1,5 @@
 function BonusAccountSummary() {
-  return <div>BonusAccountSummary</div>;
+  return <div>BonusAccountSummary</div>
 }
 
-export default BonusAccountSummary;
+export default BonusAccountSummary

@@ -1,7 +1,7 @@
-import React from "react";
+import React from 'react'
 
 const IncomeAccountSummary = () => {
-  return <div>IncomeAccountSummary</div>;
-};
+  return <div>IncomeAccountSummary</div>
+}
 
-export default IncomeAccountSummary;
+export default IncomeAccountSummary

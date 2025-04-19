@@ -1,5 +1,5 @@
 function AdhocWalletTransfer() {
-  return <div>AdhocWalletTransfer</div>;
+  return <div>AdhocWalletTransfer</div>
 }
 
-export default AdhocWalletTransfer;
+export default AdhocWalletTransfer

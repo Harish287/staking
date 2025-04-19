@@ -1,5 +1,5 @@
 function WithdrawalPendingApproval() {
-  return <div>WithdrawalPending</div>;
+  return <div>WithdrawalPending</div>
 }
 
-export default WithdrawalPendingApproval;
+export default WithdrawalPendingApproval

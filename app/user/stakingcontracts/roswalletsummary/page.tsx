@@ -1,7 +1,7 @@
-import React from "react";
+import React from 'react'
 
 const ROSWalletSummary = () => {
-  return <div>ROS Withdrawal Summary</div>;
-};
+  return <div>ROS Withdrawal Summary</div>
+}
 
-export default ROSWalletSummary;
+export default ROSWalletSummary

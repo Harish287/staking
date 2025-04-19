@@ -1,7 +1,7 @@
-import React from "react";
+import React from 'react'
 
 const AdhocWalletSummary = () => {
-  return <div>AdhocWalletSummary</div>;
-};
+  return <div>AdhocWalletSummary</div>
+}
 
-export default AdhocWalletSummary;
+export default AdhocWalletSummary

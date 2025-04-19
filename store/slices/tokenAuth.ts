@@ -1,44 +1,48 @@
 // tokenAuthSlice.ts
-import { jwtDecode } from "jwt-decode";
-import Cookies from "js-cookie";
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { AppDispatch } from "./store";
+import { jwtDecode } from 'jwt-decode'
+import Cookies from 'js-cookie'
+import { createSlice, PayloadAction } from '@reduxjs/toolkit'
+import { AppDispatch } from '../store'
 
 interface UserState {
-  user: { user_id: string | null; userName: string | null; role: string | null } | null;
-  isAuthenticated: boolean;
-  error: string | null;
+  user: {
+    user_id: string | null
+    userName: string | null
+    role: string | null
+  } | null
+  isAuthenticated: boolean
+  error: string | null
 }
 
 // Function to decode token and extract user details
 const getUserDetailsFromToken = (): {
-  user_id: string | null;
-  userName: string | null;
-  role: string | null;
+  user_id: string | null
+  userName: string | null
+  role: string | null
 } => {
-  const token = Cookies.get("token") || localStorage.getItem("token");
+  const token = Cookies.get('token') || localStorage.getItem('token')
 
   if (!token) {
-    console.error("No token found");
-    return { user_id: null, userName: null, role: null };
+    console.error('No token found')
+    return { user_id: null, userName: null, role: null }
   }
 
   try {
-    const decodedToken: any = jwtDecode(token);
+    const decodedToken: any = jwtDecode(token)
     return {
       user_id: decodedToken.user_id || null,
-      userName: decodedToken.name || null,  // 'name' from token, use 'userName' in the state
+      userName: decodedToken.name || null, // 'name' from token, use 'userName' in the state
       role: decodedToken.role || null,
-    };
+    }
   } catch (error) {
-    console.error("Failed to decode token:", error);
-    return { user_id: null, userName: null, role: null };
+    console.error('Failed to decode token:', error)
+    return { user_id: null, userName: null, role: null }
   }
-};
+}
 
 // Creating slice for token-based authentication state
 const tokenAuthSlice = createSlice({
-  name: "tokenAuth",
+  name: 'tokenAuth',
   initialState: {
     user: null,
     isAuthenticated: false,
@@ -47,28 +51,32 @@ const tokenAuthSlice = createSlice({
   reducers: {
     setTokenUser: (
       state,
-      action: PayloadAction<{ user_id: string | null; userName: string | null; role: string | null } | null>
+      action: PayloadAction<{
+        user_id: string | null
+        userName: string | null
+        role: string | null
+      } | null>,
     ) => {
-      state.user = action.payload;
-      state.isAuthenticated = action.payload !== null;
+      state.user = action.payload
+      state.isAuthenticated = action.payload !== null
     },
     setAuthError: (state, action: PayloadAction<string | null>) => {
-      state.error = action.payload;
+      state.error = action.payload
     },
   },
-});
+})
 
 // Action to fetch user details and set them in the state
 export const fetchUserDetailsAndSet = () => (dispatch: AppDispatch) => {
-  const { user_id, userName, role } = getUserDetailsFromToken();
+  const { user_id, userName, role } = getUserDetailsFromToken()
   if (user_id && userName && role) {
-    dispatch(setTokenUser({ user_id, userName, role }));
+    dispatch(setTokenUser({ user_id, userName, role }))
   } else {
-    console.log("No valid user details found.");
-    dispatch(setTokenUser(null));
+    console.log('No valid user details found.')
+    dispatch(setTokenUser(null))
   }
-};
+}
 
 // Exports
-export const { setTokenUser, setAuthError } = tokenAuthSlice.actions;
-export default tokenAuthSlice.reducer;
+export const { setTokenUser, setAuthError } = tokenAuthSlice.actions
+export default tokenAuthSlice.reducer

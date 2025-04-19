@@ -1,8 +1,8 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
   /* config options here */
-};
+}
 // next.config.js
 module.exports = {
   images: {
@@ -10,4 +10,4 @@ module.exports = {
   },
 }
 
-export default nextConfig;
+export default nextConfig

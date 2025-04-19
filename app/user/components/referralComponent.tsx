@@ -60,32 +60,33 @@
 
 // export default ReferralComponent;
 
-
-import React, { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { generateReferralLink } from '../../../store/slices/index';
-import { AppDispatch, RootState } from '../../../store/slices/store';
-import { ClipboardCopy } from 'lucide-react';
+import React, { useEffect, useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { generateReferralLink } from '../../../store/slices/index'
+import { AppDispatch, RootState } from '../../../store/store'
+import { ClipboardCopy } from 'lucide-react'
 
 const ReferralComponent: React.FC = () => {
-  const dispatch = useDispatch<AppDispatch>();
-  const { referralLink, isLoading, error } = useSelector((state: RootState) => state.auth);
+  const dispatch = useDispatch<AppDispatch>()
+  const { referralLink, isLoading, error } = useSelector(
+    (state: RootState) => state.auth,
+  )
 
-  const [copySuccess, setCopySuccess] = useState(false);
+  const [copySuccess, setCopySuccess] = useState(false)
 
   useEffect(() => {
-    dispatch(generateReferralLink());
-  }, [dispatch]);
+    dispatch(generateReferralLink())
+  }, [dispatch])
 
   const handleCopy = () => {
     if (referralLink) {
-      const referralUrl = `http://localhost:3000/auth/signup?token=${referralLink}`;
+      const referralUrl = `http://localhost:3000/auth/signup?token=${referralLink}`
       navigator.clipboard.writeText(referralUrl).then(() => {
-        setCopySuccess(true);
-        setTimeout(() => setCopySuccess(false), 2000);
-      });
+        setCopySuccess(true)
+        setTimeout(() => setCopySuccess(false), 2000)
+      })
     }
-  };
+  }
 
   return (
     <div className="text-center">
@@ -107,7 +108,7 @@ const ReferralComponent: React.FC = () => {
         error && <p className="text-red-500">Error: {error}</p>
       )}
     </div>
-  );
-};
+  )
+}
 
-export default ReferralComponent;
+export default ReferralComponent

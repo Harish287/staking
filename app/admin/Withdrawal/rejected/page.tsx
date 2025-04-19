@@ -1,7 +1,7 @@
-import React from "react";
+import React from 'react'
 
 const WithdrawalRejeted = () => {
-  return <div>WithdrawalRejeted</div>;
-};
+  return <div>WithdrawalRejeted</div>
+}
 
-export default WithdrawalRejeted;
+export default WithdrawalRejeted

@@ -1,16 +1,19 @@
-import ReduxProvider from "../store/Provider"; // Adjust path as needed
-import "./globals.css"; // Ensure global styles are applied
+import ReduxProvider from '../store/Provider' // Adjust path as needed
+import './globals.css' // Ensure global styles are applied
+import { ToastProvider } from '../components/ui/ToastProvider'; 
+
 
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode;
+  children: React.ReactNode
 }) {
   return (
     <html lang="en">
-      <body >
+      <body>
+        <ToastProvider/>
         <ReduxProvider>{children}</ReduxProvider>
       </body>
     </html>
-  );
+  )
 }

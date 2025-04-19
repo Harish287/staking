@@ -1,133 +1,130 @@
-"use client";
+'use client'
 
-import React, { useState, useEffect, useLayoutEffect } from "react";
-import { useAppDispatch, useAppSelector } from "../../../store/hooks";
-import { loginUser, checkAuth, setUser } from "../../../store/slices/index";
-import { useRouter, usePathname } from "next/navigation";
-import Cookies from "js-cookie";
-import { decodeJWT } from "../../../lib/auth";
-import Image from "next/image";
-import Logo from "../../../assets/logo2x.png";
-import { Spinner } from "@/components/ui/spinner";
-
-
+import React, { useState, useEffect, useLayoutEffect } from 'react'
+import { useAppDispatch, useAppSelector } from '../../../store/hooks'
+import { loginUser, checkAuth, setUser } from '../../../store/slices/index'
+import { useRouter, usePathname } from 'next/navigation'
+import Cookies from 'js-cookie'
+import { decodeJWT } from '../../../lib/auth'
+import Image from 'next/image'
+import Logo from '../../../assets/logo2x.png'
+import { Spinner } from '@/components/ui/spinner'
 
 const LoginPage: React.FC = () => {
-  const dispatch = useAppDispatch();
-  const router = useRouter();
-  const pathname = usePathname();
+  const dispatch = useAppDispatch()
+  const router = useRouter()
+  const pathname = usePathname()
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [loginError, setLoginError] = useState("");
-  const [showErrorPopup, setShowErrorPopup] = useState(false);
-  const [rememberMe, setRememberMe] = useState(false);
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [loginError, setLoginError] = useState('')
+  const [showErrorPopup, setShowErrorPopup] = useState(false)
+  const [rememberMe, setRememberMe] = useState(false)
 
   const { isAuthenticated, isLoading, user } = useAppSelector(
-    (state) => state.auth
-  );
+    (state) => state.auth,
+  )
 
-  const [isClient, setIsClient] = useState(false);
+  const [isClient, setIsClient] = useState(false)
 
   useLayoutEffect(() => {
-    setIsClient(true);
-  }, []);
+    setIsClient(true)
+  }, [])
 
-useEffect(() => {
-  if (!isClient) return;
+  useEffect(() => {
+    if (!isClient) return
 
-  const token = Cookies.get("token") || localStorage.getItem("token");
-  if (!token) {
-    router.replace("/auth/signin");
-    return;
-  }
-
-  const decodedToken = decodeJWT(token);
-  if (decodedToken) {
-    const currentTime = Math.floor(Date.now() / 1000);
-    if (decodedToken.exp < currentTime) {
-      handleLogout();
-    } else {
-      dispatch(checkAuth())
-        .unwrap()
-        .then((response: { user: { role: string } }) => {
-          if (response.user) {
-            dispatch(setUser(response.user));
-            if (response.user.role === "admin") {
-              router.push("/admin/dashboard");
-            } else {
-              router.push("/user/dashboard");
-            }
-          }
-        })
-        .catch(() => handleLogout());
+    const token = Cookies.get('token') || localStorage.getItem('token')
+    if (!token) {
+      router.replace('/auth/signin')
+      return
     }
-  }
-}, [dispatch, router, pathname, isClient]); 
 
+    const decodedToken = decodeJWT(token)
+    if (decodedToken) {
+      const currentTime = Math.floor(Date.now() / 1000)
+      if (decodedToken.exp < currentTime) {
+        handleLogout()
+      } else {
+        dispatch(checkAuth())
+          .unwrap()
+          .then((response: { user: { role: string } }) => {
+            if (response.user) {
+              dispatch(setUser(response.user))
+              if (response.user.role === 'admin') {
+                router.push('/admin/dashboard')
+              } else {
+                router.push('/user/dashboard')
+              }
+            }
+          })
+          .catch(() => handleLogout())
+      }
+    }
+  }, [dispatch, router, pathname, isClient])
 
   useEffect(() => {
     if (isAuthenticated && user) {
-      if (user.role === "admin" && pathname !== "/admin/dashboard") {
-        router.push("/admin/dashboard");
-      } else if (user.role !== "admin" && pathname !== "/user/dashboard") {
-        router.push("/user/dashboard");
+      if (user.role === 'admin' && pathname !== '/admin/dashboard') {
+        router.push('/admin/dashboard')
+      } else if (user.role !== 'admin' && pathname !== '/user/dashboard') {
+        router.push('/user/dashboard')
       }
     }
-  }, [isAuthenticated, user, router, pathname]);
+  }, [isAuthenticated, user, router, pathname])
 
   const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoginError("");
+    e.preventDefault()
+    setLoginError('')
 
     dispatch(loginUser({ email, password }))
       .unwrap()
       .then((response) => {
         if (response.access_token) {
           if (rememberMe) {
-            Cookies.set("token", response.access_token, { expires: 365 });
+            Cookies.set('token', response.access_token, { expires: 365 })
           } else {
-            localStorage.setItem("token", response.access_token);
+            localStorage.setItem('token', response.access_token)
           }
 
-          const decodedToken = decodeJWT(response.access_token);
-          console.log("token", decodedToken);
+          const decodedToken = decodeJWT(response.access_token)
+          console.log('token', decodedToken)
 
           if (decodedToken) {
-            dispatch(setUser(decodedToken));
+            dispatch(setUser(decodedToken))
 
             setTimeout(() => {
-              if (decodedToken.role === "admin") {
-                router.push("/admin/dashboard");
+              if (decodedToken.role === 'admin') {
+                router.push('/admin/dashboard')
               } else {
-                router.push("/user/dashboard");
+                router.push('/user/dashboard')
               }
-            }, 100);
+            }, 100)
           } else {
-            setLoginError("Failed to decode the token. Please try again.");
-            setShowErrorPopup(true);
+            setLoginError('Failed to decode the token. Please try again.')
+            setShowErrorPopup(true)
           }
         }
       })
       .catch((err) => {
-        console.error("Login error:", err);
-        if (typeof err === "string") {
-          setLoginError(err);
-        } else if (err?.detail === "User not found") {
-          setLoginError("User not found. Please register.");
+        console.error('Login error:', err)
+        if (typeof err === 'string') {
+          setLoginError(err)
+        } else if (err?.detail === 'User not found') {
+          setLoginError('User not found. Please register.')
         } else {
-          setLoginError("Login failed. Please check your credentials.");
+          setLoginError('Login failed. Please check your credentials.')
         }
-        setShowErrorPopup(true);
-      });
-  };
+        setShowErrorPopup(true)
+      })
+  }
 
   const handleLogout = () => {
-    Cookies.remove("token");
-    localStorage.removeItem("token");
-    dispatch(setUser(null));
-    router.push("/auth/signin");
-  };
+    Cookies.remove('token')
+    localStorage.removeItem('token')
+    dispatch(setUser(null))
+    router.push('/auth/signin')
+  }
 
   return (
     <div className="flex justify-center items-center lg:px-[100px] p-0 lg:py-[50px]">
@@ -212,7 +209,7 @@ useEffect(() => {
               type="submit"
               disabled={isLoading}
             >
-              {isLoading ? <Spinner /> : "Sign In"}
+              {isLoading ? <Spinner /> : 'Sign In'}
             </button>
           </form>
 
@@ -243,7 +240,7 @@ useEffect(() => {
         )}
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default LoginPage;
+export default LoginPage

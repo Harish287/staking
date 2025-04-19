@@ -1,19 +1,19 @@
-"use client";
-import Image from "next/image";
-import Link from "next/link";
-import { RiWallet3Line } from "react-icons/ri";
-import { MdOutlineDashboard } from "react-icons/md";
-import { GrShareOption } from "react-icons/gr";
-import { TbTransfer } from "react-icons/tb";
-import { PiUserListBold } from "react-icons/pi";
-import { LuSettings } from "react-icons/lu";
-import Logo from "../../../assets/logo2x.png";
-import { LuCircleUserRound } from "react-icons/lu";
-import { FaUsers } from "react-icons/fa6";
-import { PiHandbagFill } from "react-icons/pi";
-import { useState } from "react";
-import Cookies from "js-cookie";
-import { useRouter } from "next/navigation";
+'use client'
+import Image from 'next/image'
+import Link from 'next/link'
+import { RiWallet3Line } from 'react-icons/ri'
+import { MdOutlineDashboard } from 'react-icons/md'
+import { GrShareOption } from 'react-icons/gr'
+import { TbTransfer } from 'react-icons/tb'
+import { PiUserListBold } from 'react-icons/pi'
+import { LuSettings } from 'react-icons/lu'
+import Logo from '../../../assets/logo2x.png'
+import { LuCircleUserRound } from 'react-icons/lu'
+import { FaUsers } from 'react-icons/fa6'
+import { PiHandbagFill } from 'react-icons/pi'
+import { useEffect, useState } from 'react'
+import Cookies from 'js-cookie'
+import { useRouter } from 'next/navigation'
 
 import {
   DropdownMenu,
@@ -23,27 +23,57 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "../../../components/ui/dropdown-menu";
-import { Button } from "../../../components/ui/button";
-import { NotebookText } from "lucide-react";
-import useLogout from "../../../components/hooks/userLogout";
-import { useSelector } from "react-redux";
-import { RootState } from "@/store/slices/store";
+} from '../../../components/ui/dropdown-menu'
+import { Button } from '../../../components/ui/button'
+import { Eye, NotebookText, Power, User } from 'lucide-react'
+import useLogout from '../../../components/hooks/userLogout'
+import { decodeJWT } from '../../../lib/auth'
+import { useAppDispatch, useAppSelector } from '@/store/hooks'
+import { verifyKYCStatus } from '../../../store/slices/index'
 
 function Navigation() {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false)
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [decodedToken, setDecodedToken] = useState<any>(null) // To store decoded token data
 
-  const router = useRouter();
-  const { handleLogout } = useLogout();
-  // const handleLogout = () => {
-  //   Cookies.remove("token");
-  //   localStorage.removeItem("token");
-  //   router.push("/auth/signin");
-  // };
-  const { user,user_id ,name } = useSelector((state: RootState) => state.auth);
+  const router = useRouter()
+  const { handleLogout } = useLogout()
+  
+  
+  const dispatch = useAppDispatch() 
+
+
+
+  useEffect(() => {
+    dispatch(verifyKYCStatus()) 
+  }, [dispatch])
+
+  const { kycVerified } = useAppSelector((state) => state.auth)
+  const { user } = useAppSelector((state) => state.auth)
+
+  useEffect(() => {
+    const token = localStorage.getItem('token')
+    if (token) {
+      try {
+        const decoded = decodeJWT(token)
+        setDecodedToken(decoded)
+
+        if (decoded?.userName) {
+          setIsAuthenticated(true)
+        } else {
+          setIsAuthenticated(false)
+        }
+      } catch (error) {
+        console.error('Error decoding the token:', error)
+        setIsAuthenticated(false)
+      }
+    } else {
+      setIsAuthenticated(false)
+    }
+  }, [user])
 
   return (
-    <div>
+    <div className="bg-white box-border shadow-xl">
       <nav
         className="bg-gradient-to-r from-pink-700 to-gray-800 "
         // style={{
@@ -62,28 +92,42 @@ function Navigation() {
           </div>
           <div className="flex items-center text-gray-100">
             <div className=" items-center flex  ">
-              {" "}
-              Hello! /user
+              {decodedToken?.name ? `Hello! / ${decodedToken.name}` : '/user'}
+
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button className="p-0 w-11 h-11">
                     <LuCircleUserRound
-                      style={{ width: "32px", height: "32px" }}
+                      style={{ width: '32px', height: '32px' }}
                     />
                   </Button>
                 </DropdownMenuTrigger>
 
                 <DropdownMenuContent className="w-40 mr-20 bg-white">
-                  <DropdownMenuLabel>Hello!    <h2>Welcome, {name}!</h2>
-                  <p>Your User ID: {user_id}</p></DropdownMenuLabel>
+                  <DropdownMenuLabel>
+                    {decodedToken?.name
+                      ? `Welcome, ${decodedToken.name}`
+                      : '/user'}
+                  </DropdownMenuLabel>
                   <DropdownMenuSeparator className=" bg-black" />
                   <DropdownMenuGroup>
                     <DropdownMenuItem>
                       <Link
-                        href="/auth/signin"
-                        className="my-2 block border-b border-gray-100 font-semibold text-pink-800 hover:text-pink-700 md:mx-2"
+                        href="/user/profile"
+                        className="gap-1 flex justify-between items-center border-b border-gray-100 font-semibold text-pink-800 hover:text-pink-700 md:mx-2"
                       >
-                        Login
+                        <User />
+                        My Profile
+                      </Link>
+                    </DropdownMenuItem>
+                  </DropdownMenuGroup>
+                  <DropdownMenuGroup>
+                    <DropdownMenuItem>
+                      <Link
+                        href=""
+                        className=" gap-1 flex justify-between items-center  border-b border-gray-100 font-semibold text-pink-800 hover:text-pink-700 md:mx-2"
+                      >
+                        <Eye /> Activity
                       </Link>
                     </DropdownMenuItem>
                   </DropdownMenuGroup>
@@ -93,9 +137,9 @@ function Navigation() {
                       <Link
                         href="/auth/signin"
                         onClick={handleLogout}
-                        className=" block border-b border-gray-100 font-semibold text-pink-800 hover:text-pink-700 md:mx-2"
+                        className="gap-1 flex justify-between items-center border-b border-gray-100 font-semibold text-pink-800 hover:text-pink-700 md:mx-2"
                       >
-                        Logout
+                        <Power /> Logout
                       </Link>
                     </DropdownMenuItem>
                   </DropdownMenuGroup>
@@ -145,8 +189,8 @@ function Navigation() {
 
       <nav
         className={`flex flex-col lg:flex-row md:flex-col sm:flex-col container m-auto justify-center items-center
-           gap-6  bg-white box-border shadow-xl ${
-             isOpen ? "block" : "hidden"
+           gap-6  bg-transparent   ${
+             isOpen ? 'block' : 'hidden'
            } lg:flex transition-all duration-300`}
       >
         <Link
@@ -384,22 +428,23 @@ function Navigation() {
         </Link>
 
         <div className="flex items-center">
-          {!user?.kycVerified ? (
+          {kycVerified === null ? (
+            <p className="text-[12px] ml-3 text-gray-400">Checking KYC...</p>
+          ) : !kycVerified ? (
             <Link href="/user/kyc">
               <p className="text-[12px] font-normal flex justify-center items-center border-2 bg-blue-200 p-0.5 ml-3">
-                {/* <span className="mr-2 text-red-500">Not Verified</span>  */}
                 Submit KYC
               </p>
             </Link>
           ) : (
-            <span className="text-[12px] font-normal flex justify-center items-center border-2  p-0.5 ml-3 text-green-500 ">
+            <span className="text-[12px] font-normal flex justify-center items-center border-2 p-0.5 ml-3 text-green-500 ">
               KYC Approved
             </span>
           )}
         </div>
       </nav>
     </div>
-  );
+  )
 }
 
-export default Navigation;
+export default Navigation

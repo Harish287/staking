@@ -1,7 +1,7 @@
-import React from "react";
+import React from 'react'
 
 const KaitWalletTransfer = () => {
-  return <div>Kait Wallet Transfer</div>;
-};
+  return <div>Kait Wallet Transfer</div>
+}
 
-export default KaitWalletTransfer;
+export default KaitWalletTransfer

@@ -1,5 +1,5 @@
 function GenerateReceipt() {
-  return <div>GenerateReceipt</div>;
+  return <div>GenerateReceipt</div>
 }
 
-export default GenerateReceipt;
+export default GenerateReceipt

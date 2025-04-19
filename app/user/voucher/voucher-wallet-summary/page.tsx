@@ -1,5 +1,5 @@
 function VoucherWalletSummary() {
-  return <div>VoucherWalletSummary</div>;
+  return <div>VoucherWalletSummary</div>
 }
 
-export default VoucherWalletSummary;
+export default VoucherWalletSummary
