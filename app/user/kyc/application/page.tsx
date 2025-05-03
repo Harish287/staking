@@ -53,18 +53,21 @@ export default function KycVerification() {
   }, [dispatch])
 
   useEffect(() => {
-    if (kycVerified) {
-      setKycStatus('Your identity has already been verified. Thank you!')
-    } else if (kycRejected) {
+    if (kycRejected) {
       setKycStatus(
         'Your KYC application has been rejected. Please resubmit with valid documents.',
       )
+    } else if (kycVerified && !kycRejected && !kycPending) {
+      // Assume if verified is true and not rejected or pending, it's approved
+      setKycStatus('Your identity has already been verified. Thank you!')
     } else if (kycPending) {
-      setKycStatus('KYC Application Submitted Successfully')
+      setKycStatus(
+        'KYC Application is waiting for review. Please wait for confirmation.',
+      )
     } else {
       setKycStatus(null)
     }
-  }, [kycVerified, kycRejected])
+  }, [kycVerified, kycRejected, kycPending])
 
   const isKycPendingOrSubmitted =
     kycVerified || /pending|waiting for review/i.test(kycStatus ?? '')
@@ -157,6 +160,55 @@ export default function KycVerification() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
+    const requiredFields: (keyof typeof formData)[] = [
+      'first_name',
+      'last_name',
+      'dob',
+      'username',
+      'mobile',
+      'country',
+      'state',
+      'city',
+      'postal_code',
+      'gender',
+      'address_line_1',
+      'document_type',
+      'document_one',
+      'document_photo',
+    ]
+
+    const fieldLabels: Record<string, string> = {
+      first_name: 'First Name',
+      last_name: 'Last Name',
+      dob: 'Date of Birth',
+      username: 'Username',
+      mobile: 'Mobile Number',
+      country: 'Country',
+      state: 'State',
+      city: 'City',
+      postal_code: 'Postal Code',
+      gender: 'Gender',
+      address_line_1: 'Address Line 1',
+      document_type: 'Document Type',
+      document_one: 'Front Document',
+      document_photo: 'Document Photo',
+    }
+
+    for (const field of requiredFields) {
+      const value = formData[field]
+      if (!value || (typeof value === 'string' && value.trim() === '')) {
+        const el = document.getElementById(field)
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+          ;(el as HTMLElement).focus()
+        }
+        toast.error(
+          `Please fill in the required field: ${fieldLabels[field] || field}`,
+        )
+        return
+      }
+    }
+
     const submissionData = new FormData()
     Object.entries(formData).forEach(([key, value]) => {
       if (value) submissionData.append(key, value as Blob | string)
@@ -175,6 +227,9 @@ export default function KycVerification() {
         } else if (detail?.includes('rejected')) {
           setKycStatus('Your KYC application was rejected.')
           toast.error('KYC was rejected. Please try again.')
+        } else if (response.meta?.requestStatus === 'fulfilled') {
+          setKycStatus('KYC submitted successfully. Please wait for review.')
+          toast.success('KYC submitted!')
         } else {
           toast.error(
             'Submission failed. Please check your details and try again.',
@@ -199,8 +254,6 @@ export default function KycVerification() {
       </div>
     )
   }
-
-  
 
   return (
     <div className="max-w-3xl mt-6 w-full mx-auto bg-white rounded-lg shadow-lg p-6">

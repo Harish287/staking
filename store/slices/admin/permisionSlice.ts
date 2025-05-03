@@ -1,30 +1,37 @@
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { toast } from 'react-toastify'
 
-interface PermissionPayload {
+export interface PermissionPayload {
   userId: string
-  permissionType:
-    | 'transfer'
-    | 'withdraw'
-    | 'withdraw_staking'
-    | 'level_income'
-    | 'credit'
-    | 'suspend'
-    | 'adhoc_income'
+  permissionType: PermissionType
   permissionValue: boolean
   token: string
 }
+
+export type PermissionType =
+  | 'transfer'
+  | 'withdraw'
+  | 'withdraw_staking'
+  | 'level_income'
+  | 'credit'
+  | 'suspend'
+  | 'adhoc_income'
 
 interface PermissionState {
   loading: boolean
   error: string | null
   message: string | null
+  userPermissions: {
+    [userId: string]: Record<PermissionType, boolean> 
+  }
+  updatingUserIds: string[] 
 }
 
 const initialState: PermissionState = {
   loading: false,
   error: null,
   message: null,
+  userPermissions: {},
+  updatingUserIds: [],
 }
 
 const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL
@@ -37,64 +44,93 @@ export const updateUserPermission = createAsyncThunk<
   'permissions/updateUserPermission',
   async ({ userId, permissionType, permissionValue, token }, thunkAPI) => {
     try {
-      const url = `${baseURL}user/permission?user_id=${encodeURIComponent(
-        userId,
-      )}&permission_type=${permissionType}&permission_value=${permissionValue}`
+      const params = new URLSearchParams({
+        user_id: userId,
+        permission_type: permissionType,
+        permission_value: String(permissionValue),
+      })
+
+      const url =
+        new URL('user/permission', baseURL).toString() + '?' + params.toString()
 
       const res = await fetch(url, {
         method: 'PUT',
         headers: {
           Authorization: `Bearer ${token}`,
           Accept: 'application/json',
+          'Content-Type': 'application/json',
         },
       })
 
       if (!res.ok) {
-        const error = await res.json()
-        throw new Error(error?.detail || 'Failed to update permission')
+        const errorBody = await res.json()
+        const errorMessage = errorBody?.detail || res.statusText
+        throw new Error(errorMessage)
       }
 
-      return await res.json()
+      const data = await res.json()
+      return data
     } catch (error: any) {
-      return thunkAPI.rejectWithValue(error.message || 'Something went wrong')
+      return thunkAPI.rejectWithValue(
+        error.message || 'Failed to update permission',
+      )
     }
-  }
+  },
 )
 
 const permissionSlice = createSlice({
   name: 'permissions',
   initialState,
   reducers: {
-    clearPermissionState: (state) => {
-      state.loading = false
-      state.error = null
-      state.message = null
+  
+    updateLocalPermission: (
+      state,
+      action: PayloadAction<{
+        userId: string
+        permissionType: PermissionType // Updated to use PermissionType
+        permissionValue: boolean
+      }>,
+    ) => {
+      const { userId, permissionType, permissionValue } = action.payload
+      if (!state.userPermissions[userId]) {
+        state.userPermissions[userId] = {} as Record<PermissionType, boolean>
+      }
+      state.userPermissions[userId][permissionType] = permissionValue
     },
   },
   extraReducers: (builder) => {
     builder
-      .addCase(updateUserPermission.pending, (state) => {
+      .addCase(updateUserPermission.pending, (state, action) => {
         state.loading = true
         state.error = null
         state.message = null
+        state.updatingUserIds.push(action.meta.arg.userId)
       })
-      .addCase(
-        updateUserPermission.fulfilled,
-        (state, action: PayloadAction<{ detail: string }>) => {
-          state.loading = false
-          state.message = action.payload.detail
-          // Show success toast
-          toast.success(action.payload.detail)
+      .addCase(updateUserPermission.fulfilled, (state, action) => {
+        state.loading = false
+        state.message = action.payload.detail
+
+        const { userId, permissionType, permissionValue } = action.meta.arg
+        if (!state.userPermissions[userId]) {
+          state.userPermissions[userId] = {} as Record<PermissionType, boolean>
         }
-      )
+        state.userPermissions[userId][permissionType] = permissionValue
+
+        state.updatingUserIds = state.updatingUserIds.filter(
+          (id) => id !== userId,
+        )
+      })
       .addCase(updateUserPermission.rejected, (state, action) => {
         state.loading = false
         state.error = action.payload || 'Failed to update permission'
-        // Show error toast
-        toast.error(state.error)
+
+        const { userId } = action.meta.arg
+        state.updatingUserIds = state.updatingUserIds.filter(
+          (id) => id !== userId,
+        )
       })
   },
 })
 
-export const { clearPermissionState } = permissionSlice.actions
+export const { updateLocalPermission } = permissionSlice.actions
 export default permissionSlice.reducer

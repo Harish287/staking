@@ -1,7 +1,6 @@
 import ReduxProvider from '../store/Provider' // Adjust path as needed
 import './globals.css' // Ensure global styles are applied
-import { ToastProvider } from '../components/ui/ToastProvider'; 
-
+import { ToastProvider } from '../components/ui/ToastProvider'
 
 export default function RootLayout({
   children,
@@ -11,7 +10,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <ToastProvider/>
+        <ToastProvider />
         <ReduxProvider>{children}</ReduxProvider>
       </body>
     </html>

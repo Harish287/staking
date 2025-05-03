@@ -361,6 +361,12 @@ function Navigation() {
               >
                 admin Metrics
               </Link>
+              <Link
+                href="/admin/settings/stakePlans"
+                className="my-2 block border-b border-gray-100 font-semibold   text-[#7668fe] hover:duration-1000 hover:text-black md:mx-2"
+              >
+                StakePlans
+              </Link>
             </div>
           </div>
         </div>

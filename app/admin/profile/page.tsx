@@ -12,6 +12,7 @@ import {
 } from '../../../store/slices/profileAPI'
 import { RootState, AppDispatch } from '../../../store/store'
 import toast from 'react-hot-toast'
+import ChangePassword from './changePassword'
 
 export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState('MY PROFILE')
@@ -70,7 +71,6 @@ export default function ProfilePage() {
     setIsButtonDisabled(!hasChanges)
   }, [firstName, lastName, dob])
 
-
   const handleSubmit = async () => {
     if (!firstName || !lastName || !dob) {
       toast.error('All fields are required.')
@@ -94,8 +94,6 @@ export default function ProfilePage() {
       setIsButtonDisabled(false)
     }
   }
-
-
 
   const handleEnable2FA = () => {
     // Handle 2FA enablement logic here
@@ -204,6 +202,9 @@ export default function ProfilePage() {
               </Button>
             </TabsContent>
 
+            <TabsContent value="CHANGE PASSWORD" className="space-y-6 pt-6">
+<ChangePassword/>
+            </TabsContent>
             {/* Optional: other tabs like SECURITY SETTINGS can go here */}
           </Tabs>
         </Card>

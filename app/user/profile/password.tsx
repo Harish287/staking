@@ -3,9 +3,9 @@ import { useAppDispatch, useAppSelector } from '../../../store/hooks'
 import { resetUserPassword } from '../../../store/slices/profileAPI'
 import { resetPasswordState } from '../../../store/slices/profileSlice'
 import { RootState } from '../../../store/store'
-import { toast } from 'react-toastify'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import toast from 'react-hot-toast'
 
 const ResetPasswordForm = () => {
   const dispatch = useAppDispatch()
@@ -32,21 +32,31 @@ const ResetPasswordForm = () => {
   }, [success, error, dispatch])
 
   const handleSubmit = () => {
+    // Validate fields are filled
     if (!oldPassword || !newPassword || !confirmPassword) {
       toast.error('All fields are required.')
       return
     }
 
+    // Check if old password and new password are the same
+    if (oldPassword === newPassword) {
+      toast.error('New password cannot be the same as the old password.')
+      return
+    }
+
+    // Check if passwords match
     if (newPassword !== confirmPassword) {
       toast.error('Passwords do not match.')
       return
     }
 
+    // Check password length
     if (newPassword.length < 6) {
       toast.error('Password must be at least 6 characters.')
       return
     }
 
+    // Dispatch reset password action
     dispatch(
       resetUserPassword({
         old_password: oldPassword,
@@ -65,9 +75,7 @@ const ResetPasswordForm = () => {
         <Input
           type="password"
           value={oldPassword}
-          onChange={(e: { target: { value: React.SetStateAction<string> } }) =>
-            setOldPassword(e.target.value)
-          }
+          onChange={(e) => setOldPassword(e.target.value)}
           placeholder="Enter current password"
         />
       </div>
@@ -79,9 +87,7 @@ const ResetPasswordForm = () => {
         <Input
           type="password"
           value={newPassword}
-          onChange={(e: { target: { value: React.SetStateAction<string> } }) =>
-            setNewPassword(e.target.value)
-          }
+          onChange={(e) => setNewPassword(e.target.value)}
           placeholder="Enter new password"
         />
       </div>
@@ -93,9 +99,7 @@ const ResetPasswordForm = () => {
         <Input
           type="password"
           value={confirmPassword}
-          onChange={(e: { target: { value: React.SetStateAction<string> } }) =>
-            setConfirmPassword(e.target.value)
-          }
+          onChange={(e) => setConfirmPassword(e.target.value)}
           placeholder="Confirm new password"
         />
       </div>

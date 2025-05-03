@@ -88,23 +88,28 @@ const KycApplications = () => {
 
   const filteredApplications = useMemo(() => {
     return kycApplications.filter((app) => {
+      const userName = app.user_name ?? '';
+      const userId = app.user_id ?? '';
+      const search = searchQuery.toLowerCase();
+  
       const matchesSearch =
-        app.user_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        app.user_id.toLowerCase().includes(searchQuery.toLowerCase())
-
+        userName.toLowerCase().includes(search) ||
+        userId.toLowerCase().includes(search);
+  
       const normalizedStatus =
         app.status === 'Approved'
           ? 'approved'
-          : app.status === 'Rejected'
+          : app.status === 'rejected'
           ? 'rejected'
-          : 'pending'
-
+          : 'pending';
+  
       const statusMatch =
-        statusParam === 'all' || statusParam === normalizedStatus
-
-      return matchesSearch && statusMatch
-    })
-  }, [kycApplications, searchQuery, statusParam])
+        statusParam === 'all' || statusParam === normalizedStatus;
+  
+      return matchesSearch && statusMatch;
+    });
+  }, [kycApplications, searchQuery, statusParam]);
+  
 
   const changePage = (newPage: number) => {
     const params = new URLSearchParams(searchParams.toString())
@@ -159,9 +164,7 @@ const KycApplications = () => {
         toast.success(`${message}`)
       })
       .catch(() => {
-        toast.error(
-          `${action === 'approve' ? 'Approval' : 'Rejection'} failed`,
-        )
+        toast.error(`${action === 'approve' ? 'Approval' : 'Rejection'} failed`)
       })
       .finally(() => setActionLoading(false))
   }
@@ -178,7 +181,11 @@ const KycApplications = () => {
           onChange={(e) => setSearchQuery(e.target.value)}
         />
 
-        <Tabs value={statusParam} onValueChange={handleTabChange} className="mb-4">
+        <Tabs
+          value={statusParam}
+          onValueChange={handleTabChange}
+          className="mb-4"
+        >
           <TabsList>
             <TabsTrigger value="all">All</TabsTrigger>
             <TabsTrigger value="pending">Pending</TabsTrigger>
@@ -219,8 +226,10 @@ const KycApplications = () => {
                             <div className="flex gap-4">
                               {files.map((file, index) => {
                                 const cleanLabel =
-                                  file.split('/').pop()?.replace(/^\d{14}_/, '') ||
-                                  'Document'
+                                  file
+                                    .split('/')
+                                    .pop()
+                                    ?.replace(/^\d{14}_/, '') || 'Document'
 
                                 return (
                                   <Button
@@ -251,9 +260,9 @@ const KycApplications = () => {
                         className={`px-2 py-1 rounded-full text-[12px] font-medium ${
                           app.status.trim() === 'Approved'
                             ? 'bg-green-100 text-green-700'
-                            : app.status.trim() === 'Rejected'
-                            ? 'bg-red-100 text-red-700'
-                            : 'bg-yellow-100 text-yellow-700'
+                            : app.status.trim() === 'rejected'
+                              ? 'bg-red-100 text-red-700'
+                              : 'bg-yellow-100 text-yellow-700'
                         }`}
                       >
                         {app.status.trim() === ''
@@ -335,7 +344,9 @@ const KycApplications = () => {
             </div>
           </>
         ) : (
-          !isLoading && <p className="text-gray-600">No KYC applications found.</p>
+          !isLoading && (
+            <p className="text-gray-600">No KYC applications found.</p>
+          )
         )}
       </Card>
 

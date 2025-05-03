@@ -3,11 +3,16 @@
 import { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { AppDispatch, RootState } from '@/store/store'
-import { fetchInvestorList } from '@/store/slices/admin/investorSlice'
+import {
+  fetchInvestorDetails,
+  fetchInvestorList,
+} from '@/store/slices/admin/investorSlice'
 import { updateUserPermission } from '@/store/slices/admin/permisionSlice'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card } from '@/components/ui/card'
+import kaitimg from '../../../assets/logo2x.png'
+
 import {
   MoreHorizontal,
   Download,
@@ -40,9 +45,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { toast } from 'react-hot-toast' 
-import { jwtDecode } from 'jwt-decode'
-
+import { toast } from 'react-hot-toast'
+import Image from 'next/image'
+import { useRouter } from 'next/navigation'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog'
+import ResetPasswordForm from './Resetpassword/page'
 type permissionType =
   | 'transfer'
   | 'withdraw'
@@ -54,6 +67,14 @@ type permissionType =
 
 export default function InvestorList() {
   const dispatch = useDispatch<AppDispatch>()
+  const [open, setOpen] = useState(false)
+
+  const [selectedUserId, setSelectedUserId] = useState<string>('')
+  const handleResetPassword = (userId: string) => {
+    setSelectedUserId(userId)
+    setOpen(true)
+  }
+
   const { list, isLoading, error, total } = useSelector(
     (state: RootState) => state.investor,
   )
@@ -80,43 +101,83 @@ export default function InvestorList() {
     )
   }, [dispatch, currentPage, searchQuery])
 
-  const handlePermissionChange = (
+  const handlePermissionChange = async (
     userId: string,
     permissionType: permissionType,
-    permissionValue: boolean,
+    permissionValue: boolean | undefined,
   ) => {
     const token = localStorage.getItem('token')
-    if (!token) return
 
-    // Decode the token
-    const decodedToken: any = jwtDecode(token)
-    const userName = decodedToken?.name || 'User'
+    if (!token) {
+      toast.error('Authorization token missing. Please log in again.')
+      return
+    }
 
-    // Dispatch permission update
-    dispatch(
-      updateUserPermission({
-        userId,
-        permissionType,
-        permissionValue,
-        token,
-      }),
-    )
+    const investor = list.find((inv) => inv.user_id === userId)
+    const userName = investor?.name || 'User'
+    const permissionValueToSend =
+      permissionValue === undefined ? false : permissionValue
 
-    // Display success or error toast with the user's name
-    if (permissionValue) {
-      toast.success(`${permissionType} permission enabled for ${userName}`)
-    } else {
-      toast.error(`${permissionType} permission disabled for ${userName}`)
+    console.log('Attempting to update permission with values:', {
+      userId,
+      permissionType,
+      permissionValueToSend,
+    })
+
+    try {
+      const resultAction = await dispatch(
+        updateUserPermission({
+          userId,
+          permissionType,
+          permissionValue: permissionValueToSend, // Use the updated value
+          token,
+        }),
+      )
+
+      if (updateUserPermission.fulfilled.match(resultAction)) {
+        toast.success(
+          `${permissionType} permission ${permissionValueToSend ? 'enabled' : 'disabled'} for ${userName}`,
+        )
+
+        dispatch(
+          fetchInvestorList({
+            page: currentPage,
+            page_size: pageSize,
+            searchQuery,
+          }),
+        )
+      } else {
+        toast.error(
+          `Failed to update ${permissionType} permission for ${userName}`,
+        )
+      }
+    } catch (error) {
+      console.error('Error updating permission:', error)
+      toast.error(
+        `An error occurred while updating ${permissionType} permission for ${userName}`,
+      )
     }
   }
 
+  const handleViewDetails = async (userId: string) => {
+    try {
+      const resultAction = await dispatch(fetchInvestorDetails(userId))
+      if (fetchInvestorDetails.fulfilled.match(resultAction)) {
+        router.push(`/admin/UserList/Details?userId=${userId}`)
+      } else {
+        toast.error('Failed to fetch investor details.')
+      }
+    } catch (err) {
+      console.error('Unexpected error:', err)
+    }
+  }
+  const router = useRouter()
   const tabs = ['Investor / Users', 'Admin Account', 'Club Details', 'All']
 
   return (
     <div className="min-h-screen bg-blue-100 p-6">
       <Card className="container bg-white mx-auto max-w-7xl">
         <div className="p-6">
-          {/* Header */}
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-2xl font-semibold text-indigo-900">
               Investor User List
@@ -131,7 +192,6 @@ export default function InvestorList() {
             </div>
           </div>
 
-          {/* Tabs + Search */}
           <div className="flex justify-between items-center mb-6">
             <div className="flex gap-6">
               {tabs.map((tab) => (
@@ -156,7 +216,6 @@ export default function InvestorList() {
             />
           </div>
 
-          {/* Table */}
           {isLoading ? (
             <div className="text-center py-10">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto" />
@@ -191,8 +250,30 @@ export default function InvestorList() {
                         </div>
                       </td>
                       <td className="p-4">{investor.email}</td>
-                      <td className="p-4">${investor.investment}</td>
-                      <td className="p-4">${investor.team_business || 0}</td>
+                      <td className="p-4 ">
+                        <span className=" flex gap-2">
+                          <Image
+                            src={kaitimg}
+                            width={20}
+                            height={20}
+                            className=" object-contain"
+                            alt="Picture of the author"
+                          />
+                          {investor.investment}
+                        </span>
+                      </td>
+                      <td className="p-4">
+                        <span className=" flex gap-2">
+                          <Image
+                            src={kaitimg}
+                            width={20}
+                            height={20}
+                            className=" object-contain"
+                            alt="Picture of the author"
+                          />
+                          {investor.team_business || 0}
+                        </span>
+                      </td>
                       <td className="p-4">
                         <div className="flex gap-2">
                           <div className="flex items-center gap-1">
@@ -229,7 +310,7 @@ export default function InvestorList() {
                       </td>
                       <td className="p-4">
                         <Switch
-                          checked={!investor.withdraw} // If "disabled" === true, switch should be ON
+                          checked={!investor.withdraw}
                           onCheckedChange={(checked) =>
                             handlePermissionChange(
                               investor.user_id,
@@ -244,12 +325,12 @@ export default function InvestorList() {
                       <td className="p-4">
                         <span
                           className={`px-3 py-1 rounded-full text-sm ${
-                            investor.status
+                            investor.suspend
                               ? 'bg-green-100 text-green-800'
                               : 'bg-gray-200 text-gray-600'
                           }`}
                         >
-                          {investor.status ? 'Active' : 'Inactive'}
+                          {investor.suspend ? 'Active' : 'Inactive'}
                         </span>
                       </td>
                       <td className="p-4">
@@ -263,9 +344,14 @@ export default function InvestorList() {
                             align="end"
                             className="bg-white z-50 max-h-80 overflow-y-auto"
                           >
-                            <DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() =>
+                                handleViewDetails(investor.user_id)
+                              }
+                            >
                               <Eye className="w-4 h-4 mr-2" /> View Details
                             </DropdownMenuItem>
+
                             <DropdownMenuItem>
                               <Pencil className="w-4 h-4 mr-2" /> Update User
                             </DropdownMenuItem>
@@ -287,32 +373,57 @@ export default function InvestorList() {
                             <DropdownMenuItem>
                               <Activity className="w-4 h-4 mr-2" /> Activities
                             </DropdownMenuItem>
-                            <DropdownMenuItem>
-                              <RefreshCcw className="w-4 h-4 mr-2" /> Reset Pass
+                            <DropdownMenuItem
+                              onClick={() =>
+                                handleResetPassword(investor.user_id)
+                              }
+                            >
+                              <Lock className="w-4 h-4 mr-2" /> Reset Password
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               onClick={() =>
                                 handlePermissionChange(
                                   investor.user_id,
-                                  'withdraw_staking',
+                                  'transfer',
                                   !investor.transfer,
                                 )
                               }
                             >
-                              <Lock className="w-4 h-4 mr-2" /> Transfer Disable
+                              {investor.transfer ? (
+                                <>
+                                  <Lock className="w-4 h-4 mr-2" />
+                                  Transfer Disable
+                                </>
+                              ) : (
+                                <>
+                                  <Unlock className="w-4 h-4 mr-2" />
+                                  Transfer Enable
+                                </>
+                              )}
                             </DropdownMenuItem>
 
                             <DropdownMenuItem
                               onClick={() =>
                                 handlePermissionChange(
                                   investor.user_id,
-                                  'withdraw_staking',
+                                  'withdraw',
                                   !investor.withdraw,
                                 )
                               }
                             >
-                              <Lock className="w-4 h-4 mr-2" /> Withdraw Disable
+                              {investor.withdraw ? (
+                                <>
+                                  <Lock className="w-4 h-4 mr-2" />
+                                  Withdraw Disable
+                                </>
+                              ) : (
+                                <>
+                                  <Unlock className="w-4 h-4 mr-2" />
+                                  Withdraw Enable
+                                </>
+                              )}
                             </DropdownMenuItem>
+
                             <DropdownMenuItem
                               onClick={() =>
                                 handlePermissionChange(
@@ -322,9 +433,19 @@ export default function InvestorList() {
                                 )
                               }
                             >
-                              <Lock className="w-4 h-4 mr-2" /> Withdraw Stake
-                              Wallet enable
+                              {!investor.withdraw_staking ? (
+                                <>
+                                  <Lock className="w-4 h-4 mr-2" />
+                                  Withdraw Staking Disable
+                                </>
+                              ) : (
+                                <>
+                                  <Unlock className="w-4 h-4 mr-2" />
+                                  Withdraw Staking Enable
+                                </>
+                              )}
                             </DropdownMenuItem>
+
                             <DropdownMenuItem
                               onClick={() =>
                                 handlePermissionChange(
@@ -334,9 +455,19 @@ export default function InvestorList() {
                                 )
                               }
                             >
-                              <PauseCircle className="w-4 h-4 mr-2" /> Level
-                              Income Suspend
+                              {investor.level_income ? (
+                                <>
+                                  <Lock className="w-4 h-4 mr-2" />
+                                  Level Income Suspend
+                                </>
+                              ) : (
+                                <>
+                                  <Unlock className="w-4 h-4 mr-2" />
+                                  Level Income Enable
+                                </>
+                              )}
                             </DropdownMenuItem>
+
                             <DropdownMenuItem
                               onClick={() =>
                                 handlePermissionChange(
@@ -346,9 +477,19 @@ export default function InvestorList() {
                                 )
                               }
                             >
-                              <PauseCircle className="w-4 h-4 mr-2" /> Adhoc
-                              Income Suspend
+                              {investor.adhoc_income ? (
+                                <>
+                                  <Lock className="w-4 h-4 mr-2" />
+                                  Adhoc Income Disable
+                                </>
+                              ) : (
+                                <>
+                                  <Unlock className="w-4 h-4 mr-2" />
+                                  Adhoc Income Enable
+                                </>
+                              )}
                             </DropdownMenuItem>
+
                             <DropdownMenuItem
                               onClick={() =>
                                 handlePermissionChange(
@@ -358,9 +499,19 @@ export default function InvestorList() {
                                 )
                               }
                             >
-                              <CreditCard className="w-4 h-4 mr-2" /> Set Credit
-                              ID
+                              {investor.credit ? (
+                                <>
+                                  <CreditCard className="w-4 h-4 mr-2" />
+                                  Remove Credit ID
+                                </>
+                              ) : (
+                                <>
+                                  <CreditCard className="w-4 h-4 mr-2" />
+                                  Set Credit ID
+                                </>
+                              )}
                             </DropdownMenuItem>
+
                             <DropdownMenuItem
                               onClick={() =>
                                 handlePermissionChange(
@@ -370,8 +521,17 @@ export default function InvestorList() {
                                 )
                               }
                             >
-                              <Power className="w-4 h-4 mr-2 text-red-600" />{' '}
-                              Suspend
+                              {!investor.suspend ? (
+                                <>
+                                  <Power className="w-4 h-4 mr-2 text-red-600" />
+                                  Activate
+                                </>
+                              ) : (
+                                <>
+                                  <Power className="w-4 h-4 mr-2 text-red-600" />
+                                  Suspend
+                                </>
+                              )}
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
@@ -380,10 +540,18 @@ export default function InvestorList() {
                   ))}
                 </tbody>
               </table>
+              <Dialog open={open} onOpenChange={setOpen}>
+                <DialogContent className="bg-[#F3EAD8] hover:bg-blue-50 transition-colors duration-2000">
+                  <DialogHeader>
+                    <DialogTitle></DialogTitle>
+                  </DialogHeader>
+                  {/* Pass selectedUserId to ResetPasswordForm */}
+                  <ResetPasswordForm userId={selectedUserId} />
+                </DialogContent>
+              </Dialog>
             </div>
           )}
 
-          {/* Pagination */}
           <div className="flex justify-between items-center mt-6">
             <div className="flex gap-2">
               <Button
@@ -429,7 +597,4 @@ export default function InvestorList() {
       </Card>
     </div>
   )
-}
-function jwt_decode(token: string): any {
-  throw new Error('Function not implemented.')
 }

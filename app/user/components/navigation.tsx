@@ -38,14 +38,11 @@ function Navigation() {
 
   const router = useRouter()
   const { handleLogout } = useLogout()
-  
-  
-  const dispatch = useAppDispatch() 
 
-
+  const dispatch = useAppDispatch()
 
   useEffect(() => {
-    dispatch(verifyKYCStatus()) 
+    dispatch(verifyKYCStatus())
   }, [dispatch])
 
   const { kycVerified } = useAppSelector((state) => state.auth)

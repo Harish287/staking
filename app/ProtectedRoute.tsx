@@ -13,7 +13,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   const [isClient, setIsClient] = useState(false)
 
   useEffect(() => {
-    setIsClient(true) 
+    setIsClient(true)
 
     const token = localStorage.getItem('token')
     console.log(token, 'token')
@@ -38,7 +38,6 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   }, [router])
 
   if (!isClient || !isAuthenticated) {
-    
     return null
   }
 

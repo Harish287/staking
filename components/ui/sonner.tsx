@@ -1,10 +1,10 @@
 "use client";
 
 import { useTheme } from "next-themes";
-import { Toaster as Sonner, ToasterProps, toast } from "sonner";
+import { Toaster as Sonner, ToasterProps } from "sonner";
 import { useEffect, useState } from "react";
 
-const Toaster = ({ ...props }: ToasterProps) => {
+const Toaster = (props: ToasterProps) => {
   const { theme: currentTheme } = useTheme();
   const [theme, setTheme] = useState<ToasterProps["theme"]>("system");
 
