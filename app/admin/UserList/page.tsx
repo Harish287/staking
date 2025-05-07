@@ -74,22 +74,23 @@ export default function InvestorList() {
     setSelectedUserId(userId)
     setOpen(true)
   }
-
-  const { list, isLoading, error, total } = useSelector(
-    (state: RootState) => state.investor,
-  )
   const {
     loading,
     message,
     error: permissionError,
   } = useSelector((state: RootState) => state.updateUserPermission)
 
+  const { list, isLoading, error, total } = useSelector(
+    (state: RootState) => state.investor,
+  )
+
   const [currentPage, setCurrentPage] = useState(1)
   const [searchQuery, setSearchQuery] = useState('')
-  const [activeTab, setActiveTab] = useState('Investor / Users')
-
   const pageSize = 10
+
   const totalPages = Math.ceil(total / pageSize)
+
+  const router = useRouter()
 
   useEffect(() => {
     dispatch(
@@ -100,6 +101,14 @@ export default function InvestorList() {
       }),
     )
   }, [dispatch, currentPage, searchQuery])
+
+  console.log("totalPages",totalPages);
+  
+  console.log('Total pages:', totalPages, 'Total items:', total)
+  console.log('Search Query:', searchQuery)
+  console.log('pageSize', pageSize)
+  console.log('total', total)
+
 
   const handlePermissionChange = async (
     userId: string,
@@ -129,7 +138,7 @@ export default function InvestorList() {
         updateUserPermission({
           userId,
           permissionType,
-          permissionValue: permissionValueToSend, // Use the updated value
+          permissionValue: permissionValueToSend,
           token,
         }),
       )
@@ -171,7 +180,8 @@ export default function InvestorList() {
       console.error('Unexpected error:', err)
     }
   }
-  const router = useRouter()
+  const [activeTab, setActiveTab] = useState('Investor / Users')
+
   const tabs = ['Investor / Users', 'Admin Account', 'Club Details', 'All']
 
   return (
@@ -239,7 +249,7 @@ export default function InvestorList() {
                   </tr>
                 </thead>
                 <tbody>
-                  {list.map((investor) => (
+            {list?.map((investor) => (
                     <tr key={investor.user_id} className="border-b">
                       <td className="p-4">
                         <div>
@@ -555,16 +565,12 @@ export default function InvestorList() {
           <div className="flex justify-between items-center mt-6">
             <div className="flex gap-2">
               <Button
-                variant="outline"
-                className="text-sm"
                 onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                 disabled={currentPage <= 1}
               >
                 PREV
               </Button>
               <Button
-                variant="outline"
-                className="text-sm"
                 onClick={() =>
                   setCurrentPage((prev) => Math.min(prev + 1, totalPages))
                 }
@@ -573,7 +579,8 @@ export default function InvestorList() {
                 NEXT
               </Button>
             </div>
-            <div className="flex items-center gap-2 text-sm">
+
+            <div className="flex items-center gap-2">
               <span>Page</span>
               <Select
                 value={currentPage.toString()}
@@ -583,11 +590,14 @@ export default function InvestorList() {
                   <SelectValue placeholder={`Page ${currentPage}`} />
                 </SelectTrigger>
                 <SelectContent>
-                  {Array.from({ length: totalPages }, (_, i) => (
-                    <SelectItem key={i + 1} value={(i + 1).toString()}>
-                      {i + 1}
-                    </SelectItem>
-                  ))}
+                  {Array.from({ length: totalPages }, (_, i) => {
+                    const page = i + 1
+                    return (
+                      <SelectItem key={page} value={page.toString()}>
+                        {page}
+                      </SelectItem>
+                    )
+                  })}
                 </SelectContent>
               </Select>
               <span>of {totalPages}</span>

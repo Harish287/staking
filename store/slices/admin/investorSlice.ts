@@ -1,19 +1,15 @@
 // store/slices/investorAPI.ts
+
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import axios from 'axios'
-import { Key, JSX } from 'react'
 
 const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL
 
 interface Investor {
-  withdraw_staking: any
-  level_income: any
-  adhoc_income: any
-  credit: any
-  map(
-    arg0: (investor: { user_id: Key | null | undefined }) => JSX.Element,
-  ): import('react').ReactNode
-
+  withdraw_staking: boolean
+  level_income: boolean
+  adhoc_income: boolean
+  credit: boolean
   suspend: boolean
 
   user_id: string
@@ -28,12 +24,10 @@ interface Investor {
   }
   transfer: boolean
   withdraw: boolean
-  // status: boolean
 }
 
 export interface InvestorDetails {
   user_id: string
-  // userId:string
   team_business: string
   invested: string
   fiat: string
@@ -87,14 +81,14 @@ const initialState: InvestorState = {
   list: [],
   isLoading: false,
   error: null,
-  total: 1,
+  total: 0,
   details: null,
   detailsLoading: false,
   detailsError: null,
 }
 
 export const fetchInvestorList = createAsyncThunk<
-  Investor[],
+  { data: Investor[]; total: number },
   { page: number; page_size: number; searchQuery: string },
   { rejectValue: string }
 >('investor/fetchList', async ({ page, page_size, searchQuery }, thunkAPI) => {
@@ -102,7 +96,6 @@ export const fetchInvestorList = createAsyncThunk<
     const token = localStorage.getItem('token')
     let url = `${baseURL}user/investor_list?page=${page}&page_size=${page_size}`
 
-    // Add search query to the API call if present
     if (searchQuery) {
       url += `&search=${searchQuery}`
     }
@@ -113,25 +106,26 @@ export const fetchInvestorList = createAsyncThunk<
         Accept: 'application/json',
       },
     })
+    console.log('API Response:', res.data)
 
-    return res.data
+    return {
+      data: res.data.slice((page - 1) * page_size, page * page_size),
+      total: res.data.length,
+    }
   } catch (err: any) {
-    console.error('[Investor API] Error:', {
-      message: err.message,
-      response: err.response,
-      status: err.response?.status,
-      data: err.response?.data,
-    })
-
     return thunkAPI.rejectWithValue(
       err.response?.data?.message || 'Failed to fetch investor list',
     )
   }
 })
 
-export const fetchInvestorDetails = createAsyncThunk(
+export const fetchInvestorDetails = createAsyncThunk<
+  InvestorDetails,
+  string,
+  { rejectValue: string }
+>(
   'investorDetails/fetchInvestorDetails',
-  async (userId: string, { rejectWithValue }) => {
+  async (userId, { rejectWithValue }) => {
     try {
       const token = localStorage.getItem('token')
 
@@ -174,12 +168,17 @@ const investorSlice = createSlice({
       })
       .addCase(fetchInvestorList.fulfilled, (state, action) => {
         state.isLoading = false
-        state.list = action.payload
+        state.list = action.payload.data
+        state.total = action.payload.total
+
+        console.log('Total investors:', action.payload.total)
       })
+
       .addCase(fetchInvestorList.rejected, (state, action) => {
         state.isLoading = false
         state.error = action.payload || 'Failed to fetch investor list'
       })
+
       .addCase(fetchInvestorDetails.pending, (state) => {
         state.detailsLoading = true
         state.detailsError = null

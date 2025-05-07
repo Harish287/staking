@@ -6,6 +6,8 @@ import { AppDispatch, RootState } from '@/store/store'
 import { fetchInvestorDetails } from '@/store/slices/admin/investorSlice'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import TeamTreeMUI from '@/components/materialui/TeamTreeMUI'
+
 import {
   ArrowLeft,
   MoreVertical,
@@ -44,6 +46,7 @@ export default function InvestorDetailsPage({
   )
 
   const [open, setOpen] = useState(false)
+  console.log('Is window defined:', typeof window !== 'undefined')
 
   const searchParams = useSearchParams()
   const userId = searchParams.get('userId')
@@ -618,9 +621,15 @@ export default function InvestorDetailsPage({
           <div className="mt-8">
             <h2 className="text-lg font-medium mb-4">TEAM INFORMATION</h2>
             <div className="bg-gray-50 p-4 rounded-lg">
-              <pre className="text-sm overflow-x-auto">
-                {JSON.stringify(details.team_tree, null, 2)}
-              </pre>
+              {details.team_tree?.length > 0 ? (
+                <TeamTreeMUI
+                  team={
+                    Array.isArray(details.team_tree) ? details.team_tree : []
+                  }
+                />
+              ) : (
+                <p className="text-sm text-gray-500">No team data available.</p>
+              )}
             </div>
           </div>
         </div>

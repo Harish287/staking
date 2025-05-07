@@ -38,10 +38,9 @@ export default function MoreMenu({
     )
   }
 
-  // Helper function to check the current permission status
   const getPermissionStatus = (permissionType: PermissionType) => {
-    if (!currentPermissions) return false // Default to false if no details are found
-    return currentPermissions[permissionType] // Get the permission status from investor details
+    if (!currentPermissions) return false
+    return currentPermissions[permissionType]
   }
 
   return (
