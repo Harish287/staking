@@ -68,9 +68,22 @@ const initialState: AuthState = {
 }
 
 const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL
-// const decodedUserId = decodeURIComponent(user_id);
 
-// users
+interface KycListResponse {
+  total: number
+  page: number
+  page_size: number
+  total_pages: number
+  items: KycApplication[]
+}
+
+interface KycState {
+  applications: KycApplication[]
+  totalPages: number
+  currentPage: number
+  isLoading: boolean
+  error: string | null
+}
 
 // LOGIN USER
 export const loginUser = createAsyncThunk(
@@ -203,19 +216,23 @@ export const registerUser = createAsyncThunk<
     { rejectWithValue },
   ) => {
     try {
-      const requestData: any = { name, email, password, mobile }
+      const formData = new URLSearchParams()
+      formData.append('name', name)
+      formData.append('email', email)
+      formData.append('password', password)
+      formData.append('mobile', mobile)
 
       if (referral_token) {
-        requestData.referral_token = referral_token
+        formData.append('referral_token', referral_token)
       }
 
       const response = await axios.post(
         `${baseURL}user/register`,
-        requestData,
+        formData.toString(),
         {
           headers: {
-            'Content-Type': 'application/json',
-            accept: 'application/json',
+            'Content-Type': 'application/x-www-form-urlencoded',
+            Accept: 'application/json',
           },
         },
       )
@@ -236,7 +253,7 @@ export const resendConfirmationEmail = createAsyncThunk(
     try {
       const response = await axios.post(
         `${baseURL}user/email_resend`,
-        { email }, // API might not need this
+        { email },
         {
           headers: {
             Authorization: `Basic ${btoa(`${email}:your_password`)}`, // Fix authentication
@@ -359,7 +376,7 @@ export const submitKyc = createAsyncThunk(
       }
 
       const response = await axios.post(
-        `${baseURL}kyc/application`, // Ensure baseURL ends with `/` if needed
+        `${baseURL}kyc/application`, 
         formData,
         {
           headers: {
@@ -397,17 +414,20 @@ export const submitKyc = createAsyncThunk(
 
 // Fetch KYC Applications
 export const fetchKycApplications = createAsyncThunk<
-  { applications: KycApplication[] },
+  { applications: KycApplication[]; totalPages: number },
   { page: number; page_size: number },
   { rejectValue: string }
 >(
   'kyc/fetchKycApplications',
   async ({ page, page_size }, { rejectWithValue }) => {
     try {
-      const token = Cookies.get('token') || localStorage.getItem('token')
+      const token =
+        Cookies.get('token') ||
+        (typeof window !== 'undefined' && localStorage.getItem('token'))
+
       if (!token) throw new Error('No token found')
 
-      const response = await axios.get<KycApplication[]>(
+      const response = await axios.get<KycListResponse>(
         `${baseURL}kyc/list?page=${page}&page_size=${page_size}`,
         {
           headers: {
@@ -417,9 +437,12 @@ export const fetchKycApplications = createAsyncThunk<
         },
       )
 
-      const applications = Array.isArray(response.data) ? response.data : []
+      const { items = [], total_pages = 1 } = response.data
 
-      return { applications }
+      return {
+        applications: items,
+        totalPages: total_pages, // Correct pagination
+      }
     } catch (error: any) {
       console.error('Error fetching KYC applications:', error)
       return rejectWithValue(
@@ -455,7 +478,7 @@ export const approveKycApplication = createAsyncThunk<
         {
           headers: {
             Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
+            'Content-Type': 'application/x-www-form-urlencoded',
             Accept: 'application/json',
           },
         },
@@ -654,18 +677,24 @@ const authSlice = createSlice({
         state.isLoading = true
         state.error = null
       })
-      .addCase(fetchKycApplications.fulfilled, (state, action) => {
-        console.log('Redux: Fetched Data ->', action.payload)
-
-        state.isLoading = false // ✅ Ensure loading stops
-        state.kycApplications = action.payload.applications ?? []
-        state.totalPages = Math.ceil((state.kycApplications?.length || 0) / 10)
-      })
+      .addCase(
+        fetchKycApplications.fulfilled,
+        (
+          state,
+          action: PayloadAction<{
+            applications: KycApplication[]
+            totalPages: number
+          }>,
+        ) => {
+          state.isLoading = false
+          state.kycApplications = action.payload.applications
+          state.totalPages = action.payload.totalPages
+        },
+      )
       .addCase(fetchKycApplications.rejected, (state, action) => {
         state.isLoading = false
-        state.error = action.payload as string
+        state.error = action.payload || 'Failed to fetch KYC applications.'
       })
-
       .addCase(approveKycApplication.pending, (state) => {
         state.isLoading = true
       })

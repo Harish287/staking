@@ -2,6 +2,7 @@ import { createAsyncThunk } from '@reduxjs/toolkit'
 import axios from 'axios'
 import Cookies from 'js-cookie'
 import { createSlice } from '@reduxjs/toolkit'
+import qs from 'qs'
 
 const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL
 
@@ -57,7 +58,7 @@ export const fetchBankAccount = createAsyncThunk<
 
 export const updateBankAccount = createAsyncThunk<
   BankAccount,
-  BankAccount, // payload to send
+  BankAccount,
   { rejectValue: string }
 >('user/updateBankAccount', async (bankData, { rejectWithValue }) => {
   try {
@@ -66,11 +67,11 @@ export const updateBankAccount = createAsyncThunk<
 
     const response = await axios.put(
       `${baseURL}user/bank_account`,
-      bankData,
+      qs.stringify(bankData), 
       {
         headers: {
           Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/x-www-form-urlencoded',
           Accept: 'application/json',
         },
       }
@@ -86,7 +87,6 @@ export const updateBankAccount = createAsyncThunk<
     )
   }
 })
-
 const bankSlice = createSlice({
   name: 'bank',
   initialState,

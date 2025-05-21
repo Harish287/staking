@@ -22,7 +22,7 @@ export default function ConfirmAccount() {
         const response = await fetch(
           `http://localhost/user/verify_email/${token}`,
           {
-            method: 'GET', // Change to POST if needed
+            method: 'GET', 
             headers: { 'Content-Type': 'application/json' },
           },
         )
@@ -35,8 +35,10 @@ export default function ConfirmAccount() {
       } catch (error) {
         console.error('Verification failed:', error)
         setStatus('error')
-      }
-    }
+      }  
+
+    } 
+    
 
     verifyEmail()
   }, [token])

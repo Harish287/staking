@@ -21,9 +21,9 @@ interface PermissionState {
   error: string | null
   message: string | null
   userPermissions: {
-    [userId: string]: Record<PermissionType, boolean> 
+    [userId: string]: Record<PermissionType, boolean>
   }
-  updatingUserIds: string[] 
+  updatingUserIds: string[]
 }
 
 const initialState: PermissionState = {
@@ -44,22 +44,21 @@ export const updateUserPermission = createAsyncThunk<
   'permissions/updateUserPermission',
   async ({ userId, permissionType, permissionValue, token }, thunkAPI) => {
     try {
-      const params = new URLSearchParams({
-        user_id: userId,
-        permission_type: permissionType,
-        permission_value: String(permissionValue),
-      })
+      const params = new URLSearchParams()
+      params.append('user_id', userId)
+      params.append('permission_type', permissionType)
+      params.append('permission_value', String(permissionValue))
 
-      const url =
-        new URL('user/permission', baseURL).toString() + '?' + params.toString()
+      const url = new URL('user/permission', baseURL).toString()
 
       const res = await fetch(url, {
         method: 'PUT',
         headers: {
           Authorization: `Bearer ${token}`,
           Accept: 'application/json',
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/x-www-form-urlencoded',
         },
+        body: params.toString(), // ✅ FIXED HERE
       })
 
       if (!res.ok) {
@@ -78,11 +77,11 @@ export const updateUserPermission = createAsyncThunk<
   },
 )
 
+
 const permissionSlice = createSlice({
   name: 'permissions',
   initialState,
   reducers: {
-  
     updateLocalPermission: (
       state,
       action: PayloadAction<{

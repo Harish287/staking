@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
-import { Card } from '@/components/ui/card'
+import { Card, CardContent, CardDescription } from '@/components/ui/card'
 import { useDispatch, useSelector } from 'react-redux'
 import {
   fetchUserProfile,
@@ -18,6 +18,7 @@ import 'react-toastify/dist/ReactToastify.css'
 import Possword from './password'
 import NomineeComponent from './nominee'
 import BankAccountPage from './bankAccount'
+import ReferralComponent from '../components/referralComponent'
 
 export default function ProfileDetails() {
   const [activeTab, setActiveTab] = useState('PERSONAL')
@@ -122,24 +123,17 @@ export default function ProfileDetails() {
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <h2 className="text-2xl font-semibold">Profile Details</h2>
-              <div className="flex items-center gap-2">
-                <Input
-                  value="https://kaitworld.com/public/register?ref=MTMwNTk"
-                  readOnly
-                  className="bg-gray-50 text-sm"
-                />
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() =>
-                    copyToClipboard(
-                      'https://kaitworld.com/public/register?ref=MTMwNTk',
-                    )
-                  }
-                >
-                  <Copy className="h-4 w-4" />
-                </Button>
-              </div>
+              
+              <CardContent>
+              <CardDescription>Your Referral Link</CardDescription>
+              <Card className="h-[30px] flex justify-center items-center">
+                <div className="flex justify-center items-center w-[300px] h-full">
+                  <span className="m-0 w-full overflow-hidden text-ellipsis whitespace-nowrap">
+                    <ReferralComponent />
+                  </span>
+                </div>
+              </Card>
+            </CardContent>
             </div>
 
             <Tabs value={activeTab} onValueChange={setActiveTab}>

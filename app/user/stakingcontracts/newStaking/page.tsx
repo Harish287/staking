@@ -13,89 +13,103 @@ import BgImg from '../../../../assets/cib.png'
 import Kait from '../../../../assets/logo2x.png'
 import { useDispatch, useSelector } from 'react-redux'
 import { AppDispatch, RootState } from '@/store/store'
-import { fetchStakingPlans } from '@/store/slices/user/stakeSlice'
+import {
+  fetchStakingPlans,
+  fetchWalletSplits,
+  performStake,
+} from '@/store/slices/user/stakeSlice'
 import toast from 'react-hot-toast'
-
-const submitStakingRequest = async ({
-  planId,
-  walletType,
-  amount,
-}: {
-  planId: string
-  walletType: string
-  amount: number
-}) => {
-  return new Promise((resolve) => {
-    setTimeout(() => resolve({ success: true }), 1000)
-  })
-}
+import Snackbar from '@mui/material/Snackbar'
+import MuiAlert, { AlertColor } from '@mui/material/Alert'
 
 export default function StakingContract() {
-  const [selectedPlan, setSelectedPlan] = useState<string | null>(null)
+  const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null)
   const [stakeAmount, setStakeAmount] = useState('')
-  const [walletType, setWalletType] = useState('kait-100')
+  const [selectedWalletSplitId, setSelectedWalletSplitId] = useState<
+    string | null
+  >(null)
   const [agreedToTerms, setAgreedToTerms] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
+  const [snackbarOpen, setSnackbarOpen] = useState(false)
+  const [snackbarMessage, setSnackbarMessage] = useState('')
+  const [snackbarSeverity, setSnackbarSeverity] = useState<AlertColor>('error')
+
+  const showSnackbar = (message: string, severity: AlertColor = 'error') => {
+    setSnackbarMessage(message)
+    setSnackbarSeverity(severity)
+    setSnackbarOpen(true)
+  }
+
   const dispatch = useDispatch<AppDispatch>()
-  const { plans, loading, error } = useSelector(
+  const { plans, walletSplits, loading, error } = useSelector(
     (state: RootState) => state.stakingPlans,
   )
 
   useEffect(() => {
     dispatch(fetchStakingPlans())
+    dispatch(fetchWalletSplits())
   }, [dispatch])
 
-  const walletBalances = {
-    kait: 10000,
-    income: 5000,
-    adhoc: 3000,
+  useEffect(() => {
+    setSelectedWalletSplitId(null)
+    setStakeAmount('')
+  }, [selectedPlanId])
+
+  const selectedPlanObj = plans.find((plan) => plan.plan_id === selectedPlanId)
+
+  const formatWalletSplitLabel = (splitValue: Record<string, number>) => {
+    return Object.entries(splitValue)
+      .map(([wallet, percent]) => `${wallet} - ${percent}%`)
+      .join(' + ')
   }
 
-  const selectedPlanObj = plans.find((plan) => plan.name === selectedPlan)
-
   const handleStakeSubmit = async () => {
-    if (!selectedPlan || !stakeAmount || !walletType || !agreedToTerms) {
+    if (
+      !selectedPlanId ||
+      !stakeAmount ||
+      !selectedWalletSplitId ||
+      !agreedToTerms
+    ) {
       toast.error('Please fill in all required fields.')
       return
     }
-  
+
     const amountNum = Number(stakeAmount)
     if (isNaN(amountNum) || amountNum <= 0) {
       toast.error('Enter a valid staking amount.')
       return
     }
-  
-    if (selectedPlanObj && amountNum < selectedPlanObj.min_value) {
+
+    if (selectedPlanObj && amountNum < selectedPlanObj.min_amount) {
       toast.error(
-        `Minimum staking amount for this plan is ${selectedPlanObj.min_value}`,
+        `Minimum staking amount for this plan is ${selectedPlanObj.min_amount}`,
       )
       return
     }
-  
+
     try {
       setIsSubmitting(true)
-      const res = await submitStakingRequest({
-        planId: selectedPlanObj?.name || '',
-        walletType,
-        amount: amountNum,
-      })
-      if ((res as any).success) {
-        toast.success('Staking Request Submitted Successfully!')
-        setSelectedPlan(null)
-        setStakeAmount('')
-        setWalletType('') 
-        setAgreedToTerms(false)
-      } else {
-        toast.error('Failed to submit staking request.')
-      }
-    } catch (error) {
-      toast.error('Error submitting staking request.')
+      await dispatch(
+        performStake({
+          plan_id: selectedPlanId,
+          wallet_split_id: selectedWalletSplitId,
+          amount: amountNum,
+        }),
+      ).unwrap()
+
+      toast.success('Staking Request Submitted Successfully!')
+      setSelectedPlanId(null)
+      setStakeAmount('')
+      setSelectedWalletSplitId(null)
+      setAgreedToTerms(false)
+    } catch (err: any) {
+      toast.error(err || 'Failed to submit staking request.')
     } finally {
       setIsSubmitting(false)
     }
   }
-  
+
   if (loading) return <div>Loading...</div>
   if (error) return <div className="text-red-500">{error}</div>
 
@@ -120,7 +134,7 @@ export default function StakingContract() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            {/* Left: Info Section */}
+            {/* Left Section */}
             <div className="space-y-4">
               <div className="h-[300px] relative">
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-lg" />
@@ -143,7 +157,7 @@ export default function StakingContract() {
               </div>
             </div>
 
-            {/* Right: Form */}
+            {/* Right Section */}
             <div className="space-y-8">
               {/* Plan Selection */}
               <div>
@@ -153,121 +167,104 @@ export default function StakingContract() {
                 <p className="text-sm text-gray-600 mb-4">Select a Package</p>
 
                 <div className="grid md:grid-cols-2 gap-3">
-                  {plans.map((plan, index) => (
+                  {plans.map((plan) => (
                     <button
-                      key={index}
-                      onClick={() => setSelectedPlan(plan.name)}
-                      className={`w-full p-4 rounded-lg text-left transition ${
-                        selectedPlan === plan.name
+                      key={plan.plan_id}
+                      onClick={() => setSelectedPlanId(plan.plan_id)}
+                      className={`w-full p-5 rounded-lg text-left transition ${
+                        selectedPlanId === plan.plan_id
                           ? 'bg-purple-500 text-white hover:bg-purple-600'
                           : 'bg-blue-50 text-gray-700 hover:bg-blue-100'
                       }`}
                     >
-                      <div className="font-medium">{plan.name}</div>
-                      <div className="text-sm">
-                        {plan.frequency === 1 ? 'Daily' : 'Monthly'} ROS & APY:{' '}
-                        {plan.apy}% | Bonus: {plan.bonus}% | Min:{' '}
-                        {plan.min_value}
+                      <div className="font-bold text-[14px] text-center">
+                        {plan.name}
                       </div>
+                      <div className="text-[10px]">{plan.description}</div>
                     </button>
                   ))}
                 </div>
               </div>
 
-              {/* Wallet Type */}
+              {/* Stake From (show only if plan selected) */}
               {selectedPlanObj && (
                 <div>
                   <h3 className="text-lg font-semibold text-green-600 mb-2">
                     Stake From
                   </h3>
                   <p className="text-sm text-gray-600 mb-4">
-                    Pick how your funds will be split across wallets
+                    Pick your wallet split configuration
                   </p>
 
                   <RadioGroup
-                    value={walletType}
-                    onValueChange={setWalletType}
+                    value={selectedWalletSplitId || ''}
+                    onValueChange={setSelectedWalletSplitId}
                     className="space-y-3"
                   >
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="kait-100" id="kait-100" />
-                      <Label htmlFor="kait-100">KAIT Wallet - 100%</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem
-                        value={`kait-adhoc-${selectedPlanObj.name}`}
-                        id={`kait-adhoc-${selectedPlanObj.name}`}
-                      />
-                      <Label htmlFor={`kait-adhoc-${selectedPlanObj.name}`}>
-                        KAIT Wallet {selectedPlanObj.kait_wallet}% + Adhoc Wallet
-                        {selectedPlanObj.adhoc_wallet}%
-                      </Label>
-                    </div>
-                  </RadioGroup>
-
-                  <div className="grid grid-cols-3 gap-4 mt-4">
-                    {Object.entries(walletBalances).map(([key, value]) => (
-                      <div key={key} className="space-y-1">
-                        <Label className="text-sm text-gray-600 capitalize">
-                          {key} Wallet Balance:
+                    {walletSplits.map((split) => (
+                      <div
+                        key={split.id}
+                        className="flex items-center space-x-2"
+                      >
+                        <RadioGroupItem value={split.id} id={split.id} />
+                        <Label htmlFor={split.id} className="text-sm">
+                          {formatWalletSplitLabel(split.value)}
                         </Label>
-                        <div className="flex items-center gap-2">
-                          <span className="font-medium">{value}</span>
-                          <Image
-                            src={Kait}
-                            alt="kait"
-                            className="w-5 h-5 rounded-full"
-                          />
-                        </div>
                       </div>
                     ))}
-                  </div>
+                  </RadioGroup>
                 </div>
               )}
 
               {/* Stake Amount */}
-              <div>
-                <h3 className="text-lg font-semibold text-green-600 mb-2">
-                  Amount (KAIT) to stake
-                </h3>
-                <Input
-                  type="number"
-                  value={stakeAmount}
-                  onChange={(e) => setStakeAmount(e.target.value)}
-                  placeholder="3000"
-                  className="text-lg"
-                />
-              </div>
-
-              {/* Terms  Submit */}
-              <div className="space-y-4">
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="terms"
-                    checked={agreedToTerms}
-                    onCheckedChange={(checked) =>
-                      setAgreedToTerms(checked as boolean)
-                    }
+              {selectedPlanObj && (
+                <div>
+                  <h3 className="text-lg font-semibold text-green-600 mb-2">
+                    Amount (KAIT) to stake
+                  </h3>
+                  <Input
+                    type="number"
+                    value={stakeAmount}
+                    onChange={(e) => setStakeAmount(e.target.value)}
+                    placeholder={selectedPlanObj.min_amount.toString()}
+                    className="text-lg"
                   />
-                  <Label htmlFor="terms" className="text-sm">
-                    I agree to the{' '}
-                    <span className="text-red-500">Terms & Conditions</span>
-                  </Label>
                 </div>
+              )}
 
-                <Button
-                  className="w-full bg-green-500 hover:bg-green-600 text-white h-12 text-lg"
-                  disabled={
-                    !selectedPlan ||
-                    !stakeAmount ||
-                    !agreedToTerms ||
-                    isSubmitting
-                  }
-                  onClick={handleStakeSubmit}
-                >
-                  {isSubmitting ? 'Processing...' : 'Process your Request'}
-                </Button>
-              </div>
+              {selectedPlanObj && (
+                <div className="space-y-4">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="terms"
+                      checked={agreedToTerms}
+                      onCheckedChange={(checked) =>
+                        setAgreedToTerms(checked as boolean)
+                      }
+                    />
+                    <Label htmlFor="terms" className="text-sm">
+                      I agree to the{' '}
+                      <span className="text-red-500 cursor-pointer">
+                        Terms & Conditions
+                      </span>
+                    </Label>
+                  </div>
+
+                  <Button
+                    className="w-full bg-green-500 hover:bg-green-600 text-white h-12 text-lg"
+                    disabled={
+                      !selectedPlanId ||
+                      !stakeAmount ||
+                      !selectedWalletSplitId ||
+                      !agreedToTerms ||
+                      isSubmitting
+                    }
+                    onClick={handleStakeSubmit}
+                  >
+                    {isSubmitting ? 'Processing...' : 'Process your Request'}
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
         </Card>

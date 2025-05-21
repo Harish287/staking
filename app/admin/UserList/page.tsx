@@ -24,10 +24,8 @@ import {
   Mail,
   Wallet,
   Activity,
-  RefreshCcw,
   Lock,
   Unlock,
-  PauseCircle,
   CreditCard,
   Power,
 } from 'lucide-react'
@@ -102,13 +100,12 @@ export default function InvestorList() {
     )
   }, [dispatch, currentPage, searchQuery])
 
-  console.log("totalPages",totalPages);
-  
+  console.log('totalPages', totalPages)
+
   console.log('Total pages:', totalPages, 'Total items:', total)
   console.log('Search Query:', searchQuery)
   console.log('pageSize', pageSize)
   console.log('total', total)
-
 
   const handlePermissionChange = async (
     userId: string,
@@ -249,7 +246,7 @@ export default function InvestorList() {
                   </tr>
                 </thead>
                 <tbody>
-            {list?.map((investor) => (
+                  {list?.map((investor) => (
                     <tr key={investor.user_id} className="border-b">
                       <td className="p-4">
                         <div>

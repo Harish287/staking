@@ -14,7 +14,6 @@ interface UserState {
   error: string | null
 }
 
-// Function to decode token and extract user details
 const getUserDetailsFromToken = (): {
   user_id: string | null
   userName: string | null
@@ -31,7 +30,7 @@ const getUserDetailsFromToken = (): {
     const decodedToken: any = jwtDecode(token)
     return {
       user_id: decodedToken.user_id || null,
-      userName: decodedToken.name || null, // 'name' from token, use 'userName' in the state
+      userName: decodedToken.name || null, 
       role: decodedToken.role || null,
     }
   } catch (error) {
@@ -40,7 +39,7 @@ const getUserDetailsFromToken = (): {
   }
 }
 
-// Creating slice for token-based authentication state
+
 const tokenAuthSlice = createSlice({
   name: 'tokenAuth',
   initialState: {
@@ -66,7 +65,7 @@ const tokenAuthSlice = createSlice({
   },
 })
 
-// Action to fetch user details and set them in the state
+
 export const fetchUserDetailsAndSet = () => (dispatch: AppDispatch) => {
   const { user_id, userName, role } = getUserDetailsFromToken()
   if (user_id && userName && role) {
@@ -77,6 +76,6 @@ export const fetchUserDetailsAndSet = () => (dispatch: AppDispatch) => {
   }
 }
 
-// Exports
+
 export const { setTokenUser, setAuthError } = tokenAuthSlice.actions
 export default tokenAuthSlice.reducer

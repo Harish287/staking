@@ -89,31 +89,29 @@ export const resetUserPassword = createAsyncThunk(
   ) => {
     try {
       const token = Cookies.get('token') || localStorage.getItem('token')
-
       if (!token) throw new Error('No token found')
-      console.log('Authorization token:', token)
+
+      const formData = new URLSearchParams(passwordData as Record<string, string>)
 
       const response = await axios.put(
-        `${baseURL}user/password`, // ✅ now safe from double slashes
-        passwordData,
+        `${baseURL}user/password`,
+        formData,
         {
           headers: {
             Authorization: `Bearer ${token}`,
             Accept: 'application/json',
-            'Content-Type': 'application/json',
+            'Content-Type': 'application/x-www-form-urlencoded',
           },
         },
       )
-      console.log('Response status:', response.status)
-      console.log('Response data:', response.data)
+
       return response.data
     } catch (error: any) {
-      console.error('Error resetting password:', error)
       return rejectWithValue(
         error.response?.data?.message ||
-          error.message ||
-          'Failed to reset password',
+        error.message ||
+        'Failed to reset password'
       )
     }
-  },
+  }
 )

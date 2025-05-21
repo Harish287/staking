@@ -29,17 +29,18 @@ export const changePassword = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
+      const formData = new URLSearchParams()
+      formData.append('token', token) // 👈 include token in body
+      formData.append('new_password', new_password)
+      formData.append('confirm_password', confirm_password)
+
       const response = await fetch('http://localhost/user/change_password', {
         method: 'PUT',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/x-www-form-urlencoded',
           Accept: 'application/json',
         },
-        body: JSON.stringify({
-          token, // ✅ INCLUDE HERE
-          new_password,
-          confirm_password,
-        }),
+        body: formData.toString(),
       })
 
       const data = await response.json()
@@ -54,6 +55,7 @@ export const changePassword = createAsyncThunk(
     }
   }
 )
+
 
 const changePasswordSlice = createSlice({
   name: 'changePassword',

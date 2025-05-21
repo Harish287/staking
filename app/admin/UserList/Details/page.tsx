@@ -44,10 +44,8 @@ export default function InvestorDetailsPage({
   const { details, detailsLoading, detailsError } = useSelector(
     (state: RootState) => state.investor,
   )
-
   const [open, setOpen] = useState(false)
   console.log('Is window defined:', typeof window !== 'undefined')
-
   const searchParams = useSearchParams()
   const userId = searchParams.get('userId')
   useEffect(() => {
@@ -547,7 +545,7 @@ export default function InvestorDetailsPage({
                   <div className="space-y-2 ">
                     <label className="text-sm text-gray-500">Relation: </label>
                     <span className="font-medium truncate">
-                      {details.nominee.relation}
+                      {details.nominee.relationship}
                     </span>
                   </div>
                 </div>
@@ -568,28 +566,28 @@ export default function InvestorDetailsPage({
                   <div className="space-y-2">
                     <label className="text-sm text-gray-500">Account: </label>
                     <span className="font-medium truncate">
-                      {details.bank.account}
+                      {details.bank.bank_name}
                     </span>
                   </div>
 
                   <div className="space-y-2">
                     <label className="text-sm text-gray-500">IFSC: </label>
                     <span className="font-medium truncate">
-                      {details.bank.ifsc}
+                      {details.bank.ifsc_code}
                     </span>
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-sm text-gray-500">Bank: </label>
+                    <label className="text-sm text-gray-500">Account No:</label>
                     <span className="font-medium truncate">
-                      {details.bank.bank}
+                      {details.bank.account_no}
                     </span>
                   </div>
 
                   <div className="space-y-2">
                     <label className="text-sm text-gray-500">Type: </label>
                     <span className="font-medium truncate">
-                      {details.bank.type}
+                      {details.bank.account_type}
                     </span>
                   </div>
                 </div>
@@ -597,7 +595,6 @@ export default function InvestorDetailsPage({
             </div>
           </div>
 
-          {/* more Information */}
           <div className="space-y-6">
             <h2 className="text-lg font-medium mt-6">MORE INFORMATION</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

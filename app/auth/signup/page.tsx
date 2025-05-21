@@ -32,7 +32,6 @@ const RegisterPage: React.FC = () => {
     }
   })
 
-  // Check if referral token exists
   const hasReferralToken = !!params.referral_token
 
   const {
@@ -46,12 +45,11 @@ const RegisterPage: React.FC = () => {
   const router = useRouter()
 
   const [loading, setLoading] = useState(false)
-  const [showResend, setShowResend] = useState(false) // Initially false
+  const [showResend, setShowResend] = useState(false)
   const [email, setEmail] = useState('')
   const [resendLoading, setResendLoading] = useState(false)
   const [timer, setTimer] = useState(0)
 
-  // Timer logic for the resend button
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null
 
@@ -87,12 +85,12 @@ const RegisterPage: React.FC = () => {
 
     try {
       await dispatch(registerUser(finalData)).unwrap()
-      setEmail(data.email) // Store email for later use
+      setEmail(data.email)
       alert(
         'A verification email has been sent. Please check your inbox and verify your email to complete registration.',
       )
-      setShowResend(true) // Show the resend email button after registration
-      setTimer(30) // Start the 30-second timer after successful registration
+      setShowResend(true)
+      setTimer(30)
     } catch (error: any) {
       console.error('Registration error:', error)
       alert(error.detail || 'An unexpected error occurred. Please try again.')
@@ -102,17 +100,17 @@ const RegisterPage: React.FC = () => {
   }
 
   const handleResendEmail = async (email: string) => {
-    setResendLoading(true) // Show loading spinner
+    setResendLoading(true)
 
     try {
       await dispatch(resendConfirmationEmail({ email })).unwrap()
       alert('A new verification email has been sent.')
-      setTimer(30) // Start the 30-second timer after resending email
+      setTimer(30)
     } catch (error: any) {
       console.error('Error resending email:', error)
       alert(error || 'Failed to resend email. Please try again later.')
     } finally {
-      setResendLoading(false) // Hide loading spinner
+      setResendLoading(false)
     }
   }
 

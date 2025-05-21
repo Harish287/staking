@@ -38,16 +38,21 @@ export interface InvestorDetails {
   wallet: string
   dob: string
   nominee: {
+    relationship: string
     name: string
     pan: string
-    relation: string
+    // relation: string
   }
   nationality: string
   bank: {
-    account: string
-    ifsc: string
-    bank: string
-    type: string
+    account_no: string
+    account_type: string
+    bank_name: string
+    ifsc_code: string
+    // account: string
+    // ifsc: string
+    // bank: string
+    // type: string
   }
   joining_date: string
   sponsor: string
@@ -86,6 +91,13 @@ const initialState: InvestorState = {
   detailsLoading: false,
   detailsError: null,
 }
+interface InvestorListResponse {
+  items: Investor[]
+  total: number
+  page: number
+  page_size: number
+  total_pages: number
+}
 
 export const fetchInvestorList = createAsyncThunk<
   { data: Investor[]; total: number },
@@ -93,24 +105,25 @@ export const fetchInvestorList = createAsyncThunk<
   { rejectValue: string }
 >('investor/fetchList', async ({ page, page_size, searchQuery }, thunkAPI) => {
   try {
-    const token = localStorage.getItem('token')
+    const token =
+      typeof window !== 'undefined' ? localStorage.getItem('token') : null
+
     let url = `${baseURL}user/investor_list?page=${page}&page_size=${page_size}`
 
     if (searchQuery) {
       url += `&search=${searchQuery}`
     }
 
-    const res = await axios.get(url, {
+    const res = await axios.get<InvestorListResponse>(url, {
       headers: {
         Authorization: `Bearer ${token}`,
         Accept: 'application/json',
       },
     })
-    console.log('API Response:', res.data)
 
     return {
-      data: res.data.slice((page - 1) * page_size, page * page_size),
-      total: res.data.length,
+      data: res.data.items,
+      total: res.data.total,
     }
   } catch (err: any) {
     return thunkAPI.rejectWithValue(
@@ -159,7 +172,14 @@ export const fetchInvestorDetails = createAsyncThunk<
 const investorSlice = createSlice({
   name: 'investor',
   initialState,
-  reducers: {},
+  reducers: {
+    resetInvestorDetails(state) {
+      state.details = null
+      state.detailsLoading = false
+      state.detailsError = null
+    },
+  },
+
   extraReducers: (builder) => {
     builder
       .addCase(fetchInvestorList.pending, (state) => {

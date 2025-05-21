@@ -50,6 +50,8 @@ export const downloadKycDocument = createAsyncThunk<
 )
 
 export interface KycState {
+  kycApplications: never[];
+  totalPages: number;
   data: any | null
   loading: boolean
   error: string | null
@@ -59,6 +61,8 @@ const initialState: KycState = {
   data: null,
   loading: false,
   error: null,
+  kycApplications: [],
+  totalPages: 0
 }
 
 const kycSlice = createSlice({

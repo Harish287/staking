@@ -1,62 +1,117 @@
-import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
+import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit'
 import axios from 'axios'
 import Cookies from 'js-cookie'
-
+import qs from 'qs'
 
 const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL
 
 interface StakingPlan {
   name: string
-  frequency: number
-  apy: number
-  min_value: number
-  bonus: number
-  kait_wallet: number
-  adhoc_wallet: number
+  plan_id: string
+  min_amount: number
+  description: string
+}
+interface WalletSplitConfig {
+  id: string
+  value: Record<string, number>
 }
 
-interface StackingState {
+interface StakingState {
   plans: StakingPlan[]
+  walletSplits: WalletSplitConfig[]
   loading: boolean
   error: string | null
 }
 
-const initialState: StackingState = {
+const initialState: StakingState = {
   plans: [],
+  walletSplits: [],
   loading: false,
   error: null,
 }
 
-
-
-
-export const fetchStakingPlans = createAsyncThunk<StakingPlan[], void, { rejectValue: string }>(
-    'staking/fetchStakingPlans',
-    async (_, { rejectWithValue }) => {
-      try {
-        const token = Cookies.get('token') || localStorage.getItem('token')
-        if (!token) {
-          return rejectWithValue('No token found')
-        }
-  
-        const response = await axios.get(`${baseURL}stake/plans`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-            Accept: 'application/json',
-          },
-        })
-  
-        return response.data
-      } catch (error: any) {
-        if (error.response && error.response.data) {
-          return rejectWithValue(error.response.data.message || 'Server Error')
-        } else {
-          return rejectWithValue(error.message || 'Network Error')
-        }
-      }
+export const fetchStakingPlans = createAsyncThunk<
+  StakingPlan[],
+  void,
+  { rejectValue: string }
+>('staking/fetchStakingPlans', async (_, { rejectWithValue }) => {
+  try {
+    const token = Cookies.get('token') || localStorage.getItem('token')
+    if (!token) {
+      return rejectWithValue('No token found')
     }
-  )
+
+    const response = await axios.get(`${baseURL}plan/list`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+    })
+
+    return response.data
+  } catch (error: any) {
+    if (error.response && error.response.data) {
+      return rejectWithValue(error.response.data.message || 'Server Error')
+    } else {
+      return rejectWithValue(error.message || 'Network Error')
+    }
+  }
+})
+
+export const performStake = createAsyncThunk<
+  void,
+  { plan_id: string; wallet_split_id: string; amount: number },
+  { rejectValue: string }
+>(
+  'staking/performStake',
+  async ({ plan_id, wallet_split_id, amount }, thunkAPI) => {
+    try {
+      const token = typeof window !== 'undefined' ? Cookies.get('token') : null
+      console.log(token, 'token')
+
+      const payload = qs.stringify({
+        plan_id,
+        wallet_split_id,
+        amount,
+      })
+
+      await axios.post(`${baseURL}stake/perform`, payload, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+      })
+    } catch (error: any) {
+      return thunkAPI.rejectWithValue(
+        error.response?.data?.message || 'Failed to perform stake',
+      )
+    }
+  },
+)
+
+export const fetchWalletSplits = createAsyncThunk<
+  WalletSplitConfig[],
+  void,
+  { rejectValue: string }
+>('staking/fetchWalletSplits', async (_, thunkAPI) => {
+  try {
+    const token =
+      typeof window !== 'undefined' ? localStorage.getItem('token') : null
+
+    const response = await axios.get(`${baseURL}wallet/split_config/list`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+
+    return response.data as WalletSplitConfig[]
+  } catch (error: any) {
+    return thunkAPI.rejectWithValue(
+      error.response?.data?.message || 'Failed to fetch wallet splits',
+    )
+  }
+})
 
 const stakingSlice = createSlice({
   name: 'staking',
@@ -71,9 +126,35 @@ const stakingSlice = createSlice({
         state.loading = false
         state.plans = action.payload
       })
-      .addCase(fetchStakingPlans.rejected, (state, action) =>   {
+      .addCase(fetchStakingPlans.rejected, (state, action) => {
         state.loading = false
         state.error = action.error.message || 'failed to fetch the plans'
+      })
+      .addCase(performStake.pending, (state) => {
+        state.loading = true
+        state.error = null
+      })
+      .addCase(performStake.fulfilled, (state) => {
+        state.loading = false
+      })
+      .addCase(performStake.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.payload || 'Failed to perform stake'
+      })
+      .addCase(fetchWalletSplits.pending, (state) => {
+        state.loading = true
+        state.error = null
+      })
+      .addCase(
+        fetchWalletSplits.fulfilled,
+        (state, action: PayloadAction<WalletSplitConfig[]>) => {
+          state.loading = false
+          state.walletSplits = action.payload
+        },
+      )
+      .addCase(fetchWalletSplits.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.payload || 'Failed to fetch wallet splits'
       })
   },
 })

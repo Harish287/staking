@@ -96,6 +96,7 @@ export default function BankAccountPage() {
           >
             <option value="savings">Savings</option>
             <option value="current">Current</option>
+            <option value="others">others </option>
           </select>
         </div>
 

@@ -126,15 +126,18 @@ export default function KycVerification() {
 
     dispatch(verifyUsername(value))
       .then((response) => {
-        const message = response.payload?.detail
-        if (message?.toLowerCase().includes('available')) {
+        const message = response.payload
+        if (
+          message?.toLowerCase().includes('available') ||
+          message?.toLowerCase().includes('avaliable')
+        ) {
           setUsernameAvailability('✅ Username is available!')
         } else {
           setUsernameAvailability('❌ Username is taken')
         }
       })
       .catch(() => {
-        setUsernameAvailability('⚠️ Something went wrong during verification')
+        setUsernameAvailability('❌ Username is taken')
       })
   }
 
@@ -256,7 +259,7 @@ export default function KycVerification() {
   }
 
   return (
-    <div className="max-w-3xl mt-6 w-full mx-auto bg-white rounded-lg shadow-lg p-6">
+    <div className="max-w-5xl mt-6 w-full mx-auto bg-white rounded-lg shadow-lg p-6">
       <h1 className="text-2xl font-semibold text-center text-gray-900 mb-4">
         KYC Verification
       </h1>
@@ -321,39 +324,27 @@ export default function KycVerification() {
                 required
               />
               {usernameAvailability && (
-                <p className="text-sm text-gray-600">{usernameAvailability}</p>
-              )}
-              {suggestedUsernames.length > 0 && (
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <button
-                      type="button"
-                      className="absolute right-2 top-2 text-sm text-blue-600 underline"
-                    >
-                      Suggestions
-                    </button>
-                  </PopoverTrigger>
-                  <PopoverContent align="start" className="w-full bg-white">
-                    <Select
-                      onValueChange={(value) =>
-                        setFormData({ ...formData, username: value })
-                      }
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Pick a username" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {[...new Set(suggestedUsernames)].map((name) => (
-                          <SelectItem key={name} value={name}>
-                            {name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </PopoverContent>
-                </Popover>
+                <p className="text-sm text-gray-600 mt-1">
+                  {usernameAvailability}
+                </p>
               )}
             </div>
+            <Label htmlFor="suggestedusername">Suggested UserNames *</Label>
+            {suggestedUsernames.length > 0 && (
+              <div className="mt-2 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+                {[...new Set(suggestedUsernames)].map((name) => (
+                  <button
+                    key={name}
+                    type="button"
+                    onClick={() => setFormData({ ...formData, username: name })}
+                    className="px-3 py-1 rounded border border-gray-300 hover:bg-blue-100 focus:bg-blue-300  active:bg-blue-300 focus:outline-none text-[10px] text-gray-900 text-center whitespace-normal break-words"
+                    style={{ wordBreak: 'break-word' }}
+                  >
+                    {name}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
