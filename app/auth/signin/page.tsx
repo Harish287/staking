@@ -9,6 +9,7 @@ import { decodeJWT } from '../../../lib/auth'
 import Image from 'next/image'
 import Logo from '../../../assets/logo2x.png'
 import { Spinner } from '@/components/ui/spinner'
+import { TextField } from '@mui/material'
 
 const LoginPage: React.FC = () => {
   const dispatch = useAppDispatch()
@@ -160,34 +161,60 @@ const LoginPage: React.FC = () => {
 
           <form className="w-full max-w-sm" onSubmit={handleLogin}>
             <div className="mb-4">
-              <label htmlFor="email" className="block font-medium text-white">
-                Email
-              </label>
-              <input
-                className="w-full border text-white border-gray-300 rounded-md px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-pink-600"
+              <TextField
+                name="Email"
+                label="Email"
+                variant="outlined"
+                placeholder="Enter your email"
                 type="email"
                 id="email"
-                placeholder="Enter your email"
+                required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                required
+                fullWidth
+                slotProps={{
+                  input: {
+                    style: { color: 'white' },
+                  },
+                  inputLabel: {
+                    style: { color: 'white' },
+                  },
+                }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    '& fieldset': { borderColor: 'gray' },
+                    '&:hover fieldset': { borderColor: '#ec4899' },
+                    '&.Mui-focused fieldset': { borderColor: '#ec4899' },
+                  },
+                }}
               />
             </div>
             <div className="mb-4">
-              <label
-                htmlFor="password"
-                className="block font-medium text-white"
-              >
-                Password
-              </label>
-              <input
-                className="w-full border text-white border-gray-300 rounded-md px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-pink-600"
+              <TextField
+                variant="outlined"
                 type="password"
+                label="Password"
                 id="password"
-                placeholder="Enter your password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                fullWidth
+                placeholder="Enter your password"
+                slotProps={{
+                  input: {
+                    style: { color: 'white' },
+                  },
+                  inputLabel: {
+                    style: { color: 'white' },
+                  },
+                }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    '& fieldset': { borderColor: 'gray' },
+                    '&:hover fieldset': { borderColor: '#ec4899' },
+                    '&.Mui-focused fieldset': { borderColor: '#ec4899' },
+                  },
+                }}
               />
             </div>
 

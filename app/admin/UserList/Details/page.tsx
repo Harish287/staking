@@ -33,7 +33,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { updateUserPermission } from '@/store/slices/admin/permisionSlice'
 import toast from 'react-hot-toast'
-import { useParams, useSearchParams } from 'next/navigation'
+import { useParams, useRouter, useSearchParams } from 'next/navigation'
 
 export default function InvestorDetailsPage({
   params,
@@ -44,10 +44,13 @@ export default function InvestorDetailsPage({
   const { details, detailsLoading, detailsError } = useSelector(
     (state: RootState) => state.investor,
   )
-  const [open, setOpen] = useState(false)
-  console.log('Is window defined:', typeof window !== 'undefined')
   const searchParams = useSearchParams()
   const userId = searchParams.get('userId')
+  const [open, setOpen] = useState(false)
+  const router = useRouter()
+
+  console.log('Is window defined:', typeof window !== 'undefined')
+
   useEffect(() => {
     console.log('Route id:', userId)
     if (userId) {
@@ -195,12 +198,16 @@ export default function InvestorDetailsPage({
           <div className="flex justify-between items-center mb-6">
             <div className="flex items-center gap-4">
               <Link href="/admin/UserList">
-                <Button variant="outline" size="icon">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => router.back()}
+                >
                   <ArrowLeft className="h-4 w-4" />
                 </Button>
               </Link>
               <h1 className="text-xl font-semibold">
-                User Details{' '}
+                User Details
                 <span className="text-gray-400">› {details.user_name}</span>
               </h1>
             </div>

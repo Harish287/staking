@@ -202,22 +202,26 @@ export const generateReferralLink = createAsyncThunk(
 export const registerUser = createAsyncThunk<
   any,
   {
-    name: string
+    first_name: string
+    last_name: string
     email: string
     password: string
     mobile: string
+    dob: string
     referral_token?: string
   },
   { rejectValue: { detail: string } }
 >(
   'auth/registerUser',
   async (
-    { name, email, password, mobile, referral_token },
+    { first_name, last_name, dob, email, password, mobile, referral_token },
     { rejectWithValue },
   ) => {
     try {
       const formData = new URLSearchParams()
-      formData.append('name', name)
+      formData.append('first_name', first_name)
+      formData.append('last_name', last_name)
+      formData.append('dob', dob)
       formData.append('email', email)
       formData.append('password', password)
       formData.append('mobile', mobile)
@@ -274,31 +278,36 @@ export const resendConfirmationEmail = createAsyncThunk(
 
 // KYC
 //suggestUsername
-export const suggestUsername = createAsyncThunk(
+type SuggestUsernameResponse = string[];
+
+export const suggestUsername = createAsyncThunk<SuggestUsernameResponse, void>(
   'kyc/suggestUsername',
-  async ({ name, dob }: { name: string; dob: string }, { rejectWithValue }) => {
+  async (_, { rejectWithValue }) => {
     try {
+      const token = Cookies.get('token') || localStorage.getItem('token');
+
       const response = await axios.post(
-        `${baseURL}kyc/suggest_username`, // Updated endpoint
-        { name, dob },
+        `${baseURL}kyc/suggest_username`,
+        {},
         {
           headers: {
-            Authorization: `Bearer ${
-              Cookies.get('token') || localStorage.getItem('token')
-            }`,
+            Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
-            accept: 'application/json',
+            Accept: 'application/json',
           },
-        },
-      )
-      return response.data.detail
+        }
+      );
+
+      return response.data.detail;
     } catch (error: any) {
       return rejectWithValue(
-        error.response?.data || 'Failed to fetch username suggestions',
-      )
+        error.response?.data?.detail || 'Failed to fetch username suggestions'
+      );
     }
-  },
-)
+  }
+);
+
+
 
 //verifyUsername
 export const verifyUsername = createAsyncThunk(
@@ -375,16 +384,12 @@ export const submitKyc = createAsyncThunk(
         return rejectWithValue('Authentication token is missing')
       }
 
-      const response = await axios.post(
-        `${baseURL}kyc/application`, 
-        formData,
-        {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-            Authorization: `Bearer ${token}`,
-          },
+      const response = await axios.post(`${baseURL}kyc/application`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          Authorization: `Bearer ${token}`,
         },
-      )
+      })
 
       return response.data
     } catch (error: any) {
@@ -415,11 +420,11 @@ export const submitKyc = createAsyncThunk(
 // Fetch KYC Applications
 export const fetchKycApplications = createAsyncThunk<
   { applications: KycApplication[]; totalPages: number },
-  { page: number; page_size: number },
+  { page: number; page_size: number; status?: string; search?: string },
   { rejectValue: string }
 >(
   'kyc/fetchKycApplications',
-  async ({ page, page_size }, { rejectWithValue }) => {
+  async ({ page, page_size, status, search }, { rejectWithValue }) => {
     try {
       const token =
         Cookies.get('token') ||
@@ -427,8 +432,20 @@ export const fetchKycApplications = createAsyncThunk<
 
       if (!token) throw new Error('No token found')
 
+      const params = new URLSearchParams()
+      params.append('page', page.toString())
+      params.append('page_size', page_size.toString())
+
+      if (status && status !== 'all') {
+        params.append('status', status)
+      }
+
+      if (search && search.trim() !== '') {
+        params.append('search', search.trim())
+      }
+
       const response = await axios.get<KycListResponse>(
-        `${baseURL}kyc/list?page=${page}&page_size=${page_size}`,
+        `${baseURL}kyc/list?${params.toString()}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -441,7 +458,7 @@ export const fetchKycApplications = createAsyncThunk<
 
       return {
         applications: items,
-        totalPages: total_pages, // Correct pagination
+        totalPages: total_pages,
       }
     } catch (error: any) {
       console.error('Error fetching KYC applications:', error)

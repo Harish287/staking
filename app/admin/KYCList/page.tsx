@@ -3,7 +3,10 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useSearchParams, useRouter } from 'next/navigation'
-import { approveKycApplication, fetchKycApplications } from '../../../store/slices/index'
+import {
+  approveKycApplication,
+  fetchKycApplications,
+} from '../../../store/slices/index'
 import { downloadKycDocument } from '../../../store/slices/kycList'
 import { RootState, AppDispatch } from '../../../store/store'
 import { Card } from '@/components/ui/card'
@@ -42,6 +45,8 @@ import {
 } from '@/components/ui/dropdown-menu'
 import Link from 'next/link'
 import toast from 'react-hot-toast'
+import { useDebounce } from 'use-debounce'
+
 
 const KycApplications = () => {
   const dispatch = useDispatch<AppDispatch>()
@@ -54,6 +59,7 @@ const KycApplications = () => {
   const pageSizeParam = parseInt(searchParams.get('page_size') || '10', 10)
 
   const [searchQuery, setSearchQuery] = useState('')
+  const [debouncedSearch] = useDebounce(searchQuery, 300)
   const [isDialogOpen, setDialogOpen] = useState(false)
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null)
   const [message, setMessage] = useState<string>('')
@@ -63,8 +69,10 @@ const KycApplications = () => {
   const kycApplications = useSelector(
     (state: RootState) => state.auth?.kycApplications ?? [],
   )
-  const total = useSelector((state: RootState) => state.auth?.totalPages ?? 0)
-  const totalPages = Math.ceil(total / pageSizeParam)
+
+  const totalPages = useSelector(
+    (state: RootState) => state.auth?.totalPages ?? 1,
+  )
 
   const isLoading = useSelector(
     (state: RootState) => state.auth?.isLoading ?? false,
@@ -73,10 +81,29 @@ const KycApplications = () => {
   const error = useSelector((state: RootState) => state.auth?.error ?? null)
 
   useEffect(() => {
-    dispatch(
-      fetchKycApplications({ page: pageParam, page_size: pageSizeParam }),
-    )
-  }, [dispatch, pageParam, pageSizeParam])
+    const delay = setTimeout(() => {
+      dispatch(
+        fetchKycApplications({
+          page: pageParam,
+          page_size: pageSizeParam,
+          status: statusParam,
+          search: searchQuery,
+        }),
+      )
+    }, 300)
+
+    return () => clearTimeout(delay)
+  }, [dispatch, pageParam, pageSizeParam, statusParam, searchQuery])
+
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams.toString())
+    if (searchQuery) {
+      params.set('search', searchQuery)
+    } else {
+      params.delete('search')
+    }
+    router.push(`/admin/KYCList?${params.toString()}`, { scroll: false })
+  }, [searchQuery])
 
   const getDisplayStatus = (status: string) => {
     if (status === 'approved') return 'Approved'
@@ -88,16 +115,16 @@ const KycApplications = () => {
     return kycApplications.filter((app) => {
       const userName = app.user_name ?? ''
       const userId = app.user_id ?? ''
-      const search = searchQuery.toLowerCase()
+      const search = debouncedSearch.toLowerCase()
 
       const matchesSearch =
         userName.toLowerCase().includes(search) ||
         userId.toLowerCase().includes(search)
 
       const normalizedStatus =
-        app.status === 'Approved'
+        app.status === 'approved'
           ? 'approved'
-          : app.status === 'Rejected'
+          : app.status === 'rejected'
             ? 'rejected'
             : 'pending'
 
@@ -106,7 +133,7 @@ const KycApplications = () => {
 
       return matchesSearch && statusMatch
     })
-  }, [kycApplications, searchQuery, statusParam])
+  }, [kycApplications, debouncedSearch, statusParam])
 
   const changePage = (newPage: number) => {
     const params = new URLSearchParams(searchParams.toString())
@@ -147,7 +174,7 @@ const KycApplications = () => {
         user_id: selectedUserId,
         action,
         message,
-      })
+      }),
     )
       .unwrap()
       .then(({ user_id, newStatus, message }) => {
@@ -163,7 +190,7 @@ const KycApplications = () => {
       })
       .finally(() => setActionLoading(false))
   }
-
+  
 
   return (
     <div className="bg-blue-100 min-h-screen py-6">
@@ -254,9 +281,9 @@ const KycApplications = () => {
                     <TableCell>
                       <span
                         className={`px-2 py-1 rounded-full text-[12px] font-medium ${
-                          app.status.trim() === 'Approved'
+                          app.status.trim() === 'approved'
                             ? 'bg-green-100 text-green-700'
-                            : app.status.trim() === 'Rejected'
+                            : app.status.trim() === 'rejected'
                               ? 'bg-red-100 text-red-700'
                               : 'bg-yellow-100 text-yellow-700'
                         }`}

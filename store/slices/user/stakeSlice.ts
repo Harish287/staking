@@ -3,6 +3,8 @@ import axios from 'axios'
 import Cookies from 'js-cookie'
 import qs from 'qs'
 
+
+
 const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL
 
 interface StakingPlan {
@@ -67,28 +69,36 @@ export const performStake = createAsyncThunk<
   'staking/performStake',
   async ({ plan_id, wallet_split_id, amount }, thunkAPI) => {
     try {
-      const token = typeof window !== 'undefined' ? Cookies.get('token') : null
-      console.log(token, 'token')
+      const token = typeof window !== 'undefined' ? Cookies.get('token') : null;
 
       const payload = qs.stringify({
         plan_id,
         wallet_split_id,
         amount,
-      })
+      });
 
       await axios.post(`${baseURL}stake/perform`, payload, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/x-www-form-urlencoded',
         },
-      })
+      });
+
+      // success: nothing to return
     } catch (error: any) {
-      return thunkAPI.rejectWithValue(
-        error.response?.data?.message || 'Failed to perform stake',
-      )
+      const message =
+        error.response?.data?.detail ||
+        error.response?.data?.message ||
+        'Failed to perform stake';
+
+      return thunkAPI.rejectWithValue(message); 
     }
   },
-)
+);
+
+
+
+
 
 export const fetchWalletSplits = createAsyncThunk<
   WalletSplitConfig[],

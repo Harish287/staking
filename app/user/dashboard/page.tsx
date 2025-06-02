@@ -42,7 +42,7 @@ function UserDashboard() {
   }, [dispatch])
 
   return (
-    <div className="pt-5 bg-[#F3EAD8] hover:bg-blue-50 transition-colors duration-2000">
+    <div className="pt-5 bg-[#F3EAD8] hover:bg-blue-50  pb-[20px] transition-colors duration-2000">
       <div className="items-center mx-auto px-[20px] w-auto h-[180px ] grid grid-cols-1 lg:grid-cols-3 container mb-[20px]">
         <div className="col-span-1 lg:col-span-2 h-[180px] ">
           <Carousel

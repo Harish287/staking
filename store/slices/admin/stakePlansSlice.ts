@@ -120,7 +120,7 @@ export const updateStakePlan = createAsyncThunk<
   }
 })
 
-// Create Stake Plan
+
 export const createStakePlan = createAsyncThunk<
   StakePlan,
   {
@@ -152,7 +152,7 @@ export const createStakePlan = createAsyncThunk<
     formBody.append('total_liquidity', String(payload.total_liquidity))
     formBody.append('major_pair', payload.major_pair)
 
-    const response = await fetch(`${baseURL}plan/plan`, {
+    const response = await fetch(`${baseURL}plan/create`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',

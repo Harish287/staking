@@ -19,9 +19,14 @@ import Possword from './password'
 import NomineeComponent from './nominee'
 import BankAccountPage from './bankAccount'
 import ReferralComponent from '../components/referralComponent'
+import Transactionpass from './transactionpass'
+import { useRouter, useSearchParams } from 'next/navigation'
 
 export default function ProfileDetails() {
-  const [activeTab, setActiveTab] = useState('PERSONAL')
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const initialTab = searchParams.get('tab') || 'PERSONAL'
+  const [activeTab, setActiveTab] = useState(initialTab)
   const [copied, setCopied] = useState(false)
   const [isButtonDisabled, setIsButtonDisabled] = useState(true)
 
@@ -110,11 +115,19 @@ export default function ProfileDetails() {
     checkChanges()
   }, [firstName, lastName, dob])
 
-  if (isLoading) return <div>Loading...</div>
+  if (isLoading)
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
+      </div>
+    )
   if (error) return <div>Error: {error}</div>
   if (!userprofile) {
-    return <div>No user data found.</div>
+    return <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
+      </div>
   }
+  if (!searchParams) return null
 
   return (
     <div className="max-w-7xl mx-auto p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -123,20 +136,28 @@ export default function ProfileDetails() {
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <h2 className="text-2xl font-semibold">Profile Details</h2>
-              
+
               <CardContent>
-              <CardDescription>Your Referral Link</CardDescription>
-              <Card className="h-[30px] flex justify-center items-center">
-                <div className="flex justify-center items-center w-[300px] h-full">
-                  <span className="m-0 w-full overflow-hidden text-ellipsis whitespace-nowrap">
-                    <ReferralComponent />
-                  </span>
-                </div>
-              </Card>
-            </CardContent>
+                <CardDescription>Your Referral Link</CardDescription>
+                <Card className="h-[30px] flex justify-center items-center">
+                  <div className="flex justify-center items-center w-[300px] h-full">
+                    <span className="m-0 w-full overflow-hidden text-ellipsis whitespace-nowrap">
+                      <ReferralComponent />
+                    </span>
+                  </div>
+                </Card>
+              </CardContent>
             </div>
 
-            <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <Tabs
+              value={activeTab}
+              onValueChange={(val) => {
+                setActiveTab(val)
+                const params = new URLSearchParams(window.location.search)
+                params.set('tab', val)
+                router.push(`?${params.toString()}`)
+              }}
+            >
               <TabsList className="border-b w-full justify-start rounded-none gap-8">
                 {[
                   'PERSONAL',
@@ -234,6 +255,10 @@ export default function ProfileDetails() {
               <TabsContent value="PASSWORD" className="space-y-6 pt-6">
                 <Possword />
               </TabsContent>
+              <TabsContent value="TRANS.PWD" className="space-y-6 pt-6">
+                <Transactionpass />
+              </TabsContent>
+
               <TabsContent value="BANK" className="space-y-6 pt-6">
                 <BankAccountPage />
               </TabsContent>

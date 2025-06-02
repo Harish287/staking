@@ -99,7 +99,7 @@ const ReferralComponent: React.FC = () => {
           </span>
           <button
             onClick={handleCopy}
-            className="flex items-center px-3 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-700"
+            className="flex items-center px-3 py-1 bg-gradient-to-r from-pink-700 to-gray-800  text-white rounded-md hover:bg-blue-700"
           >
             {copySuccess ? 'Copied!' : <ClipboardCopy />}
           </button>

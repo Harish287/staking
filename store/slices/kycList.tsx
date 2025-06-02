@@ -50,6 +50,7 @@ export const downloadKycDocument = createAsyncThunk<
 )
 
 export interface KycState {
+  statuses: any;
   kycApplications: never[];
   totalPages: number;
   data: any | null

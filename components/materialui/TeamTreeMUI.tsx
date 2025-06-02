@@ -6,15 +6,16 @@ import { styled, alpha } from '@mui/material/styles'
 import { SimpleTreeView } from '@mui/x-tree-view/SimpleTreeView'
 import { TreeItem, treeItemClasses } from '@mui/x-tree-view/TreeItem'
 import { User } from 'lucide-react'
-import { Tooltip } from '@mui/material'
+import { Tooltip, TextField } from '@mui/material'
 import { EmojiEvents } from '@mui/icons-material'
 import DiamondIcon from '@mui/icons-material/Diamond'
 import MilitaryTechIcon from '@mui/icons-material/MilitaryTech'
 import GradeIcon from '@mui/icons-material/Grade'
+
 interface TeamMember {
-  name: string
-  user_name: string
-  email: string
+  name: string | null
+  user_name: string | null
+  email: string | null
   club: string
   level: number
   total_staking: number
@@ -66,6 +67,34 @@ function EndIcon(
   return <DisabledByDefaultRoundedIcon {...props} sx={{ opacity: 0.3 }} />
 }
 
+const filterTeam = (members: TeamMember[], query: string): TeamMember[] => {
+  if (!query) return members
+
+  return members
+    .map((member) => {
+      const name = member.name || ''
+      const username = member.user_name || ''
+      const email = member.email || ''
+
+      const matched =
+        name.toLowerCase().includes(query) ||
+        username.toLowerCase().includes(query) ||
+        email.toLowerCase().includes(query)
+
+      const filteredChildren = filterTeam(member.children || [], query)
+
+      if (matched || filteredChildren.length > 0) {
+        return {
+          ...member,
+          children: filteredChildren,
+        }
+      }
+
+      return null
+    })
+    .filter((m): m is TeamMember => m !== null)
+}
+
 const renderTree = (member: TeamMember, idPrefix = '0'): React.ReactNode => {
   const label = (
     <span className="gap-1 flex items-center text-[12px]">
@@ -110,9 +139,6 @@ const renderTree = (member: TeamMember, idPrefix = '0'): React.ReactNode => {
       )}
 
       {member.level !== 0 && <div>Level: L{member.level}</div>}
-      {/* {member.club && (
-        <div className="bg-red-400 p-0.5 rounded-[5px]">{member.club}</div>
-      )} */}
 
       <Tooltip
         title={
@@ -147,23 +173,41 @@ const renderTree = (member: TeamMember, idPrefix = '0'): React.ReactNode => {
 }
 
 export default function TeamTreeMUI({ team }: TeamTreeMUIProps) {
+  const [query, setQuery] = React.useState('')
+
+  const filtered = React.useMemo(() => {
+    return filterTeam(team, query.toLowerCase())
+  }, [team, query])
+
   return (
-    <SimpleTreeView
-      aria-label="Team Tree"
-      defaultExpandedItems={['0']}
-      slots={{
-        expandIcon: ExpandIcon,
-        collapseIcon: CollapseIcon,
-        endIcon: EndIcon,
-      }}
-      sx={{
-        overflowX: 'auto',
-        minHeight: 270,
-        flexGrow: 1,
-        width: '100%',
-      }}
-    >
-      {team.map((member, index) => renderTree(member, `${index}`))}
-    </SimpleTreeView>
+    <div>
+      <TextField
+        fullWidth
+        variant="outlined"
+        size="small"
+        placeholder="Search name, email or username"
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        sx={{ mb: 2 }}
+      />
+
+      <SimpleTreeView  
+        aria-label="Team Tree"
+        defaultExpandedItems={['0']}
+        slots={{
+          expandIcon: ExpandIcon,
+          collapseIcon: CollapseIcon,
+          endIcon: EndIcon,
+        }}
+        sx={{
+          overflowX: 'auto',
+          minHeight: 270,
+          flexGrow: 1,
+          width: '100%',
+        }}
+      >
+        {filtered.map((member, index) => renderTree(member, `${index}`))}
+      </SimpleTreeView>
+    </div>
   )
 }

@@ -12,9 +12,12 @@ import { Spinner } from '@/components/ui/spinner'
 import Image from 'next/image'
 import Logo from '../../../assets/logo2x.png'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { TextField } from '@mui/material'
 
 type FormData = {
-  name: string
+  first_name: string
+  last_name: string
+  dob: string
   email: string
   password: string
   confirm_password: string
@@ -121,9 +124,18 @@ const RegisterPage: React.FC = () => {
           <div>
             <Image src={Logo} alt="Logo" className="mx-auto mb-5" />
             <h1 className="text-2xl font-bold text-center">KAIT Staking</h1>
-            <p className="mt-5 text-[15px] text-white">
+            <p className="mt-5 text-[15px] text-white mb-5">
               Our vision is to disrupt the current financial landscape and give
-              everyday investors more control over their financial futures.
+              everyday investors more control over their financial futures. We
+              are focused on building this platform so that anyone can benefit
+              from the technology behind cryptocurrencies by making investing in
+              cryptocurrencies more accessible and secure for everyone.
+            </p>
+            <p className='className="mt-5 text-[15px] text-white"'>
+              With our platform, investors will have the ability to invest in
+              the tokens of their choice at prices which are more representative
+              of the underlying value of the asset and limit exposure to market
+              volatility.
             </p>
           </div>
         </div>
@@ -133,100 +145,87 @@ const RegisterPage: React.FC = () => {
           <h1 className="text-2xl font-semibold pb-2">Sign Up</h1>
 
           <form className="w-full max-w-sm" onSubmit={handleSubmit(onSubmit)}>
-            <div className="mb-4">
-              <label htmlFor="name" className="block font-medium text-white">
-                Name
-              </label>
-              <input
-                className="w-full border text-white border-gray-300 rounded-md px-3 py-2 mt-1 focus:ring-2 focus:ring-pink-600"
-                type="text"
-                placeholder="Enter your Name"
-                {...register('name', { required: 'Name is required' })}
-              />
-              {errors.name && (
-                <p className="text-red-500 text-sm">{errors.name.message}</p>
-              )}
-            </div>
-
-            <div className="mb-4">
-              <label htmlFor="email" className="block font-medium text-white">
-                Email
-              </label>
-              <input
-                className="w-full border text-white border-gray-300 rounded-md px-3 py-2 mt-1 focus:ring-2 focus:ring-pink-600"
-                type="email"
-                placeholder="Enter your email"
-                {...register('email', { required: 'Email is required' })}
-              />
-              {errors.email && (
-                <p className="text-red-500 text-sm">{errors.email.message}</p>
-              )}
-            </div>
-
-            <div className="mb-4">
-              <label
-                htmlFor="password"
-                className="block font-medium text-white"
-              >
-                Password
-              </label>
-              <input
-                className="w-full border text-white border-gray-300 rounded-md px-3 py-2 mt-1 focus:ring-2 focus:ring-pink-600"
-                type="password"
-                placeholder="Enter your password"
-                {...register('password', {
-                  required: 'Password is required',
-                  minLength: {
-                    value: 6,
-                    message: 'Password must be at least 6 characters long',
-                  },
-                })}
-              />
-              {errors.password && (
-                <p className="text-red-500 text-sm">
-                  {errors.password.message}
-                </p>
-              )}
-            </div>
-
-            <div className="mb-4">
-              <label
-                htmlFor="confirm_password"
-                className="block font-medium text-white"
-              >
-                Confirm Password
-              </label>
-              <input
-                className="w-full border text-white border-gray-300 rounded-md px-3 py-2 mt-1 focus:ring-2 focus:ring-pink-600"
-                type="password"
-                placeholder="ReEnter your password"
-                {...register('confirm_password', {
-                  required: 'Please confirm your password',
-                })}
-              />
-              {errors.confirm_password && (
-                <p className="text-red-500 text-sm">
-                  {errors.confirm_password.message}
-                </p>
-              )}
-            </div>
-
-            <div className="mb-4">
-              <label htmlFor="mobile" className="block font-medium text-white">
-                Mobile
-              </label>
-              <input
-                className="w-full border text-white border-gray-300 rounded-md px-3 py-2 mt-1 focus:ring-2 focus:ring-pink-600"
-                type="tel"
-                placeholder="Enter your Mobile "
-                {...register('mobile', {
-                  required: 'Mobile number is required',
-                })}
-              />
-              {errors.mobile && (
-                <p className="text-red-500 text-sm">{errors.mobile.message}</p>
-              )}
-            </div>
+            {[
+              {
+                name: 'first_name',
+                label: 'First Name',
+                type: 'text',
+                required: 'First name is required',
+              },
+              {
+                name: 'last_name',
+                label: 'Last Name',
+                type: 'text',
+                required: 'Last name is required',
+              },
+              {
+                name: 'dob',
+                // label: 'Date of Birth',
+                type: 'date',
+                required: 'Date of birth is required',
+              },
+              {
+                name: 'email',
+                label: 'Email',
+                type: 'email',
+                required: 'Email is required',
+              },
+              {
+                name: 'password',
+                label: 'Password',
+                type: 'password',
+                required: 'Password is required',
+                minLength: {
+                  value: 6,
+                  message: 'Password must be at least 6 characters long',
+                },
+              },
+              {
+                name: 'confirm_password',
+                label: 'Confirm Password',
+                type: 'password',
+                required: 'Please confirm your password',
+              },
+              {
+                name: 'mobile',
+                label: 'Mobile',
+                type: 'tel',
+                required: 'Mobile number is required',
+              },
+            ].map((field) => (
+              <div className="mb-4" key={field.name}>
+                <TextField
+                  type={field.type}
+                  label={field.label}
+                  fullWidth
+                  variant="outlined"
+                  slotProps={{
+                    input: {
+                      style: { color: 'white' },
+                    },
+                    inputLabel: {
+                      style: { color: 'white' },
+                    },
+                  }}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      '& fieldset': { borderColor: 'gray' },
+                      '&:hover fieldset': { borderColor: '#ec4899' },
+                      '&.Mui-focused fieldset': { borderColor: '#ec4899' },
+                    },
+                  }}
+                  {...register(field.name as keyof FormData, {
+                    required: field.required,
+                    ...(field.minLength ? { minLength: field.minLength } : {}),
+                  })}
+                />
+                {errors[field.name as keyof FormData] && (
+                  <p className="text-red-500 text-sm">
+                    {errors[field.name as keyof FormData]?.message as string}
+                  </p>
+                )}
+              </div>
+            ))}
 
             {hasReferralToken ? (
               <button

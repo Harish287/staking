@@ -151,7 +151,7 @@ const NomineeComponent = () => {
 
         <Button
           onClick={handleUpdateNominee}
-          className="bg-blue-600 text-white mt-2"
+          className="bg-red-600 hover:bg-red-700  text-white mt-2"
           disabled={!hasChanges}
         >
           Update Nominee

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { AppDispatch, RootState } from '@/store/store'
+import { useSearchParams } from 'next/navigation'
 import {
   fetchInvestorDetails,
   fetchInvestorList,
@@ -82,23 +83,35 @@ export default function InvestorList() {
     (state: RootState) => state.investor,
   )
 
-  const [currentPage, setCurrentPage] = useState(1)
+
+
+const searchParams = useSearchParams()
+
+
+const pageFromUrl = Number(searchParams.get('page')) || 1
+const [currentPage, setCurrentPage] = useState(pageFromUrl)
+
   const [searchQuery, setSearchQuery] = useState('')
   const pageSize = 10
 
   const totalPages = Math.ceil(total / pageSize)
 
   const router = useRouter()
+useEffect(() => {
+  const params = new URLSearchParams(searchParams.toString())
+  params.set('page', currentPage.toString())
+  router.push(`?${params.toString()}`)
+}, [currentPage])
 
-  useEffect(() => {
-    dispatch(
-      fetchInvestorList({
-        page: currentPage,
-        page_size: pageSize,
-        searchQuery,
-      }),
-    )
-  }, [dispatch, currentPage, searchQuery])
+useEffect(() => {
+  dispatch(
+    fetchInvestorList({
+      page: currentPage,
+      page_size: pageSize,
+      searchQuery,
+    }),
+  )
+}, [dispatch, currentPage, searchQuery])
 
   console.log('totalPages', totalPages)
 
@@ -166,17 +179,18 @@ export default function InvestorList() {
   }
 
   const handleViewDetails = async (userId: string) => {
-    try {
-      const resultAction = await dispatch(fetchInvestorDetails(userId))
-      if (fetchInvestorDetails.fulfilled.match(resultAction)) {
-        router.push(`/admin/UserList/Details?userId=${userId}`)
-      } else {
-        toast.error('Failed to fetch investor details.')
-      }
-    } catch (err) {
-      console.error('Unexpected error:', err)
+  try {
+    const resultAction = await dispatch(fetchInvestorDetails(userId))
+    if (fetchInvestorDetails.fulfilled.match(resultAction)) {
+      router.push(`/admin/UserList/Details?userId=${userId}&page=${currentPage}`)
+    } else {
+      toast.error('Failed to fetch investor details.')
     }
+  } catch (err) {
+    console.error('Unexpected error:', err)
   }
+}
+
   const [activeTab, setActiveTab] = useState('Investor / Users')
 
   const tabs = ['Investor / Users', 'Admin Account', 'Club Details', 'All']
@@ -552,7 +566,6 @@ export default function InvestorList() {
                   <DialogHeader>
                     <DialogTitle></DialogTitle>
                   </DialogHeader>
-                  {/* Pass selectedUserId to ResetPasswordForm */}
                   <ResetPasswordForm userId={selectedUserId} />
                 </DialogContent>
               </Dialog>

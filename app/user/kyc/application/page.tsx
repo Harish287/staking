@@ -22,25 +22,12 @@ import {
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover'
 import toast from 'react-hot-toast'
-// import { toast } from 'sonner'
 
 export default function KycVerification() {
   const dispatch = useDispatch<AppDispatch>()
-  const {
-    isLoading,
-    error,
-    kycVerified,
-    kycStatusLoading,
-    kycStatusError,
-    kycRejected,
-    kycPending,
-  } = useSelector((state: RootState) => state.auth)
+  const { isLoading, error, kycVerified, kycRejected, kycPending } =
+    useSelector((state: RootState) => state.auth)
 
   const [usernameAvailability, setUsernameAvailability] = useState<
     string | null
@@ -58,7 +45,6 @@ export default function KycVerification() {
         'Your KYC application has been rejected. Please resubmit with valid documents.',
       )
     } else if (kycVerified && !kycRejected && !kycPending) {
-      // Assume if verified is true and not rejected or pending, it's approved
       setKycStatus('Your identity has already been verified. Thank you!')
     } else if (kycPending) {
       setKycStatus(
@@ -84,11 +70,7 @@ export default function KycVerification() {
   ]
 
   const [formData, setFormData] = useState({
-    first_name: '',
-    last_name: '',
-    dob: '',
     username: '',
-    mobile: '',
     alternate_mobile: '',
     gender: '',
     country: '',
@@ -103,17 +85,22 @@ export default function KycVerification() {
     document_photo: null as File | null,
   })
 
-  useEffect(() => {
-    if (formData.first_name && formData.dob) {
-      dispatch(
-        suggestUsername({ name: formData.first_name, dob: formData.dob }),
-      )
-        .then((response) => {
-          if (response.payload) setSuggestedUsernames(response.payload)
-        })
-        .catch(() => setSuggestedUsernames([]))
+  const handleSuggestUsername = async () => {
+    try {
+      const result = await dispatch(suggestUsername())
+      if (suggestUsername.fulfilled.match(result)) {
+        setSuggestedUsernames(result.payload || [])
+      } else {
+        console.error('Suggestion failed:', result)
+      }
+    } catch (err) {
+      console.error('Error suggesting username:', err)
     }
-  }, [formData.first_name, formData.dob, dispatch])
+  }
+
+  useEffect(() => {
+    handleSuggestUsername()
+  }, [])
 
   const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value
@@ -125,20 +112,15 @@ export default function KycVerification() {
     }
 
     dispatch(verifyUsername(value))
-      .then((response) => {
-        const message = response.payload
-        if (
-          message?.toLowerCase().includes('available') ||
-          message?.toLowerCase().includes('avaliable')
-        ) {
+      .then((res) => {
+        const msg = res.payload?.toLowerCase()
+        if (msg?.includes('available') || msg?.includes('avaliable')) {
           setUsernameAvailability('✅ Username is available!')
         } else {
           setUsernameAvailability('❌ Username is taken')
         }
       })
-      .catch(() => {
-        setUsernameAvailability('❌ Username is taken')
-      })
+      .catch(() => setUsernameAvailability('❌ Username is taken'))
   }
 
   const handleInputChange = (
@@ -152,7 +134,7 @@ export default function KycVerification() {
     e: React.ChangeEvent<HTMLInputElement>,
     field: keyof typeof formData,
   ) => {
-    if (e.target.files && e.target.files.length > 0) {
+    if (e.target.files?.length) {
       setFormData({ ...formData, [field]: e.target.files[0] })
     }
   }
@@ -163,12 +145,8 @@ export default function KycVerification() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
-    const requiredFields: (keyof typeof formData)[] = [
-      'first_name',
-      'last_name',
-      'dob',
+    const required: (keyof typeof formData)[] = [
       'username',
-      'mobile',
       'country',
       'state',
       'city',
@@ -180,12 +158,8 @@ export default function KycVerification() {
       'document_photo',
     ]
 
-    const fieldLabels: Record<string, string> = {
-      first_name: 'First Name',
-      last_name: 'Last Name',
-      dob: 'Date of Birth',
+    const labels: Record<string, string> = {
       username: 'Username',
-      mobile: 'Mobile Number',
       country: 'Country',
       state: 'State',
       city: 'City',
@@ -197,29 +171,26 @@ export default function KycVerification() {
       document_photo: 'Document Photo',
     }
 
-    for (const field of requiredFields) {
-      const value = formData[field]
-      if (!value || (typeof value === 'string' && value.trim() === '')) {
+    for (const field of required) {
+      const val = formData[field]
+      if (!val || (typeof val === 'string' && val.trim() === '')) {
         const el = document.getElementById(field)
         if (el) {
           el.scrollIntoView({ behavior: 'smooth', block: 'center' })
           ;(el as HTMLElement).focus()
         }
-        toast.error(
-          `Please fill in the required field: ${fieldLabels[field] || field}`,
-        )
+        toast.error(`Missing: ${labels[field] || field}`)
         return
       }
     }
 
-    const submissionData = new FormData()
-    Object.entries(formData).forEach(([key, value]) => {
-      if (value) submissionData.append(key, value as Blob | string)
+    const payload = new FormData()
+    Object.entries(formData).forEach(([k, v]) => {
+      if (v) payload.append(k, v as Blob | string)
     })
 
     const toastId = toast.loading('Submitting KYC...')
-
-    dispatch(submitKyc({ formData: submissionData }))
+    dispatch(submitKyc({ formData: payload }))
       .then((response) => {
         toast.dismiss(toastId)
         const detail = response.payload?.detail?.toLowerCase()
@@ -247,64 +218,75 @@ export default function KycVerification() {
 
   if (isKycPendingOrSubmitted) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
-        <div className="bg-white p-6 rounded-lg shadow-lg text-center">
-          <h2 className="text-xl font-semibold text-gray-900">
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 p-6">
+        <div className="bg-white p-8 rounded-xl shadow-md max-w-md w-full text-center">
+          <h2 className="text-2xl font-semibold text-gray-900 mb-4">
             KYC Application Status
           </h2>
-          <p className="text-gray-700 mt-2">{kycStatus}</p>
+          <p className="text-gray-700 text-lg">{kycStatus}</p>
         </div>
       </div>
     )
   }
-
   return (
-    <div className="max-w-5xl mt-6 w-full mx-auto bg-white rounded-lg shadow-lg p-6">
-      <h1 className="text-2xl font-semibold text-center text-gray-900 mb-4">
+    <div className="max-w-4xl mx-auto my-12 bg-white rounded-xl shadow-lg p-8">
+      <h1 className="text-3xl font-bold text-center text-gray-900 mb-8">
         KYC Verification
       </h1>
 
       {error && (
-        <Alert className="bg-red-50 text-red-600">
+        <Alert className="bg-red-50 text-red-700 mb-6 rounded-lg shadow-sm">
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
 
       {kycStatus && (
-        <p className="text-sm text-red-500 mb-4 text-center">{kycStatus}</p>
+        <p className="text-center text-sm text-red-600 mb-6 font-medium">
+          {kycStatus}
+        </p>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="grid grid-cols-2 gap-4">
+      <form onSubmit={handleSubmit} className="space-y-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {[
-            ['first_name', 'First Name *'],
-            ['last_name', 'Last Name *'],
-            ['dob', 'Date of Birth *', 'date'],
-            ['mobile', 'Mobile *'],
+            // ['username', 'username*'],
+
+            // ['first_name', 'First Name *'],
+            // ['last_name', 'Last Name *'],
+            // ['dob', 'Date of Birth *', 'date'],
+            // ['mobile', 'Mobile *'],
             ['alternate_mobile', 'Alternate Mobile'],
             ['country', 'Country *'],
             ['state', 'State *'],
             ['city', 'City *'],
             ['postal_code', 'Postal Code *'],
           ].map(([id, label, type = 'text']) => (
-            <div key={id}>
-              <Label htmlFor={id}>{label}</Label>
+            <div key={id} className="flex flex-col">
+              <Label htmlFor={id} className="font-semibold text-gray-700 mb-1">
+                {label}
+              </Label>
               <Input
                 id={id}
                 type={type}
                 onChange={handleInputChange}
-                required
+                required={label.includes('*')}
+                className="border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition"
               />
             </div>
           ))}
 
-          <div>
-            <Label htmlFor="gender">Gender *</Label>
+          <div className="flex flex-col">
+            <Label
+              htmlFor="gender"
+              className="font-semibold text-gray-700 mb-1"
+            >
+              Gender *
+            </Label>
             <Select onValueChange={(val) => handleSelectChange('gender', val)}>
-              <SelectTrigger>
+              <SelectTrigger className="border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
                 <SelectValue placeholder="Select gender" />
               </SelectTrigger>
-              <SelectContent className="bg-white">
+              <SelectContent className="bg-white shadow-md">
                 {genders.map((g) => (
                   <SelectItem key={g.id} value={g.id}>
                     {g.label}
@@ -314,31 +296,40 @@ export default function KycVerification() {
             </Select>
           </div>
 
-          <div>
-            <Label htmlFor="username">Username *</Label>
-            <div className="relative">
-              <Input
-                id="username"
-                value={formData.username}
-                onChange={handleUsernameChange}
-                required
-              />
-              {usernameAvailability && (
-                <p className="text-sm text-gray-600 mt-1">
-                  {usernameAvailability}
-                </p>
-              )}
-            </div>
-            <Label htmlFor="suggestedusername">Suggested UserNames *</Label>
+          <div className="flex flex-col">
+            <Label
+              htmlFor="username"
+              className="font-semibold text-gray-700 mb-1"
+            >
+              Username *
+            </Label>
+            <Input
+              id="username"
+              value={formData.username}
+              onChange={handleUsernameChange}
+              required
+              className="border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+            />
+            {usernameAvailability && (
+              <p
+                className={`mt-1 text-sm font-medium ${
+                  usernameAvailability.includes('✅')
+                    ? 'text-green-600'
+                    : 'text-red-600'
+                }`}
+              >
+                {usernameAvailability}
+              </p>
+            )}
             {suggestedUsernames.length > 0 && (
-              <div className="mt-2 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
-                {[...new Set(suggestedUsernames)].map((name) => (
+              <div className="mt-2 flex flex-wrap gap-2">
+                {suggestedUsernames.map((name) => (
                   <button
                     key={name}
                     type="button"
+                    // variant="outline"
+                    className="bg-blue-100 text-blue-800 px-3 py-1 rounded-md text-xs font-medium hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     onClick={() => setFormData({ ...formData, username: name })}
-                    className="px-3 py-1 rounded border border-gray-300 hover:bg-blue-100 focus:bg-blue-300  active:bg-blue-300 focus:outline-none text-[10px] text-gray-900 text-center whitespace-normal break-words"
-                    style={{ wordBreak: 'break-word' }}
                   >
                     {name}
                   </button>
@@ -348,24 +339,52 @@ export default function KycVerification() {
           </div>
         </div>
 
-        <div>
-          <Label htmlFor="address_line_1">Address Line 1 *</Label>
-          <Textarea id="address_line_1" onChange={handleInputChange} required />
-        </div>
-        <div>
-          <Label htmlFor="address_line_2">Address Line 2</Label>
-          <Textarea id="address_line_2" onChange={handleInputChange} />
+        <div className="flex flex-col space-y-4">
+          <div className="flex flex-col">
+            <Label
+              htmlFor="address_line_1"
+              className="font-semibold text-gray-700 mb-1"
+            >
+              Address Line 1 *
+            </Label>
+            <Textarea
+              id="address_line_1"
+              onChange={handleInputChange}
+              required
+              rows={3}
+              className="border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition"
+            />
+          </div>
+          <div className="flex flex-col">
+            <Label
+              htmlFor="address_line_2"
+              className="font-semibold text-gray-700 mb-1"
+            >
+              Address Line 2
+            </Label>
+            <Textarea
+              id="address_line_2"
+              onChange={handleInputChange}
+              rows={3}
+              className="border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition"
+            />
+          </div>
         </div>
 
-        <div>
-          <Label htmlFor="document_type">Document Type *</Label>
+        <div className="flex flex-col mb-6">
+          <Label
+            htmlFor="document_type"
+            className="font-semibold text-gray-700 mb-1"
+          >
+            Document Type *
+          </Label>
           <Select
             onValueChange={(val) => handleSelectChange('document_type', val)}
           >
-            <SelectTrigger>
+            <SelectTrigger className="border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
               <SelectValue placeholder="Select document type" />
             </SelectTrigger>
-            <SelectContent className="bg-white">
+            <SelectContent className="bg-white shadow-md">
               {documentTypes.map((doc) => (
                 <SelectItem key={doc.id} value={doc.id}>
                   {doc.name}
@@ -375,14 +394,11 @@ export default function KycVerification() {
           </Select>
         </div>
 
-        <div className="space-y-4">
+        <div className="grid md:grid-cols-3 gap-6">
           {[
-            ['document_one', 'Front Document One *'],
-            ['document_two', 'Back Document Two'],
-            [
-              'document_photo',
-              'Upload Your Photo with holding Document in your hand *',
-            ],
+            ['document_one', 'Front Document *'],
+            ['document_two', 'Back Document'],
+            ['document_photo', 'Your Photo Holding Document *'],
           ].map(([id, label]) => (
             <FileUpload
               key={id}
@@ -398,10 +414,10 @@ export default function KycVerification() {
         <div className="flex justify-end">
           <Button
             type="submit"
-            className="bg-blue-600 hover:bg-blue-700 text-white px-8"
+            className="bg-blue-600 hover:bg-blue-700 text-white px-10 py-3 rounded-lg font-semibold shadow-md transition focus:outline-none focus:ring-2 focus:ring-blue-500"
             disabled={isLoading}
           >
-            {isLoading ? 'Submitting...' : 'Submit'}
+            {isLoading ? 'Submitting...' : 'Submit KYC'}
           </Button>
         </div>
       </form>
@@ -416,35 +432,54 @@ function FileUpload({
   onFileChange,
   onRemove,
 }: {
-  id: string
+  id: keyof ReturnType<typeof useState>['0']
   label: string
   file: File | null
-  onFileChange: any
-  onRemove: any
+  onFileChange: (
+    e: React.ChangeEvent<HTMLInputElement>,
+    field: keyof ReturnType<typeof useState>['0'],
+  ) => void
+  onRemove: (field: keyof ReturnType<typeof useState>['0']) => void
 }) {
   return (
-    <div className="border-2 border-dashed p-4 text-center relative">
+    <div className="flex flex-col items-center border-2 border-dashed border-gray-300 rounded-lg p-4 cursor-pointer hover:border-blue-500 transition relative">
+      <Label
+        htmlFor={id}
+        className="absolute top-2 left-3 font-semibold text-gray-700 select-none"
+      >
+        {label}
+      </Label>
+
       <input
-        id={id}
         type="file"
-        className="hidden"
+        id={id}
         onChange={(e) => onFileChange(e, id)}
+        className="opacity-0 absolute inset-0 cursor-pointer"
+        accept="image/*,application/pdf"
       />
+
       {!file ? (
-        <label htmlFor={id} className="cursor-pointer">
-          <Upload className="h-12 w-12 text-gray-400 mb-2" />
-          <p className="text-blue-600">{label}</p>
-        </label>
+        <div className="flex flex-col items-center justify-center gap-2 pt-10 pb-6 text-gray-400">
+          <Upload size={32} />
+          <p className="text-sm">Click to upload</p>
+        </div>
       ) : (
-        <div className="flex items-center justify-between p-2 bg-gray-100 rounded-lg">
-          <span className="text-gray-800 truncate">{file.name}</span>
-          <button
-            type="button"
-            onClick={() => onRemove(id)}
-            className="text-red-600"
+        <div className="flex flex-col items-center justify-center gap-3 pt-12 pb-6 w-full">
+          <p className="text-sm font-medium truncate max-w-full text-gray-900">
+            {file.name}
+          </p>
+          <Button
+            variant="destructive"
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation()
+              onRemove(id)
+            }}
+            className="mt-1"
           >
-            <X className="h-5 w-5" />
-          </button>
+            <X size={16} />
+            Remove
+          </Button>
         </div>
       )}
     </div>

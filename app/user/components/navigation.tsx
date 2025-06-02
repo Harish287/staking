@@ -71,13 +71,7 @@ function Navigation() {
 
   return (
     <div className="bg-white box-border shadow-xl">
-      <nav
-        className="bg-gradient-to-r from-pink-700 to-gray-800 "
-        // style={{
-        //   background:
-        //     "linear-gradient(90deg, rgba(216,87,255,1) 0%, rgba(224,16,69,1) 93%)",
-        // }}
-      >
+      <nav className="bg-gradient-to-r from-pink-700 to-gray-800 ">
         <div className=" container m-auto flex h-14 justify-between items-center px-4 md:px-20">
           <Image
             className=" w-[45px] h-[45px] border-[white] border-4 rounded-[60px] items-center flex "
@@ -388,6 +382,12 @@ function Navigation() {
                 className="my-2 block border-b border-gray-100  text-pink-800 hover:text-pink-700 md:mx-2"
               >
                 Kait Wallet Transfer
+              </Link>
+               <Link
+                href="/user/transfers/mature-wallet-transfer  "
+                className="my-2 block border-b border-gray-100  text-pink-800 hover:text-pink-700 md:mx-2"
+              >
+                Mature Wallet Transfer
               </Link>
               <Link
                 href="/user/transfers/income-wallet-transfer"

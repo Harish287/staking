@@ -21,7 +21,9 @@ interface ChangePasswordPayload {
   confirm_password: string;
 }
 
-// Async thunk to change password
+const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL
+
+
 export const changePassword = createAsyncThunk(
   'auth/changePassword',
   async (
@@ -30,11 +32,11 @@ export const changePassword = createAsyncThunk(
   ) => {
     try {
       const formData = new URLSearchParams()
-      formData.append('token', token) // 👈 include token in body
+      formData.append('token', token)
       formData.append('new_password', new_password)
       formData.append('confirm_password', confirm_password)
 
-      const response = await fetch('http://localhost/user/change_password', {
+      const response = await fetch(`${baseURL}user/change_password`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',

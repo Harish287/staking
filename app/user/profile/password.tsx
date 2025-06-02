@@ -3,8 +3,9 @@ import { useAppDispatch, useAppSelector } from '../../../store/hooks'
 import { resetUserPassword } from '../../../store/slices/profileAPI'
 import { resetPasswordState } from '../../../store/slices/profileSlice'
 import { RootState } from '../../../store/store'
-import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import { TextField, IconButton, InputAdornment } from '@mui/material'
+import { Visibility, VisibilityOff } from '@mui/icons-material'
 import toast from 'react-hot-toast'
 
 const ResetPasswordForm = () => {
@@ -16,6 +17,10 @@ const ResetPasswordForm = () => {
   const [oldPassword, setOldPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
+
+  const [showOld, setShowOld] = useState(false)
+  const [showNew, setShowNew] = useState(false)
+  const [showConfirm, setShowConfirm] = useState(false)
 
   useEffect(() => {
     if (success) {
@@ -32,31 +37,26 @@ const ResetPasswordForm = () => {
   }, [success, error, dispatch])
 
   const handleSubmit = () => {
-    // Validate fields are filled
     if (!oldPassword || !newPassword || !confirmPassword) {
       toast.error('All fields are required.')
       return
     }
 
-    // Check if old password and new password are the same
     if (oldPassword === newPassword) {
       toast.error('New password cannot be the same as the old password.')
       return
     }
 
-    // Check if passwords match
     if (newPassword !== confirmPassword) {
       toast.error('Passwords do not match.')
       return
     }
 
-    // Check password length
     if (newPassword.length < 6) {
       toast.error('Password must be at least 6 characters.')
       return
     }
 
-    // Dispatch reset password action
     dispatch(
       resetUserPassword({
         old_password: oldPassword,
@@ -69,45 +69,72 @@ const ResetPasswordForm = () => {
   return (
     <div className="space-y-4 max-w-md mx-auto p-4">
       <div>
-        <label className="block mb-1 font-medium text-gray-700">
-          Current Password
-        </label>
-        <Input
-          type="password"
+        <TextField
+          label="Current Password"
+          type={showOld ? 'text' : 'password'}
           value={oldPassword}
           onChange={(e) => setOldPassword(e.target.value)}
-          placeholder="Enter current password"
+          fullWidth
+          slotProps={{
+            input: {
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton onClick={() => setShowOld((prev) => !prev)}>
+                    {showOld ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            },
+          }}
         />
       </div>
 
       <div>
-        <label className="block mb-1 font-medium text-gray-700">
-          New Password
-        </label>
-        <Input
-          type="password"
+        <TextField
+          label="New Password"
+          type={showNew ? 'text' : 'password'}
           value={newPassword}
           onChange={(e) => setNewPassword(e.target.value)}
-          placeholder="Enter new password"
+          fullWidth
+       slotProps={{
+            input: {
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton onClick={() => setShowNew((prev) => !prev)}>
+                    {showNew ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            },
+          }}
         />
       </div>
 
       <div>
-        <label className="block mb-1 font-medium text-gray-700">
-          Confirm New Password
-        </label>
-        <Input
-          type="password"
+        <TextField
+          label="Confirm New Password"
+          type={showConfirm ? 'text' : 'password'}
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
-          placeholder="Confirm new password"
+          fullWidth
+           slotProps={{
+            input: {
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton onClick={() => setShowConfirm((prev) => !prev)}>
+                    {showConfirm ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            },
+          }}
         />
       </div>
 
       <Button
         onClick={handleSubmit}
         disabled={isLoading}
-        className="bg-blue-600 text-white hover:bg-blue-700"
+        className="bg-red-600 hover:bg-red-700 text-white w-full"
       >
         {isLoading ? 'Resetting...' : 'Reset Password'}
       </Button>
