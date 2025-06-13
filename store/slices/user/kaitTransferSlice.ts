@@ -29,15 +29,15 @@ interface TransferPayload {
   token: string
 }
 
-export const initiateIncomeTransfer = createAsyncThunk(
-  'transfer/initiateIncomeTransfer',
+export const initiatekaitTransfer = createAsyncThunk(
+  'transfer/initiatekaitTransfer',
   async (
     { otp, transaction_pin, receiver_user_id, amount, token }: TransferPayload,
     thunkAPI,
   ) => {
     try {
       const response = await axios.post(
-        `${baseURL}transfer/intiate/income`,
+        `${baseURL}transfer/intiate/kait`,
         new URLSearchParams({
           otp,
           transaction_pin,
@@ -58,7 +58,7 @@ export const initiateIncomeTransfer = createAsyncThunk(
   },
 )
 
-const incometransferSlice = createSlice({
+const kaittransferSlice = createSlice({
   name: 'transfer',
   initialState,
   reducers: {
@@ -70,12 +70,12 @@ const incometransferSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      .addCase(initiateIncomeTransfer.pending, (state) => {
+      .addCase(initiatekaitTransfer.pending, (state) => {
         state.loading = true
         state.success = false
         state.error = null
       })
-      .addCase(initiateIncomeTransfer.fulfilled, (state, action) => {
+      .addCase(initiatekaitTransfer.fulfilled, (state, action) => {
         state.loading = false
         state.success = true
         state.error = null
@@ -83,7 +83,7 @@ const incometransferSlice = createSlice({
           action.payload?.message || 'Transfer completed successfully'
       })
 
-      .addCase(initiateIncomeTransfer.rejected, (state, action) => {
+      .addCase(initiatekaitTransfer.rejected, (state, action) => {
         state.loading = false
         state.success = false
         state.error = action.payload || 'Something went wrong'
@@ -91,5 +91,5 @@ const incometransferSlice = createSlice({
   },
 })
 
-export const { resetTransferState } = incometransferSlice.actions
-export default incometransferSlice.reducer
+export const { resetTransferState } = kaittransferSlice.actions
+export default kaittransferSlice.reducer

@@ -1,3 +1,4 @@
+// store/slices/transferSlice.ts
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import axios from 'axios'
 
@@ -7,6 +8,7 @@ interface TransferErrorObject {
   detail?: string
   [key: string]: any
 }
+
 interface TransferState {
   loading: boolean
   success: boolean
@@ -29,15 +31,15 @@ interface TransferPayload {
   token: string
 }
 
-export const initiateIncomeTransfer = createAsyncThunk(
-  'transfer/initiateIncomeTransfer',
+export const initiateadhocTransfer = createAsyncThunk(
+  'transfer/initiateadhocTransfer',
   async (
     { otp, transaction_pin, receiver_user_id, amount, token }: TransferPayload,
     thunkAPI,
   ) => {
     try {
       const response = await axios.post(
-        `${baseURL}transfer/intiate/income`,
+        `${baseURL}transfer/intiate/adhoc`,
         new URLSearchParams({
           otp,
           transaction_pin,
@@ -58,7 +60,7 @@ export const initiateIncomeTransfer = createAsyncThunk(
   },
 )
 
-const incometransferSlice = createSlice({
+const adhoctransferSlice = createSlice({
   name: 'transfer',
   initialState,
   reducers: {
@@ -70,20 +72,17 @@ const incometransferSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      .addCase(initiateIncomeTransfer.pending, (state) => {
+      .addCase(initiateadhocTransfer.pending, (state) => {
         state.loading = true
         state.success = false
         state.error = null
       })
-      .addCase(initiateIncomeTransfer.fulfilled, (state, action) => {
+      .addCase(initiateadhocTransfer.fulfilled, (state) => {
         state.loading = false
         state.success = true
         state.error = null
-        state.message =
-          action.payload?.message || 'Transfer completed successfully'
       })
-
-      .addCase(initiateIncomeTransfer.rejected, (state, action) => {
+      .addCase(initiateadhocTransfer.rejected, (state, action) => {
         state.loading = false
         state.success = false
         state.error = action.payload || 'Something went wrong'
@@ -91,5 +90,5 @@ const incometransferSlice = createSlice({
   },
 })
 
-export const { resetTransferState } = incometransferSlice.actions
-export default incometransferSlice.reducer
+export const { resetTransferState } = adhoctransferSlice.actions
+export default adhoctransferSlice.reducer

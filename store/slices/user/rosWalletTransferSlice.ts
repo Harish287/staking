@@ -7,41 +7,35 @@ interface TransferErrorObject {
   detail?: string
   [key: string]: any
 }
-interface TransferState {
+
+interface RosState {
   loading: boolean
   success: boolean
   error: string | TransferErrorObject | null
-  message: string | null
 }
 
-const initialState: TransferState = {
+const initialState: RosState = {
   loading: false,
   success: false,
   error: null,
-  message: null,
 }
 
-interface TransferPayload {
+interface RosPayload {
   otp: string
   transaction_pin: string
-  receiver_user_id: string
   amount: number
   token: string
 }
 
-export const initiateIncomeTransfer = createAsyncThunk(
-  'transfer/initiateIncomeTransfer',
-  async (
-    { otp, transaction_pin, receiver_user_id, amount, token }: TransferPayload,
-    thunkAPI,
-  ) => {
+export const initiateRos = createAsyncThunk(
+  'transfer/initiateRos',
+  async ({ otp, transaction_pin, amount, token }: RosPayload, thunkAPI) => {
     try {
       const response = await axios.post(
-        `${baseURL}transfer/intiate/income`,
+        `${baseURL}transfer/intiate/ros`,
         new URLSearchParams({
           otp,
           transaction_pin,
-          receiver_user_id,
           amount: amount.toString(),
         }),
         {
@@ -58,11 +52,11 @@ export const initiateIncomeTransfer = createAsyncThunk(
   },
 )
 
-const incometransferSlice = createSlice({
-  name: 'transfer',
+const RosSlice = createSlice({
+  name: 'Ros',
   initialState,
   reducers: {
-    resetTransferState: (state) => {
+    resetRosState: (state) => {
       state.loading = false
       state.success = false
       state.error = null
@@ -70,20 +64,17 @@ const incometransferSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      .addCase(initiateIncomeTransfer.pending, (state) => {
+      .addCase(initiateRos.pending, (state) => {
         state.loading = true
         state.success = false
         state.error = null
       })
-      .addCase(initiateIncomeTransfer.fulfilled, (state, action) => {
+      .addCase(initiateRos.fulfilled, (state) => {
         state.loading = false
         state.success = true
         state.error = null
-        state.message =
-          action.payload?.message || 'Transfer completed successfully'
       })
-
-      .addCase(initiateIncomeTransfer.rejected, (state, action) => {
+      .addCase(initiateRos.rejected, (state, action) => {
         state.loading = false
         state.success = false
         state.error = action.payload || 'Something went wrong'
@@ -91,5 +82,5 @@ const incometransferSlice = createSlice({
   },
 })
 
-export const { resetTransferState } = incometransferSlice.actions
-export default incometransferSlice.reducer
+export const { resetRosState } = RosSlice.actions
+export default RosSlice.reducer

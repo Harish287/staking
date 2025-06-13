@@ -1,8 +1,9 @@
+// store/slices/eligibleUsersSlice.ts
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import axios from 'axios'
 
 interface EligibleUser {
-  user_id: string
+  id: string
   name: string
   user_name: string
   email: string
@@ -38,12 +39,11 @@ export const fetchEligibleUsers = createAsyncThunk<
       },
     )
 
-    // Transform the response into EligibleUser[]
     const transformed = response.data.map((user: any) => ({
-      user_id: user.id,
+      id: user.id,
       name: user.value.name,
       email: user.value.email,
-      user_name: user.value.email.split('@')[0], // Optional: customize username logic
+      user_name: user.value.email.split('@')[0],
     }))
 
     return transformed
@@ -53,7 +53,6 @@ export const fetchEligibleUsers = createAsyncThunk<
     )
   }
 })
-
 
 const eligibleUsersSlice = createSlice({
   name: 'eligibleUsers',

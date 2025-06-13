@@ -24,24 +24,24 @@ const initialState: TransferState = {
 interface TransferPayload {
   otp: string
   transaction_pin: string
-  receiver_user_id: string
+  transfer_mode: string
   amount: number
   token: string
 }
 
-export const initiateIncomeTransfer = createAsyncThunk(
-  'transfer/initiateIncomeTransfer',
+export const initiateFiatTransfer = createAsyncThunk(
+  'transfer/initiateFiatTransfer',
   async (
-    { otp, transaction_pin, receiver_user_id, amount, token }: TransferPayload,
+    { otp, transaction_pin, transfer_mode, amount, token }: TransferPayload,
     thunkAPI,
   ) => {
     try {
       const response = await axios.post(
-        `${baseURL}transfer/intiate/income`,
+        `${baseURL}transfer/intiate/fait`,
         new URLSearchParams({
           otp,
           transaction_pin,
-          receiver_user_id,
+          transfer_mode,
           amount: amount.toString(),
         }),
         {
@@ -58,7 +58,7 @@ export const initiateIncomeTransfer = createAsyncThunk(
   },
 )
 
-const incometransferSlice = createSlice({
+const fiatTransferSlice = createSlice({
   name: 'transfer',
   initialState,
   reducers: {
@@ -70,12 +70,12 @@ const incometransferSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      .addCase(initiateIncomeTransfer.pending, (state) => {
+      .addCase(initiateFiatTransfer.pending, (state) => {
         state.loading = true
         state.success = false
         state.error = null
       })
-      .addCase(initiateIncomeTransfer.fulfilled, (state, action) => {
+      .addCase(initiateFiatTransfer.fulfilled, (state, action) => {
         state.loading = false
         state.success = true
         state.error = null
@@ -83,7 +83,7 @@ const incometransferSlice = createSlice({
           action.payload?.message || 'Transfer completed successfully'
       })
 
-      .addCase(initiateIncomeTransfer.rejected, (state, action) => {
+      .addCase(initiateFiatTransfer.rejected, (state, action) => {
         state.loading = false
         state.success = false
         state.error = action.payload || 'Something went wrong'
@@ -91,5 +91,5 @@ const incometransferSlice = createSlice({
   },
 })
 
-export const { resetTransferState } = incometransferSlice.actions
-export default incometransferSlice.reducer
+export const { resetTransferState } = fiatTransferSlice.actions
+export default fiatTransferSlice.reducer

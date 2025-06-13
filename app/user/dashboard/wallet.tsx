@@ -1,69 +1,98 @@
 import { useState } from 'react'
 import { FaEllipsisH, FaTimes } from 'react-icons/fa'
+import Logo from '../../../assets/logo2x.png'
+import Image from 'next/image'
 
-type Props = {
+type WalletData = {
   title: string
   amount: string
+  list: string[] | string
+  isOpen: boolean
+  onToggle: () => void
 }
 
-const WalletCard = ({ title, amount }: Props) => {
-  const [isOpen, setIsOpen] = useState(false)
+const WalletCard = ({ title, amount, list, isOpen, onToggle }: WalletData) => {
+  const dropdownItems = Array.isArray(list) ? list : [list]
 
   return (
-    <div className="relative group w-full mt-5  ">
-      <div className="bg-white text-black mb-0 absolute  shadow-lg p-5 w-[133px] h-[110px] gap-5 ">
-        <p className="text-sm mt-[62px]">{title}</p>
+    <div className="relative w-[140px] mx-auto h-[100px] mt-[70px]">
+      <div className="absolute -top-8 left-0 w-full h-[110px] justify-center bg-white shadow-lg rounded-b-xl flex items-end p-2 z-10">
+        <p className="text-sm font-medium text-black ">{title}</p>
       </div>
-      <div className="bg-gradient-to-r from-pink-700 to-gray-800 text-white  mt-[-20px] relative rounded-b-2xl rounded-tl-2xl left-[-10px] shadow-lg p-5 h-[100px] w-[120px] ">
+
+      <div className="bg-gradient-to-r from-pink-700 to-gray-800 z-10 mt-[-52px] gap-10 left-[-19px] w-[140px] h-[100px]  text-white rounded-b-2xl rounded-tl-2xl shadow-xl  justify-center items-center flex px-4 relative">
         <div
-          className="absolute top-0 right-[-20] h-5 w-5"
+          className="absolute top-0 right-0 w-5 h-5 mr-[-19px]"
           style={{
             background:
               'linear-gradient(to top right, #AD111C 49%, transparent 53%)',
           }}
         ></div>
-        <div className=" justify-between items-center text-center">
-          <span className="text-2xl font-bold">{amount}</span>
-          <br />
-          <button className="text-white" onClick={() => setIsOpen(!isOpen)}>
-            {isOpen ? <FaTimes /> : <FaEllipsisH />}
-          </button>
-          <div
-            onClick={() => setIsOpen(!isOpen)}
-            className={`absolute z-10 top-full left-0 bg-white text-gray-800 shadow-md rounded-md mt-1 p-2 w-40 ${
-              isOpen ? 'block' : 'hidden'
-            } group-hover:block`}
-          >
-            <a
-              href="#"
-              className="block px-3 py-2 text-sm  hover:bg-gray-200 rounded-md"
-            >
-              Summary
-            </a>
+
+        <div className="flex flex-col items-center space-y-2">
+          <span className="text-2xl flex font-bold items-center text-[20px] gap-1">
+            <Image alt="" src={Logo} className="h-[20px] w-[20px]" />
+            {amount}
+          </span>
+
+          <div className="relative">
+            <button onClick={onToggle}>
+              {isOpen ? <FaTimes /> : <FaEllipsisH />}
+            </button>
+
+            {isOpen && (
+              <div className="absolute bottom-[110%] left-1/2 -translate-x-1/2 w-44 bg-white text-gray-800 shadow-xl rounded-md z-[999] border border-gray-300">
+                {dropdownItems.map((item, idx) => (
+                  <a
+                    key={idx}
+                    href="#"
+                    className="block px-4 py-2 text-sm hover:bg-gray-200"
+                    onClick={onToggle}
+                  >
+                    {item}
+                  </a>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>
     </div>
   )
 }
-// Wallets Component
+
 const Wallets = () => {
-  const data = [
-    { title: 'KAIT Wallet', amount: ' 10.0' },
-    { title: 'Total Staking', amount: ' 10,000' },
-    { title: 'Regular - ROS', amount: '0' },
-    { title: 'Fixed - ROS', amount: '3,600' },
-    { title: 'Total Earnings', amount: '8,000' },
-    { title: 'Adhoc Wallet', amount: '0' },
-    { title: 'Voucher', amount: '400' },
-    { title: 'Income Wallet', amount: '6,800' },
-    { title: 'Withdrawal', amount: '0' },
+  const [openIndex, setOpenIndex] = useState<number | null>(null)
+
+  const data: Omit<WalletData, 'isOpen' | 'onToggle'>[] = [
+    { title: 'KAIT Wallet', amount: '10.0', list: 'View Wallet' },
+    {
+      title: 'Total Staking',
+      amount: '10,000',
+      list: ['New Staking', 'All Staking'],
+    },
+    { title: 'Regular - ROS', amount: '0', list: ['Summary', 'Re-Stake'] },
+    { title: 'Fixed - ROS', amount: '3,600', list: 'Summary' },
+    { title: 'Total Earnings', amount: '8,000', list: 'Summary' },
+    { title: 'Adhoc Wallet', amount: '0', list: 'Summary' },
+    { title: 'Voucher', amount: '400', list: 'Summary' },
+    { title: 'Income Wallet', amount: '6,800', list: 'Summary' },
+    { title: 'Withdrawal', amount: '0', list: 'Summary' },
   ]
 
   return (
-    <div className="grid lg:grid-cols-4  md:grid-cols-3 grid-cols-1 gap-10 p-5">
+    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 mb-[20px] p-5 justify-items-center">
       {data.map((wallet, index) => (
-        <WalletCard key={index} title={wallet.title} amount={wallet.amount} />
+        <WalletCard
+          key={index}
+          title={wallet.title}
+          amount={wallet.amount}
+          list={wallet.list}
+          isOpen={openIndex === index}
+          onToggle={() =>
+            setOpenIndex((prev) => (prev === index ? null : index))
+          }
+        />
       ))}
     </div>
   )

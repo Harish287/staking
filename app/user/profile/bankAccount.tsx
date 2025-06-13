@@ -5,24 +5,35 @@ import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import {
   fetchBankAccount,
   updateBankAccount,
-} from '../../../store/slices/user/bankSlice'
-import { BankAccount } from '../../../store/slices/user/bankSlice'
+  BankAccount,
+} from '@/store/slices/user/bankSlice'
+import { fetchDropdownOptions } from '@/store/slices/dropdownOptions'
+import { RootState } from '@/store/store'
+import toast from 'react-hot-toast'
 
 export default function BankAccountPage() {
   const dispatch = useAppDispatch()
+
   const { account, loading, error } = useAppSelector(
     (state) => state.BankAccount,
   )
 
+  const {
+    data: dropDownOptions,
+    loading: loadingOptions,
+    error: optionsError,
+  } = useAppSelector((state: RootState) => state.dropDownOptions)
+
   const [formData, setFormData] = useState<BankAccount>({
     bank_name: '',
-    account_type: 'savings',
+    account_type: '',
     account_no: '',
     ifsc_code: '',
   })
 
   useEffect(() => {
     dispatch(fetchBankAccount())
+    dispatch(fetchDropdownOptions())
   }, [dispatch])
 
   useEffect(() => {
@@ -38,10 +49,21 @@ export default function BankAccountPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+
+    if (
+      !formData.bank_name ||
+      !formData.account_no ||
+      !formData.account_type ||
+      !formData.ifsc_code
+    ) {
+      toast.error('❌ All fields are required')
+      return
+    }
+
     dispatch(updateBankAccount(formData))
       .unwrap()
-      .then(() => alert('✅ Bank details updated!'))
-      .catch(() => alert('❌ Update failed'))
+      .then(() => toast.success('✅ Bank details updated!'))
+      .catch(() => toast.error('❌ Update failed'))
   }
 
   const isFormChanged = useMemo(() => {
@@ -58,12 +80,12 @@ export default function BankAccountPage() {
     <div className="max-w-md mx-auto mt-10 p-6 border rounded shadow">
       <h2 className="text-xl font-semibold mb-4">Bank Account Info</h2>
 
-      {loading && <p>Loading...</p>}
+      {loading && <p>Loading bank account...</p>}
       {error && <p className="text-red-500">{error}</p>}
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block">Bank Name</label>
+          <label className="block mb-1">Bank Name</label>
           <input
             type="text"
             name="bank_name"
@@ -75,7 +97,7 @@ export default function BankAccountPage() {
         </div>
 
         <div>
-          <label className="block">Account Number</label>
+          <label className="block mb-1">Account Number</label>
           <input
             type="text"
             name="account_no"
@@ -87,21 +109,31 @@ export default function BankAccountPage() {
         </div>
 
         <div>
-          <label className="block">Account Type</label>
-          <select
-            name="account_type"
-            value={formData.account_type}
-            onChange={handleChange}
-            className="w-full border rounded p-2"
-          >
-            <option value="savings">Savings</option>
-            <option value="current">Current</option>
-            <option value="others">others </option>
-          </select>
+          <label className="block mb-1">Account Type</label>
+          {loadingOptions ? (
+            <p>Loading options...</p>
+          ) : optionsError ? (
+            <p className="text-red-500">{optionsError}</p>
+          ) : (
+            <select
+              name="account_type"
+              value={formData.account_type}
+              onChange={handleChange}
+              className="w-full border rounded p-2"
+              required
+            >
+              <option value="">Select Account Type</option>
+              {dropDownOptions?.account_types?.map((type) => (
+                <option key={type.id} value={type.id}>
+                  {type.value}
+                </option>
+              ))}
+            </select>
+          )}
         </div>
 
         <div>
-          <label className="block">IFSC Code</label>
+          <label className="block mb-1">IFSC Code</label>
           <input
             type="text"
             name="ifsc_code"
@@ -115,7 +147,7 @@ export default function BankAccountPage() {
         <button
           type="submit"
           disabled={!isFormChanged || loading}
-          className={`px-4 py-2 rounded text-white ${
+          className={`px-4 py-2 rounded text-white transition ${
             !isFormChanged || loading
               ? 'bg-gray-400 cursor-not-allowed'
               : 'bg-blue-600 hover:bg-blue-700'

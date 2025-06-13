@@ -6,7 +6,10 @@ import {
   initiateIncomeTransfer,
   resetTransferState,
 } from '@/store/slices/user/incomeTransferSlice'
-import { transferWalletOtp } from '@/store/slices/user/TransferWalletOtpSlice'
+import {
+  transferWalletOtp,
+  resetOtpState,
+} from '@/store/slices/user/TransferWalletOtpSlice'
 import { fetchEligibleUsers } from '@/store/slices/user/eligibleUserTransferSlice'
 import { fetchTransferPinStatus } from '@/store/slices/user/transferPinStatusSlice'
 
@@ -17,7 +20,7 @@ import {
   DialogActions,
   Button,
   TextField,
-  Typography,
+  Autocomplete,
 } from '@mui/material'
 
 import Image from 'next/image'
@@ -25,7 +28,7 @@ import { ArrowRightLeft } from 'lucide-react'
 import { unwrapResult } from '@reduxjs/toolkit'
 import { useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
-
+import Logo from '../../../../assets/logo2x.png'
 import FiatWalletImg from '../../../../assets/fiatwallet.jpg'
 
 const IncomeTransferForm = () => {
@@ -36,6 +39,7 @@ const IncomeTransferForm = () => {
     loading: transferLoading,
     success: transferSuccess,
     error: transferError,
+    message: transferMessage,
   } = useAppSelector((state) => state.incometransfer)
 
   const {
@@ -44,7 +48,7 @@ const IncomeTransferForm = () => {
     error: otpError,
   } = useAppSelector((state) => state.TranferwalletOpt)
 
-  const { users: eligibleUsers, loading: eligibleLoading } = useAppSelector(
+  const { users: eligibleUsers } = useAppSelector(
     (state) => state.eligibleUsersTransfer,
   )
 
@@ -52,9 +56,11 @@ const IncomeTransferForm = () => {
     useAppSelector((state) => state.auth.user?.income_wallet) || 0
 
   const [openDialog, setOpenDialog] = useState(false)
+  const [selectedUser, setSelectedUser] = useState<any>(null)
 
   const [form, setForm] = useState({
     receiver_user_id: '',
+    receiver_user_email: '',
     amount: '',
     otp: '',
     transaction_pin: '',
@@ -67,19 +73,15 @@ const IncomeTransferForm = () => {
     setForm({ ...form, [e.target.name]: e.target.value })
   }
 
-  const isEligible = eligibleUsers.some(
-    (user) =>
-      user.email.toLowerCase() === form.receiver_user_id.trim().toLowerCase(),
-  )
-
   const handleStartTransfer = async () => {
     if (!form.receiver_user_id || !form.amount) {
-      toast.error('Please fill out Receiver Email and Amount')
+      toast.error('Please fill out recipient and amount')
       return
     }
 
-    if (!isEligible) {
-      toast.error('Receiver is not eligible for transfer.')
+    const amountNumber = parseFloat(form.amount)
+    if (isNaN(amountNumber) || amountNumber <= 500) {
+      toast.error('Amount should be greater than 500')
       return
     }
 
@@ -98,7 +100,7 @@ const IncomeTransferForm = () => {
         return
       }
 
-      dispatch(transferWalletOtp())
+      await dispatch(transferWalletOtp())
       setOpenDialog(true)
     } catch {
       toast.error('Error checking transfer pin status.')
@@ -130,24 +132,54 @@ const IncomeTransferForm = () => {
   }, [token, dispatch])
 
   useEffect(() => {
-    if (transferSuccess || transferError) {
-      setTimeout(() => dispatch(resetTransferState()), 3000)
+    if (transferSuccess) {
+      toast.success(transferMessage || 'Transfer completed successfully')
+      dispatch(resetTransferState())
+      setForm({
+        receiver_user_id: '',
+        receiver_user_email: '',
+        amount: '',
+        otp: '',
+        transaction_pin: '',
+      })
+      setSelectedUser(null)
     }
-  }, [transferSuccess, transferError, dispatch])
+
+    if (transferError) {
+      const errorMessage =
+        typeof transferError === 'string'
+          ? transferError
+          : transferError?.detail || 'An error occurred during transfer.'
+
+      toast.error(errorMessage)
+      dispatch(resetTransferState())
+    }
+  }, [transferSuccess, transferError, transferMessage, dispatch])
+
+  useEffect(() => {
+    if (otpSuccess) {
+      toast.success('OTP sent successfully')
+      dispatch(resetOtpState())
+    }
+    if (otpError) {
+      toast.error(otpError)
+      dispatch(resetOtpState())
+    }
+  }, [otpSuccess, otpError, dispatch])
 
   return (
-    <div className="pt-5 bg-[#F3EAD8] hover:bg-blue-50 pb-[20px] transition-colors duration-2000  mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className=" container m-auto">
-        <h1 className="  flex items-center text-2xl font-bold mb-6  mt-5">
+    <div className="pt-5 bg-[#F3EAD8] hover:bg-blue-50 pb-10 transition-colors duration-2000 mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="container m-auto">
+        <h1 className="flex items-center text-2xl font-bold mb-6 mt-5">
           <ArrowRightLeft className="mr-2" /> Transfer Income Wallet
         </h1>
-        <div className="bg-white  rounded-lg shadow-lg p-4">
-          <h2 className="text-lg p-2   rounded-[10px] w-fit font-semibold mb-2 bg-gradient-to-r from-pink-700 to-gray-800 text-white">
+        <div className="bg-white rounded-lg shadow-lg p-4">
+          <h2 className="text-lg p-2 rounded-[10px] w-fit font-semibold mb-4 bg-gradient-to-r from-pink-700 to-gray-800 text-white">
             Income Wallet Balance: ₹{walletBalance}
           </h2>
-          <div className="flex flex-col md:flex-row  p-6   gap-6">
+          <div className="flex flex-col md:flex-row gap-6">
             {/* Wallet Summary */}
-            <div className="md:w-1/3 flex  items-center text-center">
+            <div className="md:w-1/3">
               <Image
                 src={FiatWalletImg}
                 alt="Fiat Wallet"
@@ -156,78 +188,39 @@ const IncomeTransferForm = () => {
             </div>
 
             {/* Transfer Form */}
-            <form
-              onSubmit={handleSubmit}
-              className="w-full md:w-1/3 p-6  rounded-lg"
-            >
-              <h2 className="text-xl font-semibold mb-4">Transfer Form</h2>
+            <form onSubmit={handleSubmit} className="w-full md:w-1/3">
+              <h2 className="text-xl flex items-center gap-2 font-semibold mb-4">
+                <Image
+                  src={Logo}
+                  alt="Logo"
+                  className="h-[25px] w-[25px] object-fill rounded-md"
+                />{' '}
+                Transfer Income Wallet
+              </h2>
 
-              {transferSuccess && (
-                <Typography color="success.main" className="mb-2">
-                  Transfer successful!
-                </Typography>
-              )}
-              {transferError && (
-                <Typography color="error.main" className="mb-2">
-                  Error: {transferError}
-                </Typography>
-              )}
-
-              <TextField
-                name="receiver_user_id"
-                label="Receiver Email"
-                type="email"
-                placeholder="Enter receiver's email"
-                value={form.receiver_user_id}
-                onChange={handleChange}
-                fullWidth
-                margin="normal"
-                required
-                error={form.receiver_user_id !== '' && !isEligible}
-                helperText={
-                  form.receiver_user_id !== '' ? (
-                    isEligible ? (
-                      <Typography
-                        sx={{ color: 'green' }}
-                        style={{ fontSize: '12px' }}
-                      >
-                        Eligible for transfer
-                      </Typography>
-                    ) : (
-                      'This user is not eligible for transfer.'
-                    )
-                  ) : (
-                    ''
-                  )
-                }
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    '& fieldset': {
-                      borderColor:
-                        form.receiver_user_id === ''
-                          ? undefined
-                          : isEligible
-                            ? 'green'
-                            : 'red',
-                    },
-                    '&:hover fieldset': {
-                      borderColor:
-                        form.receiver_user_id === ''
-                          ? undefined
-                          : isEligible
-                            ? 'green'
-                            : 'red',
-                    },
-                    '&.Mui-focused fieldset': {
-                      borderColor:
-                        form.receiver_user_id === ''
-                          ? undefined
-                          : isEligible
-                            ? 'green'
-                            : 'red',
-                    },
-                  },
+              <Autocomplete
+                value={selectedUser}
+                onChange={(event, value) => {
+                  setSelectedUser(value)
+                  setForm({
+                    ...form,
+                    receiver_user_id: value?.id || '',
+                    receiver_user_email: value?.email || '',
+                  })
                 }}
+                options={eligibleUsers}
+                getOptionLabel={(option) => option.email}
+                isOptionEqualToValue={(option, value) =>
+                  option.id === value?.id
+                }
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Recipient Email"
+                    required
+                    fullWidth
+                  />
+                )}
               />
 
               <TextField
@@ -244,11 +237,10 @@ const IncomeTransferForm = () => {
               <Button
                 type="button"
                 variant="contained"
-                color="primary"
+                sx={{ background: 'green', mt: 2 }}
                 onClick={handleStartTransfer}
                 disabled={otpLoading}
                 fullWidth
-                sx={{ mt: 2 }}
               >
                 {otpLoading ? 'Sending OTP...' : 'Process Request'}
               </Button>
@@ -276,16 +268,6 @@ const IncomeTransferForm = () => {
                     margin="normal"
                     required
                   />
-                  {otpSuccess && (
-                    <Typography color="success.main" sx={{ mt: 1 }}>
-                      OTP sent successfully!
-                    </Typography>
-                  )}
-                  {otpError && (
-                    <Typography color="error.main" sx={{ mt: 1 }}>
-                      Error: {otpError}
-                    </Typography>
-                  )}
                 </DialogContent>
                 <DialogActions>
                   <Button onClick={() => setOpenDialog(false)} color="inherit">
@@ -320,8 +302,10 @@ const IncomeTransferForm = () => {
                   '10% deduction applies (2% admin + 8% leadership).',
                 ].map((rule, idx) => (
                   <div key={idx} className="flex items-start gap-2">
-                    <span className="font-semibold">{idx + 1}.</span>
-                    <span>{rule}</span>
+                    <span className="font-semibold bg-blue-300 text-white px-2 py-0.5">
+                      {idx + 1}
+                    </span>
+                    <span className="text-[12px]">{rule}</span>
                   </div>
                 ))}
               </div>

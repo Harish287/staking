@@ -67,12 +67,20 @@ export const updateNomineeData = createAsyncThunk(
       if (!token) {
         throw new Error('No token found')
       }
-      const response = await axios.put(`${baseURL}user/nominee`, nomineeData, {
+
+      const formData = new URLSearchParams()
+      formData.append('nominee_name', nomineeData.nominee_name)
+      formData.append('nominee_pan', nomineeData.nominee_pan)
+      formData.append('nominee_relationship', nomineeData.nominee_relationship)
+
+      const response = await axios.put(`${baseURL}user/nominee`, formData, {
         headers: {
-          Authorization: `Bearer ${token}`, // Fixed the Authorization header
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/x-www-form-urlencoded',
           Accept: 'application/json',
         },
       })
+
       return response.data
     } catch (error: any) {
       console.error('Error updating nominee data:', error)
@@ -82,8 +90,9 @@ export const updateNomineeData = createAsyncThunk(
           'Failed to update nominee data',
       )
     }
-  },
+  }
 )
+
 
 const nomineeSlice = createSlice({
   name: 'nominee',

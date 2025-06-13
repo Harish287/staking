@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { AppDispatch, RootState } from '../../../../store/store'
+import { AppDispatch, RootState, useAppSelector } from '../../../../store/store'
 import {
   submitKyc,
   suggestUsername,
@@ -23,6 +23,7 @@ import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import toast from 'react-hot-toast'
+import { fetchDropdownOptions } from '@/store/slices/dropdownOptions'
 
 export default function KycVerification() {
   const dispatch = useDispatch<AppDispatch>()
@@ -37,6 +38,7 @@ export default function KycVerification() {
 
   useEffect(() => {
     dispatch(verifyKYCStatus())
+    dispatch(fetchDropdownOptions())
   }, [dispatch])
 
   useEffect(() => {
@@ -54,6 +56,12 @@ export default function KycVerification() {
       setKycStatus(null)
     }
   }, [kycVerified, kycRejected, kycPending])
+
+  const {
+    data: dropDownOptions,
+    loading: loadingOptions,
+    error: optionsError,
+  } = useAppSelector((state: RootState) => state.dropDownOptions)
 
   const isKycPendingOrSubmitted =
     kycVerified || /pending|waiting for review/i.test(kycStatus ?? '')
@@ -287,9 +295,9 @@ export default function KycVerification() {
                 <SelectValue placeholder="Select gender" />
               </SelectTrigger>
               <SelectContent className="bg-white shadow-md">
-                {genders.map((g) => (
-                  <SelectItem key={g.id} value={g.id}>
-                    {g.label}
+                {dropDownOptions?.genders?.map((type) => (
+                  <SelectItem key={type.id} value={type.id}>
+                    {type.value}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -385,11 +393,11 @@ export default function KycVerification() {
               <SelectValue placeholder="Select document type" />
             </SelectTrigger>
             <SelectContent className="bg-white shadow-md">
-              {documentTypes.map((doc) => (
-                <SelectItem key={doc.id} value={doc.id}>
-                  {doc.name}
-                </SelectItem>
-              ))}
+               {dropDownOptions?.kyc_doc_types?.map((type) => (
+                  <SelectItem key={type.id} value={type.id}>
+                    {type.value}
+                  </SelectItem>
+                ))}
             </SelectContent>
           </Select>
         </div>

@@ -22,7 +22,7 @@ export const transferWalletOtp = createAsyncThunk(
     try {
       const token = Cookies.get('token')
       const response = await axios.post(
-        `${baseURL}transfer/confirmation_otp`, // ✅ FIXED
+        `${baseURL}transfer/confirmation_otp`,
         '',
         {
           headers: {
@@ -31,19 +31,26 @@ export const transferWalletOtp = createAsyncThunk(
           },
         },
       )
-      return response.data
+      return response.data.detail 
     } catch (error: any) {
       return rejectWithValue(
-        error.response?.data?.message || 'Failed to send OTP',
+        error.response?.data?.detail || 'Failed to send OTP'
       )
     }
-  },
+  }
 )
+
 
 const transferWalletOtpSlice = createSlice({
   name: 'transferWalletOtp',
   initialState,
-  reducers: {},
+  reducers: {
+    resetOtpState: (state) => {
+      state.loading = false
+      state.success = false
+      state.error = null
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(transferWalletOtp.pending, (state) => {
@@ -54,12 +61,15 @@ const transferWalletOtpSlice = createSlice({
       .addCase(transferWalletOtp.fulfilled, (state) => {
         state.loading = false
         state.success = true
+        state.error = null
       })
       .addCase(transferWalletOtp.rejected, (state, action) => {
         state.loading = false
+        state.success = false
         state.error = action.payload as string
       })
   },
 })
 
+export const { resetOtpState } = transferWalletOtpSlice.actions
 export default transferWalletOtpSlice.reducer

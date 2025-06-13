@@ -6,7 +6,6 @@ interface DecodedToken {
   role: 'admin' | 'customer' | string
 }
 
-// Define role-based access control using Set for O(1) lookups
 const roleAccess: Record<string, Set<string>> = {
   admin: new Set(['/admin']),
   customer: new Set(['/user']),
@@ -26,12 +25,10 @@ export function middleware(req: NextRequest) {
     return redirectWithCookieClear(req, '/auth/signin', 'Invalid token')
   }
 
-  // Token expiration check
   if (decodedToken.exp < Math.floor(Date.now() / 1000)) {
     return redirectWithCookieClear(req, '/auth/signin', 'Token expired')
   }
 
-  // Role-based access check
   const allowedPaths = roleAccess[decodedToken.role]
   if (
     !allowedPaths ||
@@ -43,7 +40,6 @@ export function middleware(req: NextRequest) {
   return NextResponse.next()
 }
 
-// Utility function to clear token and redirect
 function redirectWithCookieClear(
   req: NextRequest,
   path: string,
@@ -57,7 +53,6 @@ function redirectWithCookieClear(
   })
 }
 
-// Middleware matcher for only protected routes
 export const config = {
   matcher: ['/admin/:path*', '/user/:path*'],
 }

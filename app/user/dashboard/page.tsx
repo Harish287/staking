@@ -122,7 +122,7 @@ function UserDashboard() {
       </div>
 
       <div className="container px-[20px] justify-center items-center m-auto lg:grid lg:grid-cols-3 grid-cols-1">
-        <div className="col-span-2 flex justify-center items-center">
+        <div className="col-span-full lg:col-span-2">
           <Wallets />
         </div>
 

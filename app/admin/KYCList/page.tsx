@@ -46,7 +46,8 @@ import {
 import Link from 'next/link'
 import toast from 'react-hot-toast'
 import { useDebounce } from 'use-debounce'
-
+import { useAppSelector } from '@/store/hooks'
+import { fetchDropdownOptions } from '@/store/slices/dropdownOptions'
 
 const KycApplications = () => {
   const dispatch = useDispatch<AppDispatch>()
@@ -54,7 +55,7 @@ const KycApplications = () => {
   const searchParams = useSearchParams()
 
   const userIdString = searchParams.get('userId')
-  const statusParam = searchParams.get('status')?.toLowerCase() || 'all'
+  const statusParam = (searchParams.get('status') || 'all').toLowerCase()
   const pageParam = parseInt(searchParams.get('page') || '1', 10)
   const pageSizeParam = parseInt(searchParams.get('page_size') || '10', 10)
 
@@ -82,6 +83,8 @@ const KycApplications = () => {
 
   useEffect(() => {
     const delay = setTimeout(() => {
+      dispatch(fetchDropdownOptions())
+
       dispatch(
         fetchKycApplications({
           page: pageParam,
@@ -99,17 +102,19 @@ const KycApplications = () => {
     const params = new URLSearchParams(searchParams.toString())
     if (searchQuery) {
       params.set('search', searchQuery)
+      params.set('page', '1')
     } else {
       params.delete('search')
+      params.set('page', '1')
     }
     router.push(`/admin/KYCList?${params.toString()}`, { scroll: false })
   }, [searchQuery])
 
-  const getDisplayStatus = (status: string) => {
-    if (status === 'approved') return 'Approved'
-    if (status === 'Rejected') return 'Rejected'
-    return 'Pending'
-  }
+  // const getDisplayStatus = (status: string) => {
+  //   if (status === 'approved') return 'Approved'
+  //   if (status === 'Rejected') return 'Rejected'
+  //   return 'Pending'
+  // }
 
   const filteredApplications = useMemo(() => {
     return kycApplications.filter((app) => {
@@ -121,15 +126,14 @@ const KycApplications = () => {
         userName.toLowerCase().includes(search) ||
         userId.toLowerCase().includes(search)
 
-      const normalizedStatus =
-        app.status === 'approved'
-          ? 'approved'
-          : app.status === 'rejected'
-            ? 'rejected'
-            : 'pending'
+      const appStatus = app.status?.trim().toLowerCase() || 'pending'
 
       const statusMatch =
-        statusParam === 'all' || statusParam === normalizedStatus
+        statusParam === 'all' ||
+        statusParam === 'any' ||
+        statusParam === appStatus ||
+        (statusParam === 'unsubmitted' && !app.submitted) ||
+        (statusParam === 'submitted' && !!app.submitted)
 
       return matchesSearch && statusMatch
     })
@@ -143,7 +147,7 @@ const KycApplications = () => {
 
   const handleTabChange = (value: string) => {
     const params = new URLSearchParams(searchParams.toString())
-    params.set('status', value)
+    params.set('status', value.toLowerCase())
     params.set('page', '1')
     router.push(`/admin/KYCList?${params.toString()}`)
   }
@@ -164,6 +168,12 @@ const KycApplications = () => {
       downloadKycDocument({ user_id: userId, document_name: documentName }),
     )
   }
+
+  const {
+    data: dropDownOptions,
+    loading: loadingOptions,
+    error: optionsError,
+  } = useAppSelector((state: RootState) => state.dropDownOptions)
 
   const handleAction = (action: 'approve' | 'reject') => {
     if (!selectedUserId) return
@@ -190,7 +200,6 @@ const KycApplications = () => {
       })
       .finally(() => setActionLoading(false))
   }
-  
 
   return (
     <div className="bg-blue-100 min-h-screen py-6">
@@ -205,15 +214,16 @@ const KycApplications = () => {
         />
 
         <Tabs
-          value={statusParam}
-          onValueChange={handleTabChange}
+          value={statusParam.toLowerCase()}
+          onValueChange={(val) => handleTabChange(val.toLowerCase())}
           className="mb-4"
         >
           <TabsList>
-            <TabsTrigger value="all">All</TabsTrigger>
-            <TabsTrigger value="pending">Pending</TabsTrigger>
-            <TabsTrigger value="approved">Approved</TabsTrigger>
-            <TabsTrigger value="rejected">Rejected</TabsTrigger>
+            {dropDownOptions?.kyc_status?.map((type) => (
+              <TabsTrigger key={type.id} value={type.id.toLowerCase()}>
+                {type.value}
+              </TabsTrigger>
+            ))}
           </TabsList>
         </Tabs>
 
@@ -280,17 +290,20 @@ const KycApplications = () => {
                     <TableCell>{app.submitted}</TableCell>
                     <TableCell>
                       <span
-                        className={`px-2 py-1 rounded-full text-[12px] font-medium ${
-                          app.status.trim() === 'approved'
-                            ? 'bg-green-100 text-green-700'
-                            : app.status.trim() === 'rejected'
-                              ? 'bg-red-100 text-red-700'
-                              : 'bg-yellow-100 text-yellow-700'
-                        }`}
+                        className={`px-2 py-1 rounded-full text-[12px] font-medium ${(() => {
+                          const status = app.status?.trim().toLowerCase()
+                          if (!status) return 'bg-yellow-100 text-yellow-700' // empty = Pending
+                          if (status === 'approved')
+                            return 'bg-green-100 text-green-700'
+                          if (status === 'rejected')
+                            return 'bg-red-100 text-red-700'
+                          return 'bg-yellow-100 text-yellow-700' // fallback for others
+                        })()}`}
                       >
-                        {app.status.trim() === ''
-                          ? 'Pending'
-                          : app.status.trim()}
+                        {(() => {
+                          const status = app.status?.trim()
+                          return status ? status : 'Pending'
+                        })()}
                       </span>
                     </TableCell>
 
@@ -331,14 +344,16 @@ const KycApplications = () => {
               <div className="flex gap-2">
                 <Button
                   className="bg-gray-400 text-[14px]"
-                  onClick={() => changePage(Math.max(pageParam - 1, 1))}
+                  onClick={() => changePage(Math.max(1, pageParam - 1))}
                   disabled={pageParam <= 1}
                 >
                   PREV
                 </Button>
                 <Button
                   className="bg-gray-400 text-[14px]"
-                  onClick={() => changePage(pageParam + 1)}
+                  onClick={() =>
+                    changePage(Math.min(totalPages, pageParam + 1))
+                  }
                   disabled={pageParam >= totalPages}
                 >
                   NEXT
@@ -381,6 +396,7 @@ const KycApplications = () => {
             <DialogDescription>
               Please confirm your decision. You can also leave a message.
             </DialogDescription>
+
             <Input
               placeholder="Add optional message..."
               value={message}
@@ -388,21 +404,28 @@ const KycApplications = () => {
               className="mt-4"
             />
           </DialogHeader>
+
           <DialogFooter className="flex justify-end gap-4">
-            <Button
-              className="bg-green-500 hover:bg-green-600 text-white"
-              disabled={actionLoading}
-              onClick={() => handleAction('approve')}
-            >
-              {actionLoading ? 'Processing...' : 'Approve'}
-            </Button>
-            <Button
-              className="bg-red-500 hover:bg-red-600 text-white"
-              disabled={actionLoading}
-              onClick={() => handleAction('reject')}
-            >
-              {actionLoading ? 'Processing...' : 'Reject'}
-            </Button>
+            {dropDownOptions?.kyc_application_actions?.map((type) => {
+              const action = type.value.toLowerCase()
+
+              if (action !== 'approve' && action !== 'reject') return null
+
+              return (
+                <Button
+                  key={type.id}
+                  className={`text-white ${
+                    action === 'approve'
+                      ? 'bg-green-500 hover:bg-green-600'
+                      : 'bg-red-500 hover:bg-red-600'
+                  }`}
+                  disabled={actionLoading}
+                  onClick={() => handleAction(action as 'approve' | 'reject')}
+                >
+                  {actionLoading ? 'Processing...' : type.value}
+                </Button>
+              )
+            })}
           </DialogFooter>
         </DialogContent>
       </Dialog>

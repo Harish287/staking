@@ -11,7 +11,6 @@ interface Investor {
   adhoc_income: boolean
   credit: boolean
   suspend: boolean
-
   user_id: string
   name: string
   referred_by: string

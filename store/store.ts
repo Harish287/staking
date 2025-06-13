@@ -16,10 +16,19 @@ import KycListSlice from './slices/admin/kyclist'
 import transactionpassReducer from './slices/user/transactionPassSlice'
 import transactionOtpReducer from './slices/user/transactionPassSlice'
 import incomeTransferReducer from './slices/user/incomeTransferSlice'
+import kaitTransferReducer from './slices/user/kaitTransferSlice'
 import transferWalletOtpReducer from './slices/user/TransferWalletOtpSlice'
 import transferPinStatusReducer from './slices/user/transferPinStatusSlice'
 import eligibleUsersTransferReducer from './slices/user/eligibleUserTransferSlice'
 import restakeWalletReducer from './slices/user/restakeTransferSlice'
+import RosWalletReducer from './slices/user/rosWalletTransferSlice'
+import adhocWalletReducer from './slices/user/adhocTransferSlice'
+import fiatWalletReducer from './slices/user/fiatWalletTransfer'
+import dropDownOptionsReducer from './slices/dropdownOptions'
+import addbeneficiaryReducer from './slices/user/addBeneficiary'
+import listbeneficiaryReducer from './slices/user/listBeneficiary'
+import updateBeneficiaryReducer from './slices/user/updateBeneficiary'
+import adminbeneficiaryReducer from './slices/admin/beneficiaryAdminSlice'
 
 export const store = configureStore({
   reducer: {
@@ -40,10 +49,19 @@ export const store = configureStore({
     transactionPin: transactionpassReducer,
     transactionOtp: transactionOtpReducer,
     incometransfer: incomeTransferReducer,
+    kaitTransfer: kaitTransferReducer,
+    fiattransfer: fiatWalletReducer,
+    AdhocWalletTransfer: adhocWalletReducer,
     restaketransfer: restakeWalletReducer,
+    Rostransfer: RosWalletReducer,
     TranferwalletOpt: transferWalletOtpReducer,
     transferPinStatus: transferPinStatusReducer,
     eligibleUsersTransfer: eligibleUsersTransferReducer,
+    dropDownOptions: dropDownOptionsReducer,
+    addbeneficiary: addbeneficiaryReducer,
+    listbeneficiary: listbeneficiaryReducer,
+    updateBeneficiary: updateBeneficiaryReducer,
+    adminbeneficiary: adminbeneficiaryReducer,
   },
 })
 
@@ -51,5 +69,6 @@ export type RootState = ReturnType<typeof store.getState>
 export type AppDispatch = typeof store.dispatch
 
 import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux'
+import AdhocWalletTransfer from '@/app/user/transfers/adhoc-wallet-transfer/page'
 export const useAppDispatch = () => useDispatch<AppDispatch>()
 export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector

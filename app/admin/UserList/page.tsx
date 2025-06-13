@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { AppDispatch, RootState } from '@/store/store'
+import { AppDispatch, RootState, useAppSelector } from '@/store/store'
 import { useSearchParams } from 'next/navigation'
 import {
   fetchInvestorDetails,
@@ -55,6 +55,9 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog'
 import ResetPasswordForm from './Resetpassword/page'
+import { fetchDropdownOptions } from '@/store/slices/dropdownOptions'
+import AddUserDialog from './AddUserDialog/page'
+
 type permissionType =
   | 'transfer'
   | 'withdraw'
@@ -83,13 +86,10 @@ export default function InvestorList() {
     (state: RootState) => state.investor,
   )
 
+  const searchParams = useSearchParams()
 
-
-const searchParams = useSearchParams()
-
-
-const pageFromUrl = Number(searchParams.get('page')) || 1
-const [currentPage, setCurrentPage] = useState(pageFromUrl)
+  const pageFromUrl = Number(searchParams.get('page')) || 1
+  const [currentPage, setCurrentPage] = useState(pageFromUrl)
 
   const [searchQuery, setSearchQuery] = useState('')
   const pageSize = 10
@@ -97,28 +97,29 @@ const [currentPage, setCurrentPage] = useState(pageFromUrl)
   const totalPages = Math.ceil(total / pageSize)
 
   const router = useRouter()
-useEffect(() => {
-  const params = new URLSearchParams(searchParams.toString())
-  params.set('page', currentPage.toString())
-  router.push(`?${params.toString()}`)
-}, [currentPage])
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams.toString())
+    params.set('page', currentPage.toString())
+    router.push(`?${params.toString()}`)
+  }, [currentPage])
 
-useEffect(() => {
-  dispatch(
-    fetchInvestorList({
-      page: currentPage,
-      page_size: pageSize,
-      searchQuery,
-    }),
-  )
-}, [dispatch, currentPage, searchQuery])
+  useEffect(() => {
+    dispatch(fetchDropdownOptions())
 
-  console.log('totalPages', totalPages)
+    dispatch(
+      fetchInvestorList({
+        page: currentPage,
+        page_size: pageSize,
+        searchQuery,
+      }),
+    )
+  }, [dispatch, currentPage, searchQuery])
 
-  console.log('Total pages:', totalPages, 'Total items:', total)
-  console.log('Search Query:', searchQuery)
-  console.log('pageSize', pageSize)
-  console.log('total', total)
+  const {
+    data: dropDownOptions,
+    loading: loadingOptions,
+    error: optionsError,
+  } = useAppSelector((state: RootState) => state.dropDownOptions)
 
   const handlePermissionChange = async (
     userId: string,
@@ -179,17 +180,19 @@ useEffect(() => {
   }
 
   const handleViewDetails = async (userId: string) => {
-  try {
-    const resultAction = await dispatch(fetchInvestorDetails(userId))
-    if (fetchInvestorDetails.fulfilled.match(resultAction)) {
-      router.push(`/admin/UserList/Details?userId=${userId}&page=${currentPage}`)
-    } else {
-      toast.error('Failed to fetch investor details.')
+    try {
+      const resultAction = await dispatch(fetchInvestorDetails(userId))
+      if (fetchInvestorDetails.fulfilled.match(resultAction)) {
+        router.push(
+          `/admin/UserList/Details?userId=${userId}&page=${currentPage}`,
+        )
+      } else {
+        toast.error('Failed to fetch investor details.')
+      }
+    } catch (err) {
+      console.error('Unexpected error:', err)
     }
-  } catch (err) {
-    console.error('Unexpected error:', err)
   }
-}
 
   const [activeTab, setActiveTab] = useState('Investor / Users')
 
@@ -207,9 +210,10 @@ useEffect(() => {
               <Button variant="outline" className="flex items-center gap-2">
                 <Download className="w-4 h-4" /> Download Users
               </Button>
-              <Button className="bg-indigo-600 hover:bg-indigo-700 text-white flex items-center gap-2">
-                <UserPlus className="w-4 h-4" /> Add User
-              </Button>
+              {/* <Button className="bg-indigo-600 hover:bg-indigo-700 text-white flex items-center gap-2"> */}
+              {/* <UserPlus className="w-4 h-4" /> Add User */}
+              <AddUserDialog />
+              {/* </Button> */}
             </div>
           </div>
 
@@ -401,7 +405,7 @@ useEffect(() => {
                             >
                               <Lock className="w-4 h-4 mr-2" /> Reset Password
                             </DropdownMenuItem>
-                            <DropdownMenuItem
+                            {/* <DropdownMenuItem
                               onClick={() =>
                                 handlePermissionChange(
                                   investor.user_id,
@@ -422,6 +426,11 @@ useEffect(() => {
                                 </>
                               )}
                             </DropdownMenuItem>
+                            {dropDownOptions?.permission_types?.map((type) => (
+                              <DropdownMenuItem key={type.id} value={type.id}>
+                                {type.value}
+                              </DropdownMenuItem>
+                            ))}
 
                             <DropdownMenuItem
                               onClick={() =>
@@ -553,7 +562,112 @@ useEffect(() => {
                                   Suspend
                                 </>
                               )}
-                            </DropdownMenuItem>
+                            </DropdownMenuItem> */}
+                            {dropDownOptions?.permission_types?.map(
+                              ({ id, value }) => {
+                                let label = ''
+                                let icon = null
+
+                                const isEnabled =
+                                  investor[id as keyof typeof investor]
+
+                                switch (id) {
+                                  case 'transfer':
+                                    label = isEnabled
+                                      ? 'Transfer Disable'
+                                      : 'Transfer Enable'
+                                    icon = isEnabled ? (
+                                      <Lock className="w-4 h-4 mr-2" />
+                                    ) : (
+                                      <Unlock className="w-4 h-4 mr-2" />
+                                    )
+                                    break
+                                  case 'withdraw':
+                                    label = isEnabled
+                                      ? 'Withdraw Disable'
+                                      : 'Withdraw Enable'
+                                    icon = isEnabled ? (
+                                      <Lock className="w-4 h-4 mr-2" />
+                                    ) : (
+                                      <Unlock className="w-4 h-4 mr-2" />
+                                    )
+                                    break
+                                  case 'withdraw_staking':
+                                    label = !isEnabled
+                                      ? 'Withdraw Staking Disable'
+                                      : 'Withdraw Staking Enable'
+                                    icon = isEnabled ? (
+                                      <Unlock className="w-4 h-4 mr-2" />
+                                    ) : (
+                                      <Lock className="w-4 h-4 mr-2" />
+                                    )
+                                    break
+                                  case 'level_income':
+                                    label = isEnabled
+                                      ? 'Level Income Suspend'
+                                      : 'Level Income Enable'
+                                    icon = isEnabled ? (
+                                      <Lock className="w-4 h-4 mr-2" />
+                                    ) : (
+                                      <Unlock className="w-4 h-4 mr-2" />
+                                    )
+                                    break
+                                  case 'adhoc_income':
+                                    label = isEnabled
+                                      ? 'Adhoc Income Disable'
+                                      : 'Adhoc Income Enable'
+                                    icon = isEnabled ? (
+                                      <Lock className="w-4 h-4 mr-2" />
+                                    ) : (
+                                      <Unlock className="w-4 h-4 mr-2" />
+                                    )
+                                    break
+                                  case 'adhoc_transfer':
+                                    label = isEnabled
+                                      ? 'Adhoc Transfer Disable'
+                                      : 'Adhoc Transfer Enable'
+                                    icon = isEnabled ? (
+                                      <Lock className="w-4 h-4 mr-2" />
+                                    ) : (
+                                      <Unlock className="w-4 h-4 mr-2" />
+                                    )
+                                    break
+                                  case 'credit':
+                                    label = isEnabled
+                                      ? 'Remove Credit ID'
+                                      : 'Set Credit ID'
+                                    icon = (
+                                      <CreditCard className="w-4 h-4 mr-2" />
+                                    )
+                                    break
+                                  case 'suspend':
+                                    label = isEnabled ? 'Suspend' : 'Activate'
+                                    icon = (
+                                      <Power className="w-4 h-4 mr-2 text-red-600" />
+                                    )
+                                    break
+                                  default:
+                                    label = value
+                                    icon = <Lock className="w-4 h-4 mr-2" />
+                                }
+
+                                return (
+                                  <DropdownMenuItem
+                                    key={id}
+                                    onClick={() =>
+                                      handlePermissionChange(
+                                        investor.user_id,
+                                        id,
+                                        !isEnabled,
+                                      )
+                                    }
+                                  >
+                                    {icon}
+                                    {label}
+                                  </DropdownMenuItem>
+                                )
+                              },
+                            )}
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </td>
@@ -590,7 +704,7 @@ useEffect(() => {
               </Button>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 ">
               <span>Page</span>
               <Select
                 value={currentPage.toString()}
@@ -599,7 +713,7 @@ useEffect(() => {
                 <SelectTrigger className="w-20">
                   <SelectValue placeholder={`Page ${currentPage}`} />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className=" bg-white">
                   {Array.from({ length: totalPages }, (_, i) => {
                     const page = i + 1
                     return (
@@ -618,3 +732,95 @@ useEffect(() => {
     </div>
   )
 }
+// function AddUserDialog() {
+//   return (
+//     <Dialog>
+//       <DialogTrigger asChild>
+//         <Button className="bg-indigo-600 hover:bg-indigo-700 text-white flex items-center gap-2">
+//           <UserPlus className="w-4 h-4" /> Add User
+//         </Button>
+//       </DialogTrigger>
+
+//       <DialogContent className="w-[75vw] !max-w-none bg-white rounded-xl">
+//         <DialogHeader>
+//           <DialogTitle>Add New User</DialogTitle>
+//         </DialogHeader>
+
+//         <form className="space-y-4">
+//           <div>
+//             <label className="block text-sm font-medium mb-1">User Type</label>
+//             <Select>
+//               <SelectTrigger className="w-full">
+//                 <SelectValue placeholder="Regular" />
+//               </SelectTrigger>
+//               <SelectContent className=" bg-white">
+//                 <SelectItem value="regular">Regular</SelectItem>
+//                 <SelectItem value="admin">Admin</SelectItem>
+//               </SelectContent>
+//             </Select>
+//           </div>
+
+//           <div className="grid grid-cols-2 gap-4">
+//             <div>
+//               <label className="block text-sm font-medium mb-1">
+//                 First Name
+//               </label>
+//               <Input placeholder="User First Name" />
+//             </div>
+
+//             <div>
+//               <label className="block text-sm font-medium mb-1">
+//                 Last Name
+//               </label>
+//               <Input placeholder="User Last Name" />
+//             </div>
+
+//             <div>
+//               <label className="block text-sm font-medium mb-1">
+//                 Date Of Birth
+//               </label>
+//               <Input placeholder="Date Of Birth" />
+//             </div>
+
+//             <div>
+//               <label className="block text-sm font-medium mb-1">
+//                 Email Address
+//               </label>
+//               <Input type="email" placeholder="Email address" />
+//             </div>
+//             <div>
+//               <label className="block text-sm font-medium mb-1">Password</label>
+//               <Input placeholder="Automatically generated if blank" />
+//             </div>
+//             <div>
+//               <label className="block text-sm font-medium mb-1">
+//                 Confirm Password
+//               </label>
+//               <Input placeholder="Confirm Password" />
+//             </div>
+//             <div>
+//               <label className="block text-sm font-medium mb-1">
+//                 Mobile Number
+//               </label>
+//               <Input placeholder="Mobile Number" />
+//             </div>
+//           </div>
+
+//           <div className="flex items-center gap-2">
+//             <input type="checkbox" id="verifyEmail" defaultChecked />
+//             <label htmlFor="verifyEmail" className="text-sm">
+//               Required Email Verification
+//             </label>
+//           </div>
+
+//           <Button
+//             type="submit"
+//             className="w-full bg-indigo-600 hover:bg-indigo-700 text-white"
+//           >
+//             Add User
+//           </Button>
+//         </form>
+//       </DialogContent>
+//     </Dialog>
+//   )
+// }

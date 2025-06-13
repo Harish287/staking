@@ -3,13 +3,18 @@ import axios from 'axios'
 
 const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL
 
-interface RestakeState {
-  loading: boolean
-  success: boolean
-  error: string | null
+interface TransferErrorObject {
+  detail?: string
+  [key: string]: any
 }
 
-const initialState: RestakeState = {
+interface RosState {
+  loading: boolean
+  success: boolean
+  error: string | TransferErrorObject | null
+}
+
+const initialState: RosState = {
   loading: false,
   success: false,
   error: null,
@@ -41,10 +46,8 @@ export const initiateRestake = createAsyncThunk(
         },
       )
       return response.data
-    } catch (error: any) {
-      return thunkAPI.rejectWithValue(
-        error.response?.data?.message || 'Restake failed',
-      )
+    } catch (err: any) {
+      return thunkAPI.rejectWithValue(err.response?.data || err.message)
     }
   },
 )
@@ -74,7 +77,7 @@ const restakeSlice = createSlice({
       .addCase(initiateRestake.rejected, (state, action) => {
         state.loading = false
         state.success = false
-        state.error = action.payload as string
+        state.error = action.payload || 'Something went wrong'
       })
   },
 })

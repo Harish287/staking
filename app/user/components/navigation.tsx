@@ -13,7 +13,7 @@ import { FaUsers } from 'react-icons/fa6'
 import { PiHandbagFill } from 'react-icons/pi'
 import { useEffect, useState } from 'react'
 import Cookies from 'js-cookie'
-import { useRouter } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 
 import {
   DropdownMenu,
@@ -25,7 +25,17 @@ import {
   DropdownMenuTrigger,
 } from '../../../components/ui/dropdown-menu'
 import { Button } from '../../../components/ui/button'
-import { Eye, NotebookText, Power, User } from 'lucide-react'
+import {
+  ArrowLeftRight,
+  ArrowUpFromLine,
+  Briefcase,
+  ChartBar,
+  Download,
+  Eye,
+  NotebookText,
+  Power,
+  User,
+} from 'lucide-react'
 import useLogout from '../../../components/hooks/userLogout'
 import { decodeJWT } from '../../../lib/auth'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
@@ -68,7 +78,11 @@ function Navigation() {
       setIsAuthenticated(false)
     }
   }, [user])
-
+  const pathname = usePathname()
+  const isKaitWalletActive = pathname.startsWith('/user/kaitwallet')
+  const isStakingActive = pathname.startsWith('/user/stakingcontracts')
+  const isvoucher = pathname.startsWith('/user/voucher')
+  const isTransfer = pathname.startsWith('/user/transfers')
   return (
     <div className="bg-white box-border shadow-xl">
       <nav className="bg-gradient-to-r from-pink-700 to-gray-800 ">
@@ -186,19 +200,29 @@ function Navigation() {
       >
         <Link
           href="/user/dashboard"
-          className="flex justify-center text-[14px] items-center py-[12px] gap-[5px] text-pink-800"
+          className={`flex justify-center text-[14px] items-center py-[12px] gap-[5px] text-pink-800 ${
+            pathname === '/user/dashboard'
+              ? 'border-b-2 border-pink-800 font-semibold'
+              : ''
+          }`}
         >
           <MdOutlineDashboard className=" text-[14px]" /> Dashboard
         </Link>
 
         <div className="flex">
           <div className="group relative cursor-pointer">
-            <div className="flex items-center justify-between py-[12px] text-pink-800">
+            <div
+              className={`flex items-center justify-center py-[12px] text-pink-800 ${
+                isKaitWalletActive
+                  ? 'border-b-2 border-pink-800 font-semibold'
+                  : ''
+              }`}
+            >
               <Link
                 href="#"
-                className="menu-hover text-[14px] font-medium  flex items-center justify-center  gap-[5px]"
+                className="menu-hover text-[14px] font-medium flex items-center justify-center gap-[5px]"
               >
-                <RiWallet3Line className=" text-[14px]" /> KAIT Wallet
+                <RiWallet3Line className="text-[14px]" /> KAIT Wallet
               </Link>
               <span>
                 <svg
@@ -216,9 +240,9 @@ function Navigation() {
             <div className="invisible absolute z-50 text-[14px] flex w-max h-auto flex-col bg-gray-100 py-1 px-4 text-pink-800 shadow-xl group-hover:visible">
               <Link
                 href="/user/kaitwallet/summary "
-                className="my-2 flex items-center border-b border-gray-100 font-semibold text-pink-800 hover:text-pink-700 md:mx-2"
+                className="my-2 flex border-b items-center border-gray-100  text-pink-800 hover:text-pink-700 md:mx-2"
               >
-                <NotebookText className="text-[20px] mr-[2px]" />
+                <NotebookText className="w-[14px] mr-[2px]" />
                 Summary
               </Link>
             </div>
@@ -227,7 +251,13 @@ function Navigation() {
 
         <div className="flex">
           <div className="group relative cursor-pointer">
-            <div className="flex items-center justify-between py-[12px] text-pink-800">
+            <div
+              className={`flex items-center justify-center py-[12px] text-pink-800 ${
+                isStakingActive
+                  ? 'border-b-2 border-pink-800 font-semibold'
+                  : ''
+              }`}
+            >
               <Link
                 href="#"
                 className="menu-hover text-[14px] font-medium text-pink-800 flex items-center justify-center  gap-[5px]"
@@ -250,51 +280,58 @@ function Navigation() {
             <div className="invisible text-[14px] absolute z-50 flex w-max h-auto flex-col bg-gray-100 py-1 px-4 text-pink-800 shadow-xl group-hover:visible">
               <Link
                 href="/user/stakingcontracts/newStaking"
-                className="my-2 block border-b  border-gray-100  text-pink-800 hover:text-pink-700 md:mx-2"
+                className="my-2 flex border-b border-gray-100 items-center text-pink-800 hover:text-pink-700 md:mx-2"
               >
+                <ArrowUpFromLine className=" mr-2 w-[15px]" />
                 New Staking
               </Link>
               <Link
                 href="/user/stakingcontracts/yourstakingcontracts"
-                className="my-2 block border-b border-gray-100  text-pink-800 hover:text-pink-700 md:mx-2"
+                className="my-2 flex border-b border-gray-100 items-center text-pink-800 hover:text-pink-700 md:mx-2"
               >
-                Your Staking Contracts
+                <ArrowUpFromLine className=" mr-2 w-[15px]" /> Your Staking
+                Contracts
               </Link>
               <Link
                 href="/user/stakingcontracts/roswalletsummary"
-                className="my-2 block border-b border-gray-100  text-pink-800 hover:text-pink-700 md:mx-2"
+                className="my-2 flex border-b border-gray-100 items-center text-pink-800 hover:text-pink-700 md:mx-2"
               >
+                <ChartBar className=" mr-2 w-[15px]" />
                 ROS Wallet Summary
               </Link>
 
               <Link
                 href="/user/stakingcontracts/incomewalletsummary"
-                className="my-2 block border-b border-gray-100  text-pink-800 hover:text-pink-700 md:mx-2"
+                className="my-2 flex border-b border-gray-100 items-center text-pink-800 hover:text-pink-700 md:mx-2"
               >
+                <ChartBar className=" mr-2 w-[15px]" />
                 Income Wallet Summary
               </Link>
               <Link
                 href="/user/stakingcontracts/adhocwalletsummary"
-                className="my-2 block border-b border-gray-100  text-pink-800 hover:text-pink-700 md:mx-2"
+                className="my-2 flex border-b border-gray-100 items-center text-pink-800 hover:text-pink-700 md:mx-2"
               >
+                <ChartBar className=" mr-2 w-[15px]" />
                 Adhoc Wallet Summary
               </Link>
               <Link
                 href="/user/stakingcontracts/bonuswalletsummary"
-                className="my-2 block border-b border-gray-100  text-pink-800 hover:text-pink-700 md:mx-2"
+                className="my-2 flex border-b border-gray-100 items-center text-pink-800 hover:text-pink-700 md:mx-2"
               >
+                <ChartBar className=" mr-2 w-[15px]" />
                 Bonus Wallet Summary
               </Link>
-              <Link
+              {/* <Link
                 href="/user/stakingcontracts/incomewithdrawal"
                 className="my-2 block border-b border-gray-100  text-pink-800 hover:text-pink-700 md:mx-2"
               >
                 Income-Widthrawal
-              </Link>
+              </Link> */}
               <Link
                 href="/user/stakingcontracts/roswithdrawal"
-                className="my-2 block border-b border-gray-100  text-pink-800 hover:text-pink-700 md:mx-2"
+                className="my-2 flex border-b border-gray-100 items-center text-pink-800 hover:text-pink-700 md:mx-2"
               >
+                <Download className=" mr-2 w-[15px]" />
                 ROS-Widthrawal
               </Link>
             </div>
@@ -310,7 +347,11 @@ function Navigation() {
 
         <div className="flex">
           <div className="group relative cursor-pointer">
-            <div className="flex items-center justify-between py-[12px] text-pink-800">
+            <div   className={`flex items-center justify-center py-[12px] text-pink-800 ${
+                isvoucher
+                  ? 'border-b-2 border-pink-800 font-semibold'
+                  : ''
+              }`}>
               <Link
                 href="#"
                 className="menu-hover text-[14px] font-medium text-pink-800 flex items-center justify-center  gap-[5px]"
@@ -334,20 +375,22 @@ function Navigation() {
             <div className="invisible text-[14px] absolute z-50 flex w-max h-auto flex-col bg-gray-100 py-1 px-4 text-pink-800 shadow-xl group-hover:visible">
               <Link
                 href="/user/voucher/generate-receipt"
-                className="my-2 block border-b border-gray-100  text-pink-800 hover:text-pink-700 md:mx-2"
+                className="my-2 flex items-center border-b border-gray-100  text-pink-800 hover:text-pink-700 md:mx-2"
               >
-                Generate Recepit
+                <Briefcase className=" mr-2 w-[15px]" /> Generate Recepit
               </Link>
               <Link
                 href="/user/voucher/voucher-wallet-summary"
-                className="my-2 block border-b border-gray-100  text-pink-800 hover:text-pink-700 md:mx-2"
+                className="my-2 flex items-center border-b border-gray-100  text-pink-800 hover:text-pink-700 md:mx-2"
               >
+                <ChartBar className=" mr-2 w-[15px]" />
                 Voucher Wallet Summary
               </Link>
               <Link
                 href="/user/voucher/receipt-summary"
-                className="my-2 block border-b border-gray-100  text-pink-800 hover:text-pink-700 md:mx-2"
+                className="my-2 flex items-center border-b border-gray-100  text-pink-800 hover:text-pink-700 md:mx-2"
               >
+                <ChartBar className=" mr-2 w-[15px]" />
                 Receipt Summary
               </Link>
             </div>
@@ -356,7 +399,11 @@ function Navigation() {
 
         <div className="flex">
           <div className="group relative cursor-pointer">
-            <div className="flex items-center justify-between py-[12px] text-pink-800">
+            <div  className={`flex items-center justify-center py-[12px] text-pink-800 ${
+                isTransfer
+                  ? 'border-b-2 border-pink-800 font-semibold'
+                  : ''
+              }`}>
               <Link
                 href="#"
                 className="menu-hover text-[14px] font-medium text-pink-800 flex items-center justify-center  gap-[5px]"
@@ -379,39 +426,47 @@ function Navigation() {
             <div className="invisible absolute z-50 text-[14px] flex w-max h-auto flex-col bg-gray-100 py-1 px-4 text-pink-800 shadow-xl group-hover:visible">
               <Link
                 href="/user/transfers/kait-wallet-transfer  "
-                className="my-2 block border-b border-gray-100  text-pink-800 hover:text-pink-700 md:mx-2"
+                className="my-2 flex items-center border-b border-gray-100  text-pink-800 hover:text-pink-700 md:mx-2"
               >
+                <Image
+                  className=" w-[15px] h-[15px]  items-center flex  mr-2"
+                  src={Logo}
+                  alt="Logo"
+                />
                 Kait Wallet Transfer
               </Link>
-               <Link
+              <Link
                 href="/user/transfers/mature-wallet-transfer  "
-                className="my-2 block border-b border-gray-100  text-pink-800 hover:text-pink-700 md:mx-2"
+                className="my-2 flex items-center border-b border-gray-100  text-pink-800 hover:text-pink-700 md:mx-2"
               >
-                Mature Wallet Transfer
+                <ArrowLeftRight className=" mr-2 w-[15px]" /> Mature Wallet
+                Transfer
               </Link>
               <Link
                 href="/user/transfers/income-wallet-transfer"
-                className="my-2 block border-b border-gray-100 text-pink-800 hover:text-pink-700 md:mx-2"
+                className="my-2 flex items-center border-b border-gray-100 text-pink-800 hover:text-pink-700 md:mx-2"
               >
-                Income Wallet Transfer
+                <Briefcase className=" mr-2 w-[15px]" /> Income Wallet Transfer
               </Link>
               <Link
                 href="/user/transfers/restake-wallet-transfer"
-                className="my-2 block border-b border-gray-100  text-pink-800 hover:text-pink-700 md:mx-2"
+                className="my-2 flex items-center border-b border-gray-100  text-pink-800 hover:text-pink-700 md:mx-2"
               >
+                <ArrowLeftRight className=" mr-2 w-[15px]" />
                 Restake Wallet Transfer
               </Link>
               <Link
                 href="/user/transfers/ros-wallet-transfer"
-                className="my-2 block border-b border-gray-100  text-pink-800 hover:text-pink-700 md:mx-2"
+                className="my-2 flex items-center border-b border-gray-100  text-pink-800 hover:text-pink-700 md:mx-2"
               >
-                ROS Wallet Transfer
+                <ArrowLeftRight className=" mr-2 w-[15px]" /> ROS Wallet
+                Transfer
               </Link>
               <Link
                 href="/user/transfers/adhoc-wallet-transfer"
-                className="my-2 block border-b border-gray-100  text-pink-800 hover:text-pink-700 md:mx-2"
+                className="my-2 flex items-center border-b border-gray-100  text-pink-800 hover:text-pink-700 md:mx-2"
               >
-                Adhoc Wallet Transfer
+                <Briefcase className=" mr-2 w-[15px]" /> Adhoc Wallet Transfer
               </Link>
             </div>
           </div>
@@ -419,7 +474,11 @@ function Navigation() {
 
         <Link
           href="/user/profile"
-          className="flex justify-center items-center py-[12px]  text-[14px] gap-[5px] text-pink-800"
+          className={`flex justify-center text-[14px] items-center py-[12px] gap-[5px] text-pink-800 ${
+            pathname === '/user/profile'
+              ? 'border-b-2 border-pink-800 font-semibold'
+              : ''
+          }`}
         >
           <PiUserListBold className=" text-[14px]" /> Profile
         </Link>

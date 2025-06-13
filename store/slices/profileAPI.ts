@@ -8,14 +8,12 @@ export const fetchUserProfile = createAsyncThunk(
   'auth/fetchUserProfile',
   async (_, { rejectWithValue }) => {
     try {
-      // Retrieve the token from cookies or localStorage
       const token = Cookies.get('token') || localStorage.getItem('token')
 
       if (!token) {
-        throw new Error('No token found') // Ensure there's a token for authentication
+        throw new Error('No token found')
       }
 
-      // Make the API call to fetch the user profile
       const response = await axios.get(`${baseURL}user/personal_info`, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -23,12 +21,10 @@ export const fetchUserProfile = createAsyncThunk(
         },
       })
 
-      return response.data // Assuming the response has user data in the `data` property
+      return response.data
     } catch (error: any) {
-      // Log the error for debugging purposes
       console.error('Error fetching user profile:', error)
 
-      // Handle errors and return the error message if it fails
       return rejectWithValue(
         error.response?.data || error.message || 'Failed to fetch user profile',
       )
@@ -42,14 +38,12 @@ export const updateUserProfile = createAsyncThunk(
     { rejectWithValue },
   ) => {
     try {
-      // Retrieve the token from cookies or localStorage
       const token = Cookies.get('token') || localStorage.getItem('token')
 
       if (!token) {
-        throw new Error('No token found') // Ensure there's a token for authentication
+        throw new Error('No token found') 
       }
 
-      // Make the API call to update the user profile
       const response = await axios.put(
         `${baseURL}user/personal_info`,
         userData,
@@ -62,12 +56,9 @@ export const updateUserProfile = createAsyncThunk(
         },
       )
 
-      return response.data // Return the updated profile data
+      return response.data 
     } catch (error: any) {
-      // Log the error for debugging purposes
       console.error('Error updating user profile:', error)
-
-      // Handle errors and return the error message if it fails
       return rejectWithValue(
         error.response?.data ||
           error.message ||
@@ -91,27 +82,25 @@ export const resetUserPassword = createAsyncThunk(
       const token = Cookies.get('token') || localStorage.getItem('token')
       if (!token) throw new Error('No token found')
 
-      const formData = new URLSearchParams(passwordData as Record<string, string>)
-
-      const response = await axios.put(
-        `${baseURL}user/password`,
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            Accept: 'application/json',
-            'Content-Type': 'application/x-www-form-urlencoded',
-          },
-        },
+      const formData = new URLSearchParams(
+        passwordData as Record<string, string>,
       )
+
+      const response = await axios.put(`${baseURL}user/password`, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: 'application/json',
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+      })
 
       return response.data
     } catch (error: any) {
       return rejectWithValue(
         error.response?.data?.message ||
-        error.message ||
-        'Failed to reset password'
+          error.message ||
+          'Failed to reset password',
       )
     }
-  }
+  },
 )

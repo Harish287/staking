@@ -8,17 +8,33 @@ import {
 } from '../../../store/slices/nomineeslice'
 import { RootState } from '../../../store/store'
 import { Button } from '@/components/ui/button'
-import toast from 'react-hot-toast' // ✅ react-hot-toast
+import toast from 'react-hot-toast'
+import { fetchDropdownOptions } from '@/store/slices/dropdownOptions'
 
 const NomineeComponent = () => {
   const dispatch = useAppDispatch()
-  const { data, isLoading, error } = useAppSelector(
-    (state: RootState) => state.nominee,
-  )
+
+  const {
+    data: nomineeData,
+    isLoading,
+    error,
+  } = useAppSelector((state: RootState) => state.nominee)
+
+  const {
+    data: dropDownOptions,
+    loading: loadingOptions,
+    error: optionsError,
+  } = useAppSelector((state: RootState) => state.dropDownOptions)
+
+  useEffect(() => {
+    dispatch(fetchDropdownOptions())
+    dispatch(fetchNomineeData())
+  }, [dispatch])
 
   const [name, setName] = useState('')
   const [pan, setPan] = useState('')
   const [relationship, setRelationship] = useState('')
+
   const [initialValues, setInitialValues] = useState({
     nominee_name: '',
     nominee_pan: '',
@@ -26,21 +42,17 @@ const NomineeComponent = () => {
   })
 
   useEffect(() => {
-    dispatch(fetchNomineeData())
-  }, [dispatch])
-
-  useEffect(() => {
-    if (data) {
-      const nominee_name = data.name || ''
-      const nominee_pan = data.pan || ''
-      const nominee_relationship = data.relationship || ''
+    if (nomineeData) {
+      const nominee_name = nomineeData.name || ''
+      const nominee_pan = nomineeData.pan || ''
+      const nominee_relationship = nomineeData.relationship || ''
 
       setName(nominee_name)
       setPan(nominee_pan)
       setRelationship(nominee_relationship)
       setInitialValues({ nominee_name, nominee_pan, nominee_relationship })
     }
-  }, [data])
+  }, [nomineeData])
 
   const isValidPAN = (pan: string) => /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/i.test(pan)
 
@@ -74,7 +86,7 @@ const NomineeComponent = () => {
             nominee_pan: pan.toUpperCase(),
             nominee_relationship: relationship,
           })
-          dispatch(fetchNomineeData()) // Re-fetch to sync
+          dispatch(fetchNomineeData())
         } else {
           throw new Error()
         }
@@ -86,6 +98,9 @@ const NomineeComponent = () => {
       },
     )
   }
+
+  if (loadingOptions) return <div>Loading options...</div>
+  if (optionsError) return <div>Error loading dropdowns: {optionsError}</div>
 
   return (
     <div className="space-y-4">
@@ -139,19 +154,19 @@ const NomineeComponent = () => {
           onChange={(e) => setRelationship(e.target.value)}
           className="p-2 border border-gray-300 rounded-md w-full"
         >
-          <option value="">Select Relationship</option>
-          <option value="father">Father</option>
-          <option value="mother">Mother</option>
-          <option value="husband">Husband</option>
-          <option value="wife">Wife</option>
-          <option value="son">Son</option>
-          <option value="daughter">Daughter</option>
-          <option value="others">Others</option>
+          <option value="" disabled>
+            Select Relationship
+          </option>
+          {dropDownOptions?.nominee_relations?.map((relation) => (
+            <option key={relation.id} value={relation.id}>
+              {relation.value}
+            </option>
+          ))}
         </select>
 
         <Button
           onClick={handleUpdateNominee}
-          className="bg-red-600 hover:bg-red-700  text-white mt-2"
+          className="bg-red-600 hover:bg-red-700 text-white mt-2"
           disabled={!hasChanges}
         >
           Update Nominee

@@ -109,12 +109,6 @@ export const loginUser = createAsyncThunk(
       if (response.data.access_token) {
         localStorage.setItem('token', response.data.access_token)
         Cookies.set('token', response.data.access_token, { expires: 1 })
-        // Cookies.set("user_id", response.data.user_id);
-        // Cookies.set("name", response.data.name);
-
-        // Store name & user_id
-        // localStorage.setItem('user_id', response.data.user_id)
-        // localStorage.setItem('name', response.data.name)
       }
 
       return response.data
@@ -278,13 +272,13 @@ export const resendConfirmationEmail = createAsyncThunk(
 
 // KYC
 //suggestUsername
-type SuggestUsernameResponse = string[];
+type SuggestUsernameResponse = string[]
 
 export const suggestUsername = createAsyncThunk<SuggestUsernameResponse, void>(
   'kyc/suggestUsername',
   async (_, { rejectWithValue }) => {
     try {
-      const token = Cookies.get('token') || localStorage.getItem('token');
+      const token = Cookies.get('token') || localStorage.getItem('token')
 
       const response = await axios.post(
         `${baseURL}kyc/suggest_username`,
@@ -295,19 +289,17 @@ export const suggestUsername = createAsyncThunk<SuggestUsernameResponse, void>(
             'Content-Type': 'application/json',
             Accept: 'application/json',
           },
-        }
-      );
+        },
+      )
 
-      return response.data.detail;
+      return response.data.detail
     } catch (error: any) {
       return rejectWithValue(
-        error.response?.data?.detail || 'Failed to fetch username suggestions'
-      );
+        error.response?.data?.detail || 'Failed to fetch username suggestions',
+      )
     }
-  }
-);
-
-
+  },
+)
 
 //verifyUsername
 export const verifyUsername = createAsyncThunk(
@@ -436,8 +428,9 @@ export const fetchKycApplications = createAsyncThunk<
       params.append('page', page.toString())
       params.append('page_size', page_size.toString())
 
+      // ✅ Correct param name for backend
       if (status && status !== 'all') {
-        params.append('status', status)
+        params.append('kyc_status', status)
       }
 
       if (search && search.trim() !== '') {

@@ -12,7 +12,7 @@ import {
   fetchUserProfile,
   updateUserProfile,
 } from '../../../store/slices/profileAPI'
-import { RootState, AppDispatch } from '../../../store/store'
+import { RootState, AppDispatch, useAppSelector } from '../../../store/store'
 import { toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import Possword from './password'
@@ -42,6 +42,7 @@ export default function ProfileDetails() {
   )
 
   const { user } = useSelector((state: RootState) => state.auth)
+  const { kycVerified } = useAppSelector((state) => state.auth)
 
   const [firstName, setFirstName] = useState(userprofile?.first_name || '')
   const [lastName, setLastName] = useState(userprofile?.last_name || '')
@@ -123,9 +124,11 @@ export default function ProfileDetails() {
     )
   if (error) return <div>Error: {error}</div>
   if (!userprofile) {
-    return <div className="flex items-center justify-center min-h-screen">
+    return (
+      <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
       </div>
+    )
   }
   if (!searchParams) return null
 
@@ -199,7 +202,7 @@ export default function ProfileDetails() {
                     <Input
                       // value={lastName}
                       onChange={(e) => setLastName(e.target.value)}
-                      defaultValue={userprofile?.last_name} // Default value
+                      defaultValue={userprofile?.last_name}
                     />
                   </div>
 
@@ -297,11 +300,14 @@ export default function ProfileDetails() {
             <div className="flex gap-2">
               <Badge className="bg-emerald-500">Email Verified</Badge>
               <Badge
-                className={`${user?.kycVerified ? 'bg-red-500-500' : 'bg-red-500'}`}
+                className={`flex items-center text-[12px] ${
+                  kycVerified ? 'bg-emerald-500' : 'bg-red-500'
+                }`}
               >
-                {user?.kycVerified ? (
+                {kycVerified ? (
                   <>
-                    <CheckCheck /> Verified
+                    <CheckCheck />
+                    Kyc Verified
                   </>
                 ) : (
                   'Not Verified'
