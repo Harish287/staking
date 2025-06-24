@@ -428,7 +428,6 @@ export const fetchKycApplications = createAsyncThunk<
       params.append('page', page.toString())
       params.append('page_size', page_size.toString())
 
-      // ✅ Correct param name for backend
       if (status && status !== 'all') {
         params.append('kyc_status', status)
       }
@@ -635,8 +634,8 @@ const authSlice = createSlice({
         state.usernameError = null
       })
       .addCase(verifyUsername.fulfilled, (state, action) => {
-        state.usernameAvailable = action.payload.available // Boolean indicating availability
-        state.usernameError = null // Clear error message
+        state.usernameAvailable = action.payload.available 
+        state.usernameError = null 
       })
       .addCase(verifyUsername.rejected, (state, action) => {
         state.usernameAvailable = null
@@ -710,8 +709,6 @@ const authSlice = createSlice({
       })
       .addCase(approveKycApplication.fulfilled, (state, action) => {
         const { user_id, newStatus } = action.payload
-
-        // Updating the state immutably
         state.kycApplications = state.kycApplications.map((app) =>
           app.user_id === user_id ? { ...app, status: newStatus } : app,
         )

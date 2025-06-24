@@ -93,7 +93,13 @@ const TransactionPass = () => {
   }
 
   useEffect(() => {
-    if (otpSuccess || otpError) {
+    if (otpSuccess) {
+      toast.success('OTP sent successfully to your email.')
+      dispatch(resetTransactionOtpState())
+    }
+
+    if (otpError) {
+      toast.error(otpError || 'Failed to send OTP. Please try again.')
       dispatch(resetTransactionOtpState())
     }
   }, [otpSuccess, otpError, dispatch])
@@ -106,7 +112,7 @@ const TransactionPass = () => {
   if (isLoading)
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-indigo-500"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-t-pink-700 border-b-gray-800 border-l-transparent border-r-transparent"></div>
       </div>
     )
 
@@ -190,7 +196,7 @@ const TransactionPass = () => {
             onChange={(e) => setOtp(e.target.value)}
             fullWidth
           />
-          <div className="flex gap-4">
+          <div className="flex gap-4 mt-4">
             <button
               type="submit"
               className="bg-gray-400 text-white px-4 py-2 rounded w-1/2"

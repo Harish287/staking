@@ -159,9 +159,30 @@ export default function AddBeneficiaryForm() {
       ? items
       : items.filter((b) => b.status === reviewStatus)
 
+  if (listLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-t-pink-700 border-b-gray-800 border-l-transparent border-r-transparent"></div>
+      </div>
+    )
+  }
+   if (addLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-t-pink-700 border-b-gray-800 border-l-transparent border-r-transparent"></div>
+      </div>
+    )
+  } if (updateLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-t-pink-700 border-b-gray-800 border-l-transparent border-r-transparent"></div>
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-6">
-      <Card className="p-6 max-w-7xl mx-auto mb-6 mt-6">
+      <Card className="p-6 max-w-6xl mx-auto mb-6 mt-6">
         <div className="flex justify-between">
           <h2 className="text-xl font-bold mb-4">Beneficiary List</h2>
 
@@ -282,55 +303,77 @@ export default function AddBeneficiaryForm() {
         </div>
 
         {listLoading && <p>Loading list...</p>}
-        {listError && <p className="text-red-500">{renderError(listError)}</p>}
+        {/* {listError && <p className="text-red-500">{renderError(listError)}</p>} */}
 
         {!listLoading && filteredItems.length === 0 ? (
           <p className="text-center text-gray-500 mt-4">No records found.</p>
         ) : (
           <>
-            <table className="w-full text-sm">
+            <table className="w-full text-sm table-auto">
               <thead>
-                <tr className="text-left border-b text-[18px] text-gray-600">
-                  <th className="p-4">Nickname</th>
-                  <th className="p-4">Email</th>
-                  <th className="p-4">Wallet</th>
-                  <th className="p-4">Mobile</th>
-                  <th className="p-4">Status</th>
-                  <th className="p-4">Action</th>
+                <tr className="text-left border-b text-base text-gray-700 bg-gray-50">
+                  <th className="px-4 py-3">Nickname</th>
+                  <th className="px-4 py-3">Email</th>
+                  <th className="px-4 py-3">Wallet</th>
+                  <th className="px-4 py-3">Beneficiary ID</th>
+                  <th className="px-4 py-3">Mobile</th>
+                  <th className="px-4 py-3">Status</th>
+                  <th className="px-4 py-3">Action</th>
                 </tr>
               </thead>
               <tbody>
-                {filteredItems.map((b) => (
-                  <tr key={b.beneficiary_id} className="border-b text-[15px]">
-                    <td className="p-4">{b.nick_name}</td>
-                    <td className="p-4">{b.email}</td>
-                    <td className="p-4">{b.wallet_address}</td>
-                    <td className="p-4">{b.mobile}</td>
-                    <td className="capitalize p-4">{b.status}</td>
-                    <td className="p-4">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => {
-                          setEditMode(true)
-                          setEditingBeneficiaryId(b.beneficiary_id)
-                          setEditingUserId(b.user_id)
-                          setFormData({
-                            nick_name: b.nick_name || '',
-                            wallet_address: b.wallet_address || '',
-                            mobile: b.mobile || '',
-                            email: b.email || '',
-                            limit: b.limit?.toString() || '',
-                          })
-                          setOpenDialog(true)
-                        }}
-                        className="text-xs"
-                      >
-                        Edit
-                      </Button>
+                {filteredItems.length > 0 ? (
+                  filteredItems.map((b) => (
+                    <tr
+                      key={b.beneficiary_id}
+                      className="border-b hover:bg-gray-50 transition-colors"
+                    >
+                      <td className="px-4 py-2">{b.nick_name || '—'}</td>
+                      <td className="px-4 py-2 break-words">
+                        {b.email || '—'}
+                      </td>
+                      <td className="px-4 py-2 break-all">
+                        {b.wallet_address || '—'}
+                      </td>
+                      <td className="px-4 py-2">{b.beneficiary_id}</td>
+                      <td className="px-4 py-2">{b.mobile || '—'}</td>
+                      <td className="px-4 py-2 capitalize">
+                        {b.status || '—'}
+                      </td>
+                      <td className="px-4 py-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            setEditMode(true)
+                            setEditingBeneficiaryId(b.beneficiary_id)
+                            setEditingUserId(b.user_id)
+                            setFormData({
+                              nick_name: b.nick_name || '',
+                              wallet_address: b.wallet_address || '',
+                              mobile: b.mobile || '',
+                              email: b.email || '',
+                              limit: b.limit?.toString() || '',
+                            })
+                            setOpenDialog(true)
+                          }}
+                          className="text-xs"
+                        >
+                          Edit
+                        </Button>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td
+                      colSpan={7}
+                      className="px-4 py-4 text-center text-gray-500"
+                    >
+                      No beneficiaries found.
                     </td>
                   </tr>
-                ))}
+                )}
               </tbody>
             </table>
 

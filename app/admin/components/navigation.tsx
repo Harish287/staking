@@ -287,13 +287,13 @@ function Navigation() {
                 href="/admin/Withdrawal/pendingApproval"
                 className="my-2 block border-b border-gray-100 font-semibold   text-[#7668fe] hover:duration-1000 hover:text-black md:mx-2"
               >
-                Pending Approval
+                Pending For Approval
               </Link>
               <Link
-                href="/Withdrawal/pending"
+                href="/admin/Withdrawal/approved"
                 className="my-2 block border-b border-gray-100 font-semibold   text-[#7668fe] hover:duration-1000 hover:text-black md:mx-2"
               >
-                Pending
+                Approved
               </Link>
               <Link
                 href="/admin/Withdrawal/rejected"
@@ -366,6 +366,12 @@ function Navigation() {
                 className="my-2 block border-b border-gray-100 font-semibold   text-[#7668fe] hover:duration-1000 hover:text-black md:mx-2"
               >
                 StakePlans
+              </Link>
+               <Link
+                href="/admin/beneficiary"
+                className="my-2 block border-b border-gray-100 font-semibold   text-[#7668fe] hover:duration-1000 hover:text-black md:mx-2"
+              >
+                Beneficiary
               </Link>
             </div>
           </div>

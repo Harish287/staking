@@ -196,7 +196,7 @@ export default function InvestorList() {
 
   const [activeTab, setActiveTab] = useState('Investor / Users')
 
-  const tabs = ['Investor / Users', 'Admin Account', 'Club Details', 'All']
+  const tabs = ['Investor / Users']
 
   return (
     <div className="min-h-screen bg-blue-100 p-6">
@@ -268,7 +268,14 @@ export default function InvestorList() {
                     <tr key={investor.user_id} className="border-b">
                       <td className="p-4">
                         <div>
-                          <div className="font-medium">{investor.name}</div>
+                          <div className="flex gap-2">
+                            <div className="font-medium">{investor.name}</div>
+                            {investor.credit && (
+                              <div className="bg-red-500 w-fit px-2 text-white">
+                                C
+                              </div>
+                            )}
+                          </div>
                           <div className="text-sm text-gray-500">
                             {investor.referred_by}
                           </div>
@@ -351,11 +358,11 @@ export default function InvestorList() {
                         <span
                           className={`px-3 py-1 rounded-full text-sm ${
                             investor.suspend
-                              ? 'bg-green-100 text-green-800'
-                              : 'bg-gray-200 text-gray-600'
+                              ? 'bg-gray-200 text-gray-600'
+                              : 'bg-green-100 text-green-800'
                           }`}
                         >
-                          {investor.suspend ? 'Active' : 'Inactive'}
+                          {investor.suspend ? 'InActive' : 'Active'}
                         </span>
                       </td>
                       <td className="p-4">
@@ -641,7 +648,7 @@ export default function InvestorList() {
                                     )
                                     break
                                   case 'suspend':
-                                    label = isEnabled ? 'Suspend' : 'Activate'
+                                    label = isEnabled ? 'Activate' : 'Suspend'
                                     icon = (
                                       <Power className="w-4 h-4 mr-2 text-red-600" />
                                     )
@@ -657,7 +664,7 @@ export default function InvestorList() {
                                     onClick={() =>
                                       handlePermissionChange(
                                         investor.user_id,
-                                        id,
+                                        id as permissionType,
                                         !isEnabled,
                                       )
                                     }
@@ -686,7 +693,7 @@ export default function InvestorList() {
             </div>
           )}
 
-          <div className="flex justify-between items-center mt-6">
+          <div className="flex justify-between items-center mt-6 flex-wrap gap-2">
             <div className="flex gap-2">
               <Button
                 onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
@@ -703,8 +710,10 @@ export default function InvestorList() {
                 NEXT
               </Button>
             </div>
-
-            <div className="flex items-center gap-2 ">
+            <div className="text-sm text-gray-600">
+              Total Investors: <strong>{total}</strong>
+            </div>
+            <div className="flex items-center gap-2">
               <span>Page</span>
               <Select
                 value={currentPage.toString()}
@@ -713,7 +722,7 @@ export default function InvestorList() {
                 <SelectTrigger className="w-20">
                   <SelectValue placeholder={`Page ${currentPage}`} />
                 </SelectTrigger>
-                <SelectContent className=" bg-white">
+                <SelectContent className="bg-white">
                   {Array.from({ length: totalPages }, (_, i) => {
                     const page = i + 1
                     return (

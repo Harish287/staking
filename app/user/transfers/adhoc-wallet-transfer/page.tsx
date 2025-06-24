@@ -182,8 +182,19 @@ const AdhocWalletTransfer = () => {
           <ArrowRightLeft className="mr-2" /> Transfer Adhoc Wallet
         </h1>
         <div className="bg-white rounded-lg shadow-lg p-4">
-          <h2 className="text-lg p-2 rounded-[10px] w-fit font-semibold mb-2 bg-gradient-to-r from-pink-700 to-gray-800 text-white">
-            Adhoc Wallet Balance: ₹{walletBalance}
+          <h2 className="text-lg p-2 rounded-[10px] flex  w-fit font-semibold mb-2 bg-gradient-to-r from-pink-700 to-gray-800 text-white">
+            Adhoc Wallet Balance:
+            <div className=" flex items-center ml-0.5">
+              <Image
+                src={Logo}
+                alt="Logo"
+                priority
+                width={15}
+                height={15}
+                className=" mr-0.5"
+              />
+              <span>{walletBalance}</span>
+            </div>
           </h2>
           <div className="flex flex-col md:flex-row pb-6 gap-6">
             <div className="md:w-1/3 flex items-center text-center">

@@ -38,7 +38,9 @@ const registrationData = [
 
 export default function Dashboard() {
   return (
-    <div className="min-h-screen bg-gray-50/50 dark:bg-gray-900/50 p-8">
+        <div className="p-6 space-y-6 bg-blue-100">
+
+    <div className="min-h-screen  rounded-2xl bg-white dark:bg-gray-900/50 p-8">
       <div className="max-w-7xl mx-auto space-y-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {/* Total Contracts Card */}
@@ -215,6 +217,7 @@ export default function Dashboard() {
           </Card>
         </div>
       </div>
+    </div>
     </div>
   )
 }

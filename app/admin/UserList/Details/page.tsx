@@ -34,6 +34,8 @@ import {
 import { updateUserPermission } from '@/store/slices/admin/permisionSlice'
 import toast from 'react-hot-toast'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
+import Image from 'next/image'
+import kaitimg from '../../../../assets/logo2x.png'
 
 export default function InvestorDetailsPage({
   params,
@@ -97,10 +99,10 @@ export default function InvestorDetailsPage({
   const getStatusBadges = (details: InvestorDetails): StatusBadge[] => {
     const badges: StatusBadge[] = [
       {
-        label: 'ACTIVE',
+        label: 'Active',
         className: 'bg-green-500 text-white',
-        condition: details.suspend,
-        disabledLabel: 'Suspended',
+        condition: !details.suspend,
+        disabledLabel: 'suspend',
       },
       {
         label: 'Transfer Enabled',
@@ -133,10 +135,10 @@ export default function InvestorDetailsPage({
         disabledLabel: 'Adhoc Income Disabled',
       },
       {
-        label: 'Active',
-        className: 'bg-indigo-500 text-white',
-        condition: details.suspend,
-        disabledLabel: 'InActive',
+        label: 'Credit',
+        className: 'bg-red-500 text-white',
+        condition: details.credit,
+        disabledLabel: 'Credit',
       },
     ]
 
@@ -380,12 +382,12 @@ export default function InvestorDetailsPage({
                   {!details.suspend ? (
                     <>
                       <Power className="w-4 h-4 mr-2 text-red-600" />
-                      Activate
+                      Suspend
                     </>
                   ) : (
                     <>
                       <Power className="w-4 h-4 mr-2 text-red-600" />
-                      Suspend
+                      Activate
                     </>
                   )}
                 </DropdownMenuItem>
@@ -408,88 +410,169 @@ export default function InvestorDetailsPage({
           {/* Investment Stats */}
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
             <div className="space-y-1 border-2">
-              <div className="text-sm text-gray-500">Fiat</div>
+              <div className="text-sm text-gray-500 ml-2">Fiat</div>
               <div className="flex items-center gap-2">
-                <span className="text-red-500">₹</span>
+                <span className="text-red-500">
+                  {' '}
+                  <Image
+                    src={kaitimg}
+                    width={20}
+                    height={20}
+                    className=" object-contain ml-2"
+                    alt="Picture of the author"
+                  />
+                </span>
                 <span className="text-lg font-medium">
                   {details.fiat || '0'}
                 </span>
               </div>
             </div>
             <div className="space-y-1 border-2">
-              <div className="text-sm text-gray-500">Invested</div>
+              <div className="text-sm text-gray-500 ml-2">Invested</div>
               <div className="flex items-center gap-2">
-                <span className="text-red-500">₹</span>
+                <span className="text-red-500">
+                  {' '}
+                  <Image
+                    src={kaitimg}
+                    width={20}
+                    height={20}
+                    className=" object-contain ml-2"
+                    alt="Picture of the author"
+                  />
+                </span>
                 <span className="text-lg font-medium">
                   {details.invested || '0'}
                 </span>
               </div>
             </div>
             <div className="space-y-1 border-2">
-              <div className="text-sm text-gray-500">Team Business</div>
+              <div className="text-sm text-gray-500 ml-2">Team Business</div>
               <div className="flex items-center gap-2">
-                <span className="text-red-500">₹</span>
+                <span className="text-red-500">
+                  {' '}
+                  <Image
+                    src={kaitimg}
+                    width={20}
+                    height={20}
+                    className=" object-contain ml-2"
+                    alt="Picture of the author"
+                  />
+                </span>
                 <span className="text-lg font-medium">
                   {details.team_business || '0'}
                 </span>
               </div>
             </div>
             <div className="space-y-1 border-2">
-              <div className="text-sm text-gray-500">ROI</div>
+              <div className="text-sm text-gray-500 ml-2">ROI</div>
               <div className="flex items-center gap-2">
-                <span className="text-red-500">₹</span>
+                <span className="text-red-500">
+                  {' '}
+                  <Image
+                    src={kaitimg}
+                    width={20}
+                    height={20}
+                    className=" object-contain ml-2"
+                    alt="Picture of the author"
+                  />
+                </span>
                 <span className="text-lg font-medium">
                   {details.roi || '0'}
                 </span>
               </div>
             </div>
             <div className="space-y-1 border-2">
-              <div className="text-sm text-gray-500">ROI Spent</div>
+              <div className="text-sm text-gray-500 ml-2">ROI Spent</div>
               <div className="flex items-center gap-2">
-                <span className="text-red-500">₹</span>
+                <span className="text-red-500">
+                  {' '}
+                  <Image
+                    src={kaitimg}
+                    width={20}
+                    height={20}
+                    className=" object-contain ml-2"
+                    alt="Picture of the author"
+                  />
+                </span>
                 <span className="text-lg font-medium">
                   {details.roi_spent || '0'}
                 </span>
               </div>
             </div>
             <div className="space-y-1 border-2">
-              <div className="text-sm text-gray-500">Level Income</div>
+              <div className="text-sm text-gray-500 ml-2">Level Income</div>
               <div className="flex items-center gap-2">
-                <span className="text-red-500">₹</span>
+                <span className="text-red-500">
+                  {' '}
+                  <Image
+                    src={kaitimg}
+                    width={20}
+                    height={20}
+                    className=" object-contain ml-2"
+                    alt="Picture of the author"
+                  />
+                </span>
                 <span className="text-lg font-medium">
                   {details.level_income_value || '0'}
                 </span>
               </div>
             </div>
             <div className="space-y-1 border-2">
-              <div className="text-sm text-gray-500">Total Earnings</div>
+              <div className="text-sm text-gray-500 ml-2">Total Earnings</div>
               <div className="flex items-center gap-2">
-                <span className="text-red-500">₹</span>
+                <span className="text-red-500">
+                  {' '}
+                  <Image
+                    src={kaitimg}
+                    width={20}
+                    height={20}
+                    className=" object-contain ml-2"
+                    alt="Picture of the author"
+                  />
+                </span>
                 <span className="text-lg font-medium">
                   {details.total_earnings || '0'}
                 </span>
               </div>
             </div>
             <div className="space-y-1 border-2">
-              <div className="text-sm text-gray-500">Balance</div>
+              <div className="text-sm text-gray-500 ml-2">Balance</div>
               <div className="flex items-center gap-2">
-                <span className="text-red-500">₹</span>
+                <span className="text-red-500">
+                  {' '}
+                  <Image
+                    src={kaitimg}
+                    width={20}
+                    height={20}
+                    className=" object-contain ml-2"
+                    alt="Picture of the author"
+                  />
+                </span>
                 <span className="text-lg font-medium">
                   {details.balance || '0'}
                 </span>
               </div>
             </div>
             <div className="space-y-1 border-2">
-              <div className="text-sm text-gray-500">Stake Wallet</div>
+              <div className="text-sm text-gray-500 ml-2">Stake Wallet</div>
               <div className="flex items-center gap-2">
-                <span className="text-red-500">₹</span>
+                <span className="text-red-500">
+                  {' '}
+                  <Image
+                    src={kaitimg}
+                    width={20}
+                    height={20}
+                    className=" object-contain ml-2"
+                    alt="Picture of the author"
+                  />
+                </span>
                 <span className="text-lg font-medium">
                   {details.stake_wallet || '0'}
                 </span>
               </div>
             </div>
-            <div className="flex gap-4 border-2">
-              <div className="flex items-center gap-2">
+            <div className="flex gap-4 border-2 ">
+              <div className="flex items-center ml-2 gap-2">
                 <CheckCircle2 className="h-5 w-5 text-green-500" />
                 <span>Email</span>
               </div>

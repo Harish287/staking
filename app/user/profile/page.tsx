@@ -36,6 +36,7 @@ export default function ProfileDetails() {
     setTimeout(() => setCopied(false), 2000)
   }
 
+
   const dispatch = useDispatch<AppDispatch>()
   const { userprofile, isLoading, error } = useSelector(
     (state: RootState) => state.profile.profile,
@@ -119,14 +120,14 @@ export default function ProfileDetails() {
   if (isLoading)
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
+      <div className="animate-spin rounded-full h-12 w-12 border-4 border-t-pink-700 border-b-gray-800 border-l-transparent border-r-transparent"></div>
       </div>
     )
   if (error) return <div>Error: {error}</div>
   if (!userprofile) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
+      <div className="animate-spin rounded-full h-12 w-12 border-4 border-t-pink-700 border-b-gray-800 border-l-transparent border-r-transparent"></div>
       </div>
     )
   }
@@ -186,27 +187,22 @@ export default function ProfileDetails() {
 
               <TabsContent value="PERSONAL" className="space-y-6 pt-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* First Name */}
                   <div className="space-y-2">
                     <label className="text-sm text-gray-600">First Name</label>
                     <Input
-                      // value={firstName}
                       onChange={(e) => setFirstName(e.target.value)}
-                      defaultValue={userprofile?.first_name} // Default value
+                      defaultValue={userprofile?.first_name} 
                     />
                   </div>
 
-                  {/* Last Name */}
                   <div className="space-y-2">
                     <label className="text-sm text-gray-600">Last Name</label>
                     <Input
-                      // value={lastName}
                       onChange={(e) => setLastName(e.target.value)}
                       defaultValue={userprofile?.last_name}
                     />
                   </div>
 
-                  {/* Email Address (Read Only) */}
                   <div className="space-y-2">
                     <label className="text-sm text-gray-600">
                       Email Address
@@ -218,26 +214,23 @@ export default function ProfileDetails() {
                     />
                   </div>
 
-                  {/* Mobile Number (Read Only) */}
                   <div className="space-y-2">
                     <label className="text-sm text-gray-600">
                       Mobile Number
                     </label>
                     <Input
-                      defaultValue={userprofile?.mobile} // Ensure userprofile has the mobile number
+                      defaultValue={userprofile?.mobile} 
                       readOnly
                       className="bg-gray-50"
                     />
                   </div>
 
-                  {/* Date of Birth */}
                   <div className="space-y-2">
                     <label className="text-sm text-gray-600">
                       Date of Birth
                     </label>
                     <Input
                       type="date"
-                      // value={dob}
                       onChange={(e) => setDob(e.target.value)}
                       defaultValue={userprofile?.dob}
                     />

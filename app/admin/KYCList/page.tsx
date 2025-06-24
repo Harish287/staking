@@ -176,30 +176,37 @@ const KycApplications = () => {
   } = useAppSelector((state: RootState) => state.dropDownOptions)
 
   const handleAction = (action: 'approve' | 'reject') => {
-    if (!selectedUserId) return
-    setActionLoading(true)
+  if (!selectedUserId) return
+  setActionLoading(true)
 
-    dispatch(
-      approveKycApplication({
-        user_id: selectedUserId,
-        action,
-        message,
-      }),
-    )
-      .unwrap()
-      .then(({ user_id, newStatus, message }) => {
-        closeDialog()
-        const params = new URLSearchParams(searchParams.toString())
-        params.set('status', newStatus)
-        params.set('page', '1')
-        router.push(`/admin/KYCList?${params.toString()}`)
-        toast.success(`${message}`)
-      })
-      .catch(() => {
-        toast.error(`${action === 'approve' ? 'Approval' : 'Rejection'} failed`)
-      })
-      .finally(() => setActionLoading(false))
-  }
+  dispatch(
+    approveKycApplication({
+      user_id: selectedUserId,
+      action,
+      message,
+    }),
+  )
+    .unwrap()
+    .then(({ user_id, newStatus, message }) => {
+      closeDialog()
+
+      // ✅ Refetch without changing the tab
+      dispatch(
+        fetchKycApplications({
+          page: pageParam,
+          page_size: pageSizeParam,
+          status: statusParam,
+          search: searchQuery,
+        }),
+      )
+
+      toast.success(`${message}`)
+    })
+    .catch(() => {
+      toast.error(`${action === 'approve' ? 'Approval' : 'Rejection'} failed`)
+    })
+    .finally(() => setActionLoading(false))
+}
 
   return (
     <div className="bg-blue-100 min-h-screen py-6">

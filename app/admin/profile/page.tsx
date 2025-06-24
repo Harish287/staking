@@ -96,7 +96,6 @@ export default function ProfilePage() {
   }
 
   const handleEnable2FA = () => {
-    // Handle 2FA enablement logic here
     console.log('Enabling 2FA')
   }
 

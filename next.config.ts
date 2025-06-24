@@ -11,3 +11,19 @@ module.exports = {
 }
 
 export default nextConfig
+// import type { NextConfig } from 'next'
+
+// const nextConfig: NextConfig = {
+//   images: {
+//     domains: ['images.unsplash.com'],
+//   },
+//   webpack(config) {
+//     config.resolve.extensionAlias = {
+//       '.js': ['.js', '.ts'],
+//       '.mjs': ['.mjs', '.js'],
+//     }
+//     return config
+//   },
+// }
+
+// export default nextConfig

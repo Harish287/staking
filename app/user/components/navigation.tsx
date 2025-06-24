@@ -321,6 +321,13 @@ function Navigation() {
                 <ChartBar className=" mr-2 w-[15px]" />
                 Bonus Wallet Summary
               </Link>
+               <Link
+                href="/user/stakingcontracts/restakewalletSummary"
+                className="my-2 flex border-b border-gray-100 items-center text-pink-800 hover:text-pink-700 md:mx-2"
+              >
+                <ChartBar className=" mr-2 w-[15px]" />
+                Restake Wallet Summary
+              </Link>
               {/* <Link
                 href="/user/stakingcontracts/incomewithdrawal"
                 className="my-2 block border-b border-gray-100  text-pink-800 hover:text-pink-700 md:mx-2"
@@ -332,7 +339,14 @@ function Navigation() {
                 className="my-2 flex border-b border-gray-100 items-center text-pink-800 hover:text-pink-700 md:mx-2"
               >
                 <Download className=" mr-2 w-[15px]" />
-                ROS-Widthrawal
+                ROS - Widthrawal
+              </Link>
+              <Link
+                href="/user/stakingcontracts/fiatwithdrawal"
+                className="my-2 flex border-b border-gray-100 items-center text-pink-800 hover:text-pink-700 md:mx-2"
+              >
+                <Download className=" mr-2 w-[15px]" />
+                Fiat - Widthrawal
               </Link>
             </div>
           </div>
@@ -340,18 +354,22 @@ function Navigation() {
 
         <Link
           href="/user/teamsummary"
-          className="flex justify-center items-center py-[12px] text-[14px]  gap-[5px] text-pink-800"
+          className={`flex justify-center text-[14px] items-center py-[12px] gap-[5px] text-pink-800 ${
+            pathname === '/user/teamsummary'
+              ? 'border-b-2 border-pink-800 font-semibold'
+              : ''
+          }`}
         >
           <FaUsers className=" text-[14px]" /> Team Summary
         </Link>
 
         <div className="flex">
           <div className="group relative cursor-pointer">
-            <div   className={`flex items-center justify-center py-[12px] text-pink-800 ${
-                isvoucher
-                  ? 'border-b-2 border-pink-800 font-semibold'
-                  : ''
-              }`}>
+            <div
+              className={`flex items-center justify-center py-[12px] text-pink-800 ${
+                isvoucher ? 'border-b-2 border-pink-800 font-semibold' : ''
+              }`}
+            >
               <Link
                 href="#"
                 className="menu-hover text-[14px] font-medium text-pink-800 flex items-center justify-center  gap-[5px]"
@@ -391,7 +409,7 @@ function Navigation() {
                 className="my-2 flex items-center border-b border-gray-100  text-pink-800 hover:text-pink-700 md:mx-2"
               >
                 <ChartBar className=" mr-2 w-[15px]" />
-                Receipt Summary
+                Receipt Usage
               </Link>
             </div>
           </div>
@@ -399,11 +417,11 @@ function Navigation() {
 
         <div className="flex">
           <div className="group relative cursor-pointer">
-            <div  className={`flex items-center justify-center py-[12px] text-pink-800 ${
-                isTransfer
-                  ? 'border-b-2 border-pink-800 font-semibold'
-                  : ''
-              }`}>
+            <div
+              className={`flex items-center justify-center py-[12px] text-pink-800 ${
+                isTransfer ? 'border-b-2 border-pink-800 font-semibold' : ''
+              }`}
+            >
               <Link
                 href="#"
                 className="menu-hover text-[14px] font-medium text-pink-800 flex items-center justify-center  gap-[5px]"
