@@ -5,7 +5,7 @@ import Autoplay from 'embla-carousel-autoplay'
 import { useSelector, useDispatch } from 'react-redux'
 import { AppDispatch, RootState } from '../../../store/store'
 import { verifyKYCStatus } from '../../../store/slices/index'
-import { Bell, Siren } from 'lucide-react'
+import { Bell, ClipboardCopy, Siren } from 'lucide-react'
 import ReferralComponent from '@/app/user/components/referralComponent'
 import {
   Card,
@@ -29,12 +29,29 @@ import Link from 'next/link'
 import { useAppSelector } from '@/store/hooks'
 import { motion } from 'framer-motion'
 import { fetchUserData } from '@/store/slices/user/userTreeDataReducer'
-import { FaHandPointRight, FaUser, FaUserPlus, FaWallet } from 'react-icons/fa'
+import {
+  FaHandPointRight,
+  FaList,
+  FaTrophy,
+  FaUser,
+  FaUserPlus,
+  FaWallet,
+} from 'react-icons/fa'
 import { FaSquareCheck } from 'react-icons/fa6'
 import Logo from '@/assets/logo2x.png'
 import { IconButton, Menu, MenuItem, Divider } from '@mui/material'
 import MoreVertIcon from '@mui/icons-material/MoreVert'
-import { Padding } from '@mui/icons-material'
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Legend,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts'
+import CountUp from 'react-countup'
 
 function UserDashboard() {
   const dispatch = useDispatch<AppDispatch>()
@@ -62,6 +79,27 @@ function UserDashboard() {
   }
   const handleMenuClose = () => {
     setAnchorEl(null)
+  }
+
+  const levelChartData =
+    userData?.level_info?.levels.map((level) => ({
+      name: `L${level.level}`,
+      users: level.total_users,
+      volume: Number(level.total_volume),
+    })) || []
+  // const levelChartData = Array.from({ length: 18 }, (_, i) => ({
+  //   name: `L ${i + 1}`,
+  //   users: Math.floor(Math.random() * 100),      // Random users
+  //   volume: Math.floor(Math.random() * 50000),   // Random volume
+  // }))
+  const [copied, setCopied] = useState(false)
+
+  const handleCopy = () => {
+    if (userData?.wallet) {
+      navigator.clipboard.writeText(userData.wallet)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    }
   }
 
   if (kycStatusLoading) {
@@ -107,7 +145,7 @@ function UserDashboard() {
         </div>
 
         <div className="flex h-auto items-center justify-center">
-          <Card className="w-[350px]  bg-white">
+          <Card className="w-[350px] sm:mt-5 lg:mt-0 mt-0  bg-white">
             <CardHeader>
               <CardTitle className="text-center flex justify-evenly">
                 <p className="flex justify-center items-center gap-1 text-[14px] text-gray-600">
@@ -143,11 +181,9 @@ function UserDashboard() {
                 <span>Your Referral Link</span>
               </CardDescription>
 
-              <Card className="h-[30px] flex justify-center items-center">
-                <div className="flex justify-center items-center w-full h-full">
-                  <span className="m-0 w-full overflow-hidden text-ellipsis whitespace-nowrap">
-                    <ReferralComponent />
-                  </span>
+              <Card className="py-0 px-2 bg-gray-100">
+                <div className="w-full overflow-hidden">
+                  <ReferralComponent />
                 </div>
               </Card>
             </CardContent>
@@ -155,7 +191,7 @@ function UserDashboard() {
         </div>
       </div>
 
-      <div className="container px-[20px] justify-center items-center m-auto lg:grid lg:grid-cols-3 grid-cols-1">
+      <div className="container px-[20px] justify-center items-center m-auto lg:grid lg:grid-cols-3 grid-cols-1 gap-4">
         <div className="col-span-full lg:col-span-2">
           <Wallets />
         </div>
@@ -241,23 +277,22 @@ function UserDashboard() {
                           list: { 'aria-labelledby': 'wallet-button' },
                         }}
                       >
-                        <MenuItem
-                          onClick={handleMenuClose}
-                          sx={{
-                            fontSize: '15px',
-                            padding: '0px 5px',
-                            fontWeight: 300,
-                            margin: 0,
-                            width: 'fit',
-                          }}
+                        <Link
+                          href="/user/stakingcontracts/restakewalletSummary"
+                          passHref
                         >
-                          <Link
-                            href="/user/stakingcontracts/restakewalletSummary"
-                            passHref
+                          <MenuItem
+                            component="a"
+                            onClick={handleMenuClose}
+                            sx={{
+                              fontSize: '15px',
+                              px: 1,
+                              fontWeight: 300,
+                            }}
                           >
-                            <span className="w-full block">View Wallet</span>
-                          </Link>
-                        </MenuItem>
+                            View Wallet
+                          </MenuItem>
+                        </Link>
 
                         <Divider />
                         <MenuItem
@@ -281,9 +316,292 @@ function UserDashboard() {
               </div>
             </CardContent>
           </Card>
-            
         </div>
-         <Card className=' w-full bg-white'><div > Club & Reward Details</div></Card>
+
+        <div className="col-span-full">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <Card className="bg-white gap-2 p-4">
+              <h4 className="text-[15px] flex gap-1 items-center font-semibold mb-4">
+                <Image
+                  alt="KAIT Logo"
+                  src={Logo}
+                  width={20}
+                  height={20}
+                  className="object-contain"
+                />
+                Available KAIT Wallet
+              </h4>
+
+              <div className="bg-white shadow rounded-xl p-4 w-full">
+                <div className="flex justify-between text-sm text-gray-600 mb-1">
+                  <span>Invested</span>
+                  <span>Kiat Wallet</span>
+                </div>
+
+                <div className="relative group">
+                  <div className="absolute -top-7 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded shadow opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
+                    <span className="flex items-center gap-1">
+                      Total:
+                      <Image
+                        alt="KAIT Logo"
+                        src={Logo}
+                        width={14}
+                        height={14}
+                        className="object-contain"
+                      />
+                      <CountUp
+                        end={Math.max(
+                          userData?.kiat_wallet ?? 0,
+                          userData?.invested ?? 0,
+                        )}
+                        duration={1.5}
+                        separator=","
+                      />
+                    </span>
+                  </div>
+
+                  <div className="w-full h-3 rounded-full bg-gray-200 overflow-hidden flex">
+                    {(() => {
+                      const invested = userData?.invested ?? 0
+                      const wallet = userData?.kiat_wallet ?? 0
+                      const total = Math.max(wallet, invested)
+
+                      const investedPercent = total
+                        ? Math.min((invested / total) * 100, 100)
+                        : 0
+
+                      const remainingPercent = total
+                        ? Math.max(((total - invested) / total) * 100, 0)
+                        : 0
+
+                      return (
+                        <>
+                          <div
+                            className="bg-green-500 transition-all duration-1000"
+                            style={{
+                              width: `${Math.max(investedPercent, 2)}%`, 
+                            }}
+                          />
+                          {remainingPercent > 0 && (
+                            <div
+                              className="bg-red-500 transition-all duration-1000"
+                              style={{
+                                width: `${remainingPercent}%`,
+                              }}
+                            />
+                          )}
+                        </>
+                      )
+                    })()}
+                  </div>
+                </div>
+
+                <div className="mt-2 text-xs text-gray-600 font-medium flex justify-between">
+                  <span className="flex items-center gap-1">
+                    Invested:
+                    <span className="text-green-500 flex items-center gap-1">
+                      <Image
+                        alt="KAIT Logo"
+                        src={Logo}
+                        width={14}
+                        height={14}
+                        className="object-contain"
+                      />
+                      <CountUp
+                        end={userData?.invested ?? 0}
+                        duration={1.5}
+                        separator=","
+                      />
+                    </span>
+                  </span>
+                  <span className="flex items-center gap-1">
+                    Remaining:
+                    <span className="text-red-500 flex items-center gap-1">
+                      <Image
+                        alt="KAIT Logo"
+                        src={Logo}
+                        width={14}
+                        height={14}
+                        className="object-contain"
+                      />
+                      <CountUp
+                        end={Math.max(
+                          (userData?.kiat_wallet ?? 0) -
+                            (userData?.invested ?? 0),
+                          0,
+                        )}
+                        duration={1.5}
+                        separator=","
+                      />
+                    </span>
+                  </span>
+                </div>
+              </div>
+            </Card>
+
+            <Card className="bg-white p-4">
+              <h4> Club Based Monthly Volume (Live)</h4>
+            </Card>
+
+            <Card className="bg-white p-4 flex flex-col gap-2 overflow-hidden">
+              <h4 className="text-base font-semibold text-gray-700">
+                Your Team Metrics - Total of {userData?.total_members ?? 0}{' '}
+                Members
+              </h4>
+
+              {userData?.club_counts ? (
+                <div className="text-sm text-gray-700 flex flex-wrap gap-2">
+                  {Object.entries(userData.club_counts).map(([club, count]) => {
+                    const countNum = Number(count)
+
+                    if (countNum === 0) {
+                      return (
+                        <span key={club} className="text-gray-400">
+                          {club}
+                        </span>
+                      )
+                    }
+
+                    if (countNum === 1) {
+                      return (
+                        <span
+                          key={club}
+                          className="font-semibold text-pink-700"
+                        >
+                          {club}
+                        </span>
+                      )
+                    }
+
+                    return (
+                      <span key={club} className="font-semibold text-pink-700">
+                        {club} - {countNum}
+                      </span>
+                    )
+                  })}
+                </div>
+              ) : (
+                <span className="text-sm text-red-500 font-medium">
+                  No Club Members associated with you !!!
+                </span>
+              )}
+            </Card>
+          </div>
+        </div>
+
+        <div className="col-span-full">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <Card className="bg-white p-4">
+              <div className="p-2">
+                <h4 className="text-lg font-bold text-center mb-2">
+                  <span className="flex justify-center items-center text-[15px] gap-1">
+                    <FaTrophy className="w-4 h-4" /> Club & Reward Details
+                  </span>
+                </h4>
+                <h5 className="font-semibold text-pink-700 border mt-6 border-pink-700 shadow-lg shadow-pink-700 px-4 py-2 rounded-xl mx-auto w-fit text-center">
+                  <span>Current Status:</span>
+                  <span className="ml-2">
+                    {userData?.team_tree?.[0]?.club || '—'}
+                  </span>
+                </h5>
+
+                <div className="overflow-hidden w-full p-3 mt-5 rounded-2xl inline-block bg-gradient-to-r from-pink-700 to-gray-800 border border-pink-700 shadow-lg shadow-pink-200/50">
+                  <CardDescription className=" text-white text-[15px] flex gap-1">
+                    <Siren color="red" className=" h-5 w-5" /> To Achive the
+                    Target of {userData?.next_progress.next_club || '—'}
+                  </CardDescription>
+                </div>
+
+                <div className="mt-4 space-y-4">
+                  {userData?.next_progress?.progress.map((item, idx) => {
+                    const total = item.required || 1
+                    const current = item.current || 0
+                    const remaining = total - current
+                    const currentPercent = Math.min(
+                      (current / total) * 100,
+                      100,
+                    )
+                    const remainingPercent = 100 - currentPercent
+
+                    return (
+                      <div key={idx} className="space-y-1">
+                        <div className="flex justify-between items-center text-sm text-gray-700">
+                          <span className="font-medium">{item.title}</span>
+                          <span className="text-xs">
+                            {current} / {total} {item.status && '✅'}
+                          </span>
+                        </div>
+
+                        <div className="w-full h-2 rounded-full bg-gray-200 overflow-hidden flex">
+                          <div
+                            className="bg-green-500 h-full transition-all duration-700"
+                            style={{ width: `${currentPercent}%` }}
+                          ></div>
+                          <div
+                            className="bg-red-500 h-full transition-all duration-700"
+                            style={{ width: `${remainingPercent}%` }}
+                          ></div>
+                        </div>
+
+                        {!item.status && (
+                          <div className="text-xs text-gray-400 text-right font-medium">
+                            {remaining} remaining
+                          </div>
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            </Card>
+
+            <Card className="bg-white p-4">
+              <h4 className="text-lg font-bold text-center mb-4">
+                <span className=" flex justify-center items-center gap-1 text-[14px]">
+                  <FaList className="w-3 h-3" /> Your Team Volume Metrics
+                </span>
+              </h4>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart
+                  data={levelChartData}
+                  margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  <Bar dataKey="users" fill="#8884d8" name="Users" />
+                  <Bar dataKey="volume" fill="#82ca9d" name="Volume" />
+                </BarChart>
+              </ResponsiveContainer>
+            </Card>
+
+            <Card className="bg-white p-4 flex flex-col gap-2 overflow-hidden">
+              <h2 className="text-lg font-semibold text-gray-700">
+                Wallet Address
+              </h2>
+              <div className="flex items-center gap-2 border border-pink-700 shadow-xl shadow-pink-300 rounded px-3 py-2 w-full overflow-hidden">
+                <span
+                  className="text-[15px] whitespace-nowrap overflow-hidden text-ellipsis flex-1"
+                  title={userData?.wallet}
+                >
+                  {userData?.wallet || '—'}
+                </span>
+                <button
+                  onClick={handleCopy}
+                  className="flex items-center px-3 py-1 bg-gradient-to-r from-pink-700 to-gray-800  hover:cursor-pointer text-white rounded-md hover:bg-blue-700"
+                  title="Copy"
+                >
+                  <ClipboardCopy size={20} />
+                </button>
+              </div>
+              {copied && (
+                <span className="text-sm text-green-600 mt-1">Copied!</span>
+              )}
+            </Card>
+          </div>
+        </div>
       </div>
     </div>
   )

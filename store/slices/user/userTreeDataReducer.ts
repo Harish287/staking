@@ -31,16 +31,40 @@ export interface TeamMember {
 }
 
 export interface Nominee {
-  name: string
-  pan: string
-  relationship: string
+  name: string | null
+  pan: string | null
+  relationship: string | null
 }
 
 export interface Bank {
-  bank_name: string
-  account_type: 'savings' | 'current'
-  account_no: string
-  ifsc_code: string
+  bank_name: string | null
+  account_type: 'savings' | 'current' | null
+  account_no: string | null
+  ifsc_code: string | null
+}
+
+export interface ProgressRequirement {
+  title: string
+  current: number
+  required: number
+  status: boolean
+  remaining: number
+}
+
+export interface NextProgress {
+  next_club: string
+  progress: ProgressRequirement[]
+}
+
+export interface Level {
+  level: number
+  total_users: number
+  total_volume: string
+}
+
+export interface LevelInfo {
+  total_levels: number
+  levels: Level[]
 }
 
 export interface UserData {
@@ -75,8 +99,10 @@ export interface UserData {
   adhoc_wallet: number
   vpay_voucher: number
   ecommerce_voucher: number
-  verified: Record<string, any> 
-  next_progress: Record<string, any> 
+  verified: Record<string, any>
+  next_progress: NextProgress
+  level_info: LevelInfo
+  club_counts: Record<string, number>
   team_tree: TeamMember[]
 }
 
