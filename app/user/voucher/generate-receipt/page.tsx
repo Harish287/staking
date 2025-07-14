@@ -142,7 +142,7 @@ export default function VoucherPage() {
 
   return (
     <div className="bg-[#F3EAD8] min-h-screen hover:bg-blue-50 transition-colors duration-2000">
-        <div className="grid md:grid-cols-[40%_60%] sm:grid-cols-1 gap-6 pt-5 max-w-6xl m-auto py-10">
+      <div className="grid md:grid-cols-[40%_60%] sm:grid-cols-1 gap-6 pt-5 max-w-6xl m-auto py-10">
         <Box className="p-6 shadow rounded bg-white space-y-6">
           <Typography variant="h6" className="font-extrabold text-2xl">
             Voucher Generator
@@ -153,23 +153,24 @@ export default function VoucherPage() {
               <CircularProgress />
             </div>
           ) : (
-            <Box className="bg-gradient-to-r from-pink-700 to-gray-800  text-white p-4 rounded-2xl space-y-2">
-           <div className=' flex items-center gap-2'>
-              <div>
-                <ReceiptIndianRupee className=' w-[40px] h-[40px]' />
+            <Box className=" bg-gradient-to-r from-blue-500 to-purple-700  text-white p-4 rounded-2xl space-y-2">
+              <div className=" flex items-center gap-2">
+                <div>
+                  <ReceiptIndianRupee className=" w-[40px] h-[40px]" />
+                </div>
+                <div>
+                  <Typography>
+                    Total Voucher Wallet | Voucher Generated
+                  </Typography>
+                  <Typography className="gap-1 flex items-center">
+                    <Image src={Logo} alt="Logo" width={20} height={20} />
+                    {balance?.total}
+                    <span>|</span>
+                    <Image src={Logo} alt="Logo" width={20} height={20} />
+                    {balance?.voucher_generated}
+                  </Typography>
+                </div>
               </div>
-              <div>
-                <Typography>
-                  Total Voucher Wallet | Voucher Generated
-                </Typography>
-                <Typography className="gap-1 flex items-center">
-                  <Image src={Logo} alt="Logo" width={20} height={20} />
-                  {balance?.total}
-                  <span>|</span>
-                  <Image src={Logo} alt="Logo" width={20} height={20} />
-                  {balance?.voucher_generated}
-                </Typography>
-              </div></div>
             </Box>
           )}
 
@@ -186,7 +187,7 @@ export default function VoucherPage() {
             <Button
               fullWidth
               variant="contained"
-              className="bg-gradient-to-r from-pink-700 to-gray-800 text-white"
+              className=" bg-gradient-to-r from-blue-500 to-purple-700 text-white"
               onClick={handleSendOtp}
               disabled={otpLoading}
             >
@@ -228,7 +229,7 @@ export default function VoucherPage() {
                 onClick={handleConfirm}
                 variant="contained"
                 disabled={generating}
-                className="bg-gradient-to-r from-pink-700 to-gray-800 text-white"
+                className=" bg-gradient-to-r from-blue-500 to-purple-700 text-white"
               >
                 {generating ? 'Generating...' : 'Confirm'}
               </Button>
@@ -243,13 +244,12 @@ export default function VoucherPage() {
           </Typography>
 
           {summaryLoading && <Typography>Loading summary...</Typography>}
-          {summaryError && (
+
+          {summaryError && summaryError !== 'No records found' && (
             <Typography className="text-red-600">{summaryError}</Typography>
           )}
-          {!summaryLoading && items.length === 0 && (
-            <Typography>No voucher transactions found.</Typography>
-          )}
-          {!summaryLoading && items.length > 0 && (
+
+          {!summaryLoading && (
             <TableContainer component={Paper} className="shadow">
               <Table size="small">
                 <TableHead>
@@ -269,28 +269,41 @@ export default function VoucherPage() {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {items.map((item, idx) => (
-                    <TableRow key={idx}>
-                      <TableCell>{item.voucher}</TableCell>
-                      <TableCell>{item.pin}</TableCell>
-                      <TableCell>₹ {item.amount}</TableCell>
-                      <TableCell>₹ {item.balance_amount}</TableCell>
-                      <TableCell>
-                        <Box className="flex items-center gap-1">
-                          <span>{item.coin}</span>
-                          <Image src={Logo} alt="logo" width={15} height={15} />
-                        </Box>
+                  {items.length > 0 ? (
+                    items.map((item, idx) => (
+                      <TableRow key={idx}>
+                        <TableCell>{item.voucher}</TableCell>
+                        <TableCell>{item.pin}</TableCell>
+                        <TableCell>₹ {item.amount}</TableCell>
+                        <TableCell>₹ {item.balance_amount}</TableCell>
+                        <TableCell>
+                          <Box className="flex items-center gap-1">
+                            <span>{item.coin}</span>
+                            <Image
+                              src={Logo}
+                              alt="logo"
+                              width={15}
+                              height={15}
+                            />
+                          </Box>
+                        </TableCell>
+                        <TableCell>
+                          {item.is_redeemed ? (
+                            <span className="text-green-600">Yes</span>
+                          ) : (
+                            <span className="text-red-600">No</span>
+                          )}
+                        </TableCell>
+                        <TableCell>{item.description}</TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={7} align="center">
+                        No voucher transactions found.
                       </TableCell>
-                      <TableCell>
-                        {item.is_redeemed ? (
-                          <span className="text-green-600">Yes</span>
-                        ) : (
-                          <span className="text-red-600">No</span>
-                        )}
-                      </TableCell>
-                      <TableCell>{item.description}</TableCell>
                     </TableRow>
-                  ))}
+                  )}
                 </TableBody>
               </Table>
             </TableContainer>

@@ -87,11 +87,7 @@ function UserDashboard() {
       users: level.total_users,
       volume: Number(level.total_volume),
     })) || []
-  // const levelChartData = Array.from({ length: 18 }, (_, i) => ({
-  //   name: `L ${i + 1}`,
-  //   users: Math.floor(Math.random() * 100),      // Random users
-  //   volume: Math.floor(Math.random() * 50000),   // Random volume
-  // }))
+
   const [copied, setCopied] = useState(false)
 
   const handleCopy = () => {
@@ -105,14 +101,14 @@ function UserDashboard() {
   if (kycStatusLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-4 border-t-pink-700 border-b-gray-800 border-l-transparent border-r-transparent"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-t-purple-700 border-b-gray-800 border-l-transparent border-r-transparent"></div>
       </div>
     )
   }
   return (
-    <div className="pt-5 bg-[#F3EAD8] hover:bg-blue-50  pb-[20px] transition-colors duration-2000">
+    <div className="pt-5 bg-[#F3EAD8] hover:bg-blue-50  pb-[20px]  transition-colors duration-2000">
       <div className="items-center mx-auto px-[20px] w-auto h-[180px ] grid grid-cols-1 lg:grid-cols-3 container mb-[20px]">
-        <div className="col-span-1 lg:col-span-2 h-[180px] ">
+        <div className="col-span-1 lg:col-span-3 h-[180px] ">
           <Carousel
             plugins={[plugin.current]}
             className="lg:px-7 px-0"
@@ -143,17 +139,23 @@ function UserDashboard() {
             </CarouselContent>
           </Carousel>
         </div>
+      </div>
 
-        <div className="flex h-auto items-center justify-center">
-          <Card className="w-[350px] sm:mt-5 lg:mt-0 mt-0  bg-white">
+      <div className="container px-[20px] mx-auto lg:grid lg:grid-cols-3 grid-cols-1 gap-4">
+        <div className="col-span-full lg:col-span-2">
+          <Wallets />
+        </div>
+
+        <div className="flex flex-col items-center justify-start gap-4 mt-6 lg:mt-0 h-full py-8">
+          <Card className="w-full  p-3 bg-white">
             <CardHeader>
-              <CardTitle className="text-center flex justify-evenly">
-                <p className="flex justify-center items-center gap-1 text-[14px] text-gray-600">
+              <CardTitle className="text-center flex justify-between items-center">
+                <p className="flex items-center gap-1 text-[14px] text-gray-600">
                   <span>KYC Status</span> <FaHandPointRight />
                 </p>
-                <div className="flex justify-center items-center">
+                <div className="flex items-center">
                   <span
-                    className={`flex items-center text-[12px] ${
+                    className={`text-[12px] flex items-center gap-1 ${
                       kycVerified ? 'text-green-600' : 'text-red-500'
                     }`}
                   >
@@ -167,7 +169,7 @@ function UserDashboard() {
                   </span>
                   {!kycVerified && (
                     <Link href="/user/kyc">
-                      <p className="text-[12px] font-normal flex justify-center items-center border-2 bg-blue-200 p-0.5 ml-3">
+                      <p className="text-[12px] font-normal border-2 bg-blue-200 p-0.5 ml-3">
                         Submit KYC
                       </p>
                     </Link>
@@ -175,9 +177,10 @@ function UserDashboard() {
                 </div>
               </CardTitle>
             </CardHeader>
+
             <CardContent>
               <CardDescription className="text-gray-600 font-bold flex items-center gap-1 mb-1">
-                <FaUserPlus className=" w-5 h-5" />
+                <FaUserPlus className="w-5 h-5" />
                 <span>Your Referral Link</span>
               </CardDescription>
 
@@ -188,22 +191,13 @@ function UserDashboard() {
               </Card>
             </CardContent>
           </Card>
-        </div>
-      </div>
-
-      <div className="container px-[20px] justify-center items-center m-auto lg:grid lg:grid-cols-3 grid-cols-1 gap-4">
-        <div className="col-span-full lg:col-span-2">
-          <Wallets />
-        </div>
-
-        <div className="flex justify-center lg:justify-center items-center mt-6 lg:mt-0 h-[100%] p-8">
-          <Card className="w-[350px] h-[100%] bg-white">
+          <Card className="w-full  p-3 bg-white">
             <CardHeader>
-              <CardTitle className=" justify-center items-center flex gap-1 text-gray-600">
-                <Bell className=" w-5 h-5 text-red-500" />
+              <CardTitle className="flex items-center justify-center gap-2 text-gray-600">
+                <Bell className="w-5 h-5 text-red-500" />
                 Flash Notification
               </CardTitle>
-              <div className="overflow-hidden w-full p-3 mt-2 rounded-2xl inline-block bg-gradient-to-r from-pink-700 to-gray-800 border border-pink-700 shadow-lg shadow-pink-200/50">
+              <div className="overflow-hidden w-full p-3 mt-2 rounded-2xl  bg-gradient-to-r from-blue-500 to-purple-700 border border-purple-700 shadow-lg shadow-purple-200/50">
                 <motion.div
                   className="whitespace-nowrap"
                   animate={{ x: ['100%', '-100%'] }}
@@ -213,21 +207,23 @@ function UserDashboard() {
                     ease: 'linear',
                   }}
                 >
-                  <CardDescription className=" text-white text-[15px] flex gap-1">
-                    <Siren color="red" className=" h-5 w-5" /> Welcome to KAIT
-                    Staking Platform
+                  <CardDescription className="text-white text-[15px] flex gap-1">
+                    <Siren color="red" className="h-5 w-5" />
+                    Welcome to KAIT Staking Platform
                   </CardDescription>
                 </motion.div>
               </div>
             </CardHeader>
+
             <CardContent>
-              <Card className="h-[30px] flex justify-center items-center  border-pink-700 shadow-lg shadow-pink-200/50">
-                <div className=" flex gap-1 text-gray-600">
-                  <span> Membership Since </span>
-                  <span className=" font-bold">{userData?.joining_date}</span>
+              <Card className="h-[30px] flex justify-center items-center border-purple-700 shadow-lg shadow-purple-200/50">
+                <div className="flex gap-1 text-gray-600">
+                  <span>Membership Since</span>
+                  <span className="font-bold">{userData?.joining_date}</span>
                 </div>
               </Card>
             </CardContent>
+
             <CardContent>
               <div className="flex flex-col text-sm font-medium text-gray-700">
                 <span className="text-gray-500 flex gap-1 items-center">
@@ -239,13 +235,13 @@ function UserDashboard() {
 
             <CardContent>
               <div className="flex flex-col items-center gap-4">
-                <span className="border px-3 py-1 border-red-700 text-pink-700 rounded-xl flex items-center gap-2 text-sm">
+                <span className="border px-3 py-1 border-red-700 text-purple-700 rounded-xl flex items-center gap-2 text-sm">
                   <FaWallet /> Restake Wallet
                 </span>
 
                 <span className="text-sm text-gray-800 font-semibold">
                   Balance:
-                  <div className=" flex items-center">
+                  <div className="flex items-center">
                     <span className="text-black flex items-center gap-1 ml-1">
                       <Image
                         alt="KAIT Logo"
@@ -278,34 +274,21 @@ function UserDashboard() {
                         }}
                       >
                         <Link
-                          href="/user/stakingcontracts/restakewalletSummary"
+                          href="/user/stakingcontracts/walletSummary?wallet_kind=ReStakeWallet&page=1"
                           passHref
                         >
                           <MenuItem
                             component="a"
                             onClick={handleMenuClose}
-                            sx={{
-                              fontSize: '15px',
-                              px: 1,
-                              fontWeight: 300,
-                            }}
+                            sx={{ fontSize: '15px', px: 1 }}
                           >
                             View Wallet
                           </MenuItem>
                         </Link>
-
                         <Divider />
                         <MenuItem
-                          onClick={() => {
-                            handleMenuClose()
-                          }}
-                          sx={{
-                            fontSize: '15px',
-                            padding: '0px 5px',
-                            fontWeight: 300,
-                            margin: 0,
-                            width: 'fit',
-                          }}
+                          onClick={handleMenuClose}
+                          sx={{ fontSize: '15px', px: 1 }}
                         >
                           Restake from Wallet
                         </MenuItem>
@@ -316,6 +299,8 @@ function UserDashboard() {
               </div>
             </CardContent>
           </Card>
+
+          {/* KYC Card */}
         </div>
 
         <div className="col-span-full">
@@ -377,14 +362,14 @@ function UserDashboard() {
                       return (
                         <>
                           <div
-                            className="bg-green-500 transition-all duration-1000"
+                            className="bg-emerald-400 transition-all duration-1000"
                             style={{
-                              width: `${Math.max(investedPercent, 2)}%`, 
+                              width: `${Math.max(investedPercent, 2)}%`,
                             }}
                           />
                           {remainingPercent > 0 && (
                             <div
-                              className="bg-red-500 transition-all duration-1000"
+                              className="bg-red-400 transition-all duration-1000"
                               style={{
                                 width: `${remainingPercent}%`,
                               }}
@@ -425,11 +410,7 @@ function UserDashboard() {
                         className="object-contain"
                       />
                       <CountUp
-                        end={Math.max(
-                          (userData?.kiat_wallet ?? 0) -
-                            (userData?.invested ?? 0),
-                          0,
-                        )}
+                        end={Math.max(userData?.kiat_wallet ?? 0, 0)}
                         duration={1.5}
                         separator=","
                       />
@@ -443,39 +424,33 @@ function UserDashboard() {
               <h4> Club Based Monthly Volume (Live)</h4>
             </Card>
 
-            <Card className="bg-white p-4 flex flex-col gap-2 overflow-hidden">
+            <Card className="bg-white p-4 flex flex-col gap-4 overflow-hidden">
               <h4 className="text-base font-semibold text-gray-700">
-                Your Team Metrics - Total of {userData?.total_members ?? 0}{' '}
+                Your Team Metrics – Total of {userData?.total_members ?? 0}{' '}
                 Members
               </h4>
 
-              {userData?.club_counts ? (
-                <div className="text-sm text-gray-700 flex flex-wrap gap-2">
+              {userData?.club_counts &&
+              Object.keys(userData.club_counts).length > 0 ? (
+                <div className="text-sm text-gray-700 flex flex-wrap gap-3">
                   {Object.entries(userData.club_counts).map(([club, count]) => {
                     const countNum = Number(count)
 
-                    if (countNum === 0) {
-                      return (
-                        <span key={club} className="text-gray-400">
-                          {club}
-                        </span>
-                      )
-                    }
-
-                    if (countNum === 1) {
-                      return (
-                        <span
-                          key={club}
-                          className="font-semibold text-pink-700"
-                        >
-                          {club}
-                        </span>
-                      )
-                    }
-
                     return (
-                      <span key={club} className="font-semibold text-pink-700">
-                        {club} - {countNum}
+                      <span
+                        key={club}
+                        className={`px-3 py-1 rounded-full border transition
+              ${
+                countNum === 0
+                  ? 'text-gray-400 border-gray-200 bg-gray-50'
+                  : 'text-purple-700 font-semibold border-purple-200 bg-purple-50'
+              }`}
+                      >
+                        {countNum === 0
+                          ? club
+                          : countNum === 1
+                            ? `${club}`
+                            : `${club} - ${countNum}`}
                       </span>
                     )
                   })}
@@ -498,16 +473,19 @@ function UserDashboard() {
                     <FaTrophy className="w-4 h-4" /> Club & Reward Details
                   </span>
                 </h4>
-                <h5 className="font-semibold text-pink-700 border mt-6 border-pink-700 shadow-lg shadow-pink-700 px-4 py-2 rounded-xl mx-auto w-fit text-center">
+                <h5 className="font-semibold text-purple-700 border mt-6 border-purple-700 shadow-lg shadow-purple-700 px-4 py-2 rounded-xl mx-auto w-fit text-center">
                   <span>Current Status:</span>
                   <span className="ml-2">
                     {userData?.team_tree?.[0]?.club || '—'}
                   </span>
                 </h5>
 
-                <div className="overflow-hidden w-full p-3 mt-5 rounded-2xl inline-block bg-gradient-to-r from-pink-700 to-gray-800 border border-pink-700 shadow-lg shadow-pink-200/50">
-                  <CardDescription className=" text-white text-[15px] flex gap-1">
-                    <Siren color="red" className=" h-5 w-5" /> To Achive the
+                <div className="overflow-hidden w-full p-3 mt-5 rounded-2xl inline-block  bg-gradient-to-r from-blue-500 to-purple-700 border border-purple-700 shadow-lg shadow-purple-200/50">
+                  <CardDescription
+                    className=" text-white text-[15px] animate-bounce
+                  flex gap-1"
+                  >
+                    <Siren color="red" className=" h-5 w-5 " /> To Achive the
                     Target of {userData?.next_progress.next_club || '—'}
                   </CardDescription>
                 </div>
@@ -534,11 +512,11 @@ function UserDashboard() {
 
                         <div className="w-full h-2 rounded-full bg-gray-200 overflow-hidden flex">
                           <div
-                            className="bg-green-500 h-full transition-all duration-700"
+                            className="bg-emerald-400 h-full transition-all duration-700"
                             style={{ width: `${currentPercent}%` }}
                           ></div>
                           <div
-                            className="bg-red-500 h-full transition-all duration-700"
+                            className="bg-red-400 h-full transition-all duration-700"
                             style={{ width: `${remainingPercent}%` }}
                           ></div>
                         </div>
@@ -581,7 +559,7 @@ function UserDashboard() {
               <h2 className="text-lg font-semibold text-gray-700">
                 Wallet Address
               </h2>
-              <div className="flex items-center gap-2 border border-pink-700 shadow-xl shadow-pink-300 rounded px-3 py-2 w-full overflow-hidden">
+              <div className="flex items-center gap-2 border border-purple-700 shadow-xl shadow-purple-300 rounded px-3 py-2 w-full overflow-hidden">
                 <span
                   className="text-[15px] whitespace-nowrap overflow-hidden text-ellipsis flex-1"
                   title={userData?.wallet}
@@ -590,7 +568,7 @@ function UserDashboard() {
                 </span>
                 <button
                   onClick={handleCopy}
-                  className="flex items-center px-3 py-1 bg-gradient-to-r from-pink-700 to-gray-800  hover:cursor-pointer text-white rounded-md hover:bg-blue-700"
+                  className="flex items-center px-3 py-1  bg-gradient-to-r from-blue-500 to-purple-700  hover:cursor-pointer text-white rounded-md hover:bg-blue-700"
                   title="Copy"
                 >
                   <ClipboardCopy size={20} />

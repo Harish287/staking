@@ -51,9 +51,11 @@ const KaitWalletTransfer = () => {
   const { users: eligibleUsers } = useAppSelector(
     (state) => state.eligibleUsersTransfer,
   )
-
+  const { data: userData, loading: userLoading } = useAppSelector(
+    (state) => state.UserTree,
+  )
   const walletBalance =
-    useAppSelector((state) => state.auth.user?.kait_wallet) || 0
+    useAppSelector((state) => userData?.kiat_wallet || '0') || 0
 
   const [openDialog, setOpenDialog] = useState(false)
   const [selectedUser, setSelectedUser] = useState<any>(null)
@@ -167,14 +169,14 @@ const KaitWalletTransfer = () => {
     }
   }, [otpSuccess, otpError, dispatch])
 
-      if (otpLoading || transferLoading) {
+  if (otpLoading || transferLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-4 border-t-pink-700 border-b-gray-800 border-l-transparent border-r-transparent"></div>
       </div>
     )
   }
-  
+
   return (
     <div className="pt-5 bg-[#F3EAD8] hover:bg-blue-50 pb-10 transition-colors duration-2000 mx-auto px-4 sm:px-6 lg:px-8">
       <div className="container m-auto">
@@ -182,20 +184,20 @@ const KaitWalletTransfer = () => {
           <ArrowRightLeft className="mr-2" /> Transfer kait Wallet
         </h1>
         <div className="bg-white rounded-lg shadow-lg p-4">
-           <h2 className="text-lg p-2 rounded-[10px] flex  w-fit font-semibold mb-2 bg-gradient-to-r from-pink-700 to-gray-800 text-white">
-                      Kait Wallet Balance:
-                      <div className=" flex items-center ml-0.5">
-                        <Image
-                          src={Logo}
-                          alt="Logo"
-                          priority
-                          width={15}
-                          height={15}
-                          className=" mr-0.5"
-                        />
-                        <span>{walletBalance}</span>
-                      </div>
-                    </h2>
+          <h2 className="text-lg p-2 rounded-[10px] flex  w-fit font-semibold mb-2  bg-gradient-to-r from-blue-500 to-purple-700 text-white">
+            Kait Wallet Balance:
+            <div className=" flex items-center ml-0.5">
+              <Image
+                src={Logo}
+                alt="Logo"
+                priority
+                width={15}
+                height={15}
+                className=" mr-0.5"
+              />
+              <span>{walletBalance}</span>
+            </div>
+          </h2>
           <div className="flex flex-col md:flex-row gap-6">
             {/* Wallet Summary */}
             <div className="md:w-1/3">

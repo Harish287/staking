@@ -43,7 +43,7 @@ export const fetchRosWithdrawSummary = createAsyncThunk(
     { rejectWithValue },
   ) => {
     try {
-      const token = localStorage.getItem('token') || '' 
+      const token = localStorage.getItem('token') || ''
       const response = await axios.get(
         `${baseURL}withdraw/ros/summary?review_status=${review_status}&page=${page}&page_size=${page_size}`,
         {
@@ -72,14 +72,19 @@ const RosSummarySlice = createSlice({
       })
       .addCase(fetchRosWithdrawSummary.fulfilled, (state, action) => {
         state.loading = false
-        state.items = action.payload.items
-        state.total = action.payload.total
-        state.page = action.payload.page
-        state.total_pages = action.payload.total_pages
+        state.items = action.payload.items || []
+        state.total = action.payload.total || 0
+        state.page = action.payload.page || 1
+        state.total_pages = action.payload.total_pages || 0
+        state.error = null
       })
       .addCase(fetchRosWithdrawSummary.rejected, (state, action) => {
         state.loading = false
-        state.error = action.payload as string
+        const errorMsg = action.payload as string
+        state.error = errorMsg === 'No records found' ? null : errorMsg
+        if (errorMsg === 'No records found') {
+          state.items = []
+        }
       })
   },
 })

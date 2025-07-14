@@ -1,3 +1,4 @@
+
 'use client'
 
 import React, { useEffect, useState } from 'react'
@@ -12,7 +13,13 @@ import { Spinner } from '@/components/ui/spinner'
 import Image from 'next/image'
 import Logo from '../../../assets/logo2x.png'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { TextField } from '@mui/material'
+import {
+  TextField,
+  IconButton,
+  InputAdornment,
+} from '@mui/material'
+import { Visibility, VisibilityOff } from '@mui/icons-material'
+import toast, { Toaster } from 'react-hot-toast'
 
 type FormData = {
   first_name: string
@@ -42,6 +49,7 @@ const RegisterPage: React.FC = () => {
     handleSubmit,
     formState: { errors },
     setError,
+    watch,
   } = useForm<FormData>()
 
   const dispatch = useDispatch<AppDispatch>()
@@ -52,10 +60,11 @@ const RegisterPage: React.FC = () => {
   const [email, setEmail] = useState('')
   const [resendLoading, setResendLoading] = useState(false)
   const [timer, setTimer] = useState(0)
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null
-
     if (timer > 0) {
       interval = setInterval(() => {
         setTimer((prev) => prev - 1)
@@ -63,7 +72,6 @@ const RegisterPage: React.FC = () => {
     } else if (interval) {
       clearInterval(interval)
     }
-
     return () => {
       if (interval) clearInterval(interval)
     }
@@ -89,14 +97,30 @@ const RegisterPage: React.FC = () => {
     try {
       await dispatch(registerUser(finalData)).unwrap()
       setEmail(data.email)
-      alert(
-        'A verification email has been sent. Please check your inbox and verify your email to complete registration.',
+      toast.success(
+        'Verification email sent. Please check your inbox to complete registration.',
       )
       setShowResend(true)
       setTimer(30)
     } catch (error: any) {
       console.error('Registration error:', error)
-      alert(error.detail || 'An unexpected error occurred. Please try again.')
+
+      const message =
+        error?.detail || error?.message || 'An unexpected error occurred.'
+
+      if (
+        error?.code === 'email_not_verified' ||
+        message.toLowerCase().includes('not verified')
+      ) {
+        setEmail(data.email)
+        toast.error(
+          'Email already registered but not verified. You can resend it.',
+        )
+        setShowResend(true)
+        setTimer(30)
+      } else {
+        toast.error(message)
+      }
     } finally {
       setLoading(false)
     }
@@ -104,43 +128,42 @@ const RegisterPage: React.FC = () => {
 
   const handleResendEmail = async (email: string) => {
     setResendLoading(true)
-
     try {
       await dispatch(resendConfirmationEmail({ email })).unwrap()
-      alert('A new verification email has been sent.')
+      toast.success('Verification email resent successfully.')
       setTimer(30)
     } catch (error: any) {
-      console.error('Error resending email:', error)
-      alert(error || 'Failed to resend email. Please try again later.')
+      console.error('Resend error:', error)
+      toast.error(
+        error?.detail || error?.message || 'Failed to resend. Try again later.',
+      )
     } finally {
       setResendLoading(false)
     }
   }
 
+  const password = watch('password')
+
   return (
     <div className="flex justify-center items-center lg:px-[160px] p-0 lg:py-[50px]">
-      <div className="text-white w-[auto] h-[auto] bg-gradient-to-r from-pink-700 to-gray-800 flex container justify-center rounded-2xl">
+      <Toaster position="top-right" />
+      <div className="text-white w-auto h-auto bg-gradient-to-r from-blue-500 to-purple-700 flex container justify-center rounded-2xl">
         <div className="hidden w-1/2 relative overflow-hidden p-[50px] rounded-2xl lg:items-center bg-black lg:flex">
           <div>
             <Image src={Logo} alt="Logo" className="mx-auto mb-5" />
             <h1 className="text-2xl font-bold text-center">KAIT Staking</h1>
             <p className="mt-5 text-[15px] text-white mb-5">
               Our vision is to disrupt the current financial landscape and give
-              everyday investors more control over their financial futures. We
-              are focused on building this platform so that anyone can benefit
-              from the technology behind cryptocurrencies by making investing in
-              cryptocurrencies more accessible and secure for everyone.
+              everyday investors more control over their financial futures.
             </p>
-            <p className='className="mt-5 text-[15px] text-white"'>
-              With our platform, investors will have the ability to invest in
-              the tokens of their choice at prices which are more representative
-              of the underlying value of the asset and limit exposure to market
-              volatility.
+            <p className="text-[15px] text-white">
+              With our platform, investors will be able to invest securely in
+              cryptocurrencies and gain from market opportunities.
             </p>
           </div>
         </div>
 
-        <div className="flex flex-col justify-center items-center bg-transparent bg-gradient-to-r from-pink-700 to-gray-800 p-12 w-full lg:w-1/2 lg:mr-[30px] rounded-2xl">
+        <div className="flex flex-col justify-center items-center bg-transparent bg-gradient-to-r from-blue-500 to-purple-700 p-12 w-full lg:w-1/2 lg:mr-[30px] rounded-2xl">
           <Image src={Logo} alt="Logo" className="mx-auto mb-5" />
           <h1 className="text-2xl font-semibold pb-2">Sign Up</h1>
 
@@ -160,7 +183,6 @@ const RegisterPage: React.FC = () => {
               },
               {
                 name: 'dob',
-                // label: 'Date of Birth',
                 type: 'date',
                 required: 'Date of birth is required',
               },
@@ -173,18 +195,28 @@ const RegisterPage: React.FC = () => {
               {
                 name: 'password',
                 label: 'Password',
-                type: 'password',
+                type: showPassword ? 'text' : 'password',
                 required: 'Password is required',
                 minLength: {
                   value: 6,
-                  message: 'Password must be at least 6 characters long',
+                  message: 'Password must be at least 6 characters',
                 },
+                endAdornment: (
+                  <IconButton className=' text-white' onClick={() => setShowPassword((prev) => !prev)}>
+                    {showPassword ? <VisibilityOff className=' text-white'/> : <Visibility className=' text-white' />}
+                  </IconButton>
+                ),
               },
               {
                 name: 'confirm_password',
                 label: 'Confirm Password',
-                type: 'password',
+                type: showConfirmPassword ? 'text' : 'password',
                 required: 'Please confirm your password',
+                endAdornment: (
+                  <IconButton className=' text-white' onClick={() => setShowConfirmPassword((prev) => !prev)}>
+                    {showConfirmPassword ? <VisibilityOff className=' text-white'/> : <Visibility className=' text-white' />}
+                  </IconButton>
+                ),
               },
               {
                 name: 'mobile',
@@ -202,10 +234,13 @@ const RegisterPage: React.FC = () => {
                   slotProps={{
                     input: {
                       style: { color: 'white' },
+                      endAdornment: field.endAdornment ? (
+                        <InputAdornment position="end">
+                          {field.endAdornment}
+                        </InputAdornment>
+                      ) : undefined,
                     },
-                    inputLabel: {
-                      style: { color: 'white' },
-                    },
+                    inputLabel: { style: { color: 'white' } },
                   }}
                   sx={{
                     '& .MuiOutlinedInput-root': {
@@ -217,10 +252,16 @@ const RegisterPage: React.FC = () => {
                   {...register(field.name as keyof FormData, {
                     required: field.required,
                     ...(field.minLength ? { minLength: field.minLength } : {}),
+                    validate:
+                      field.name === 'confirm_password'
+                        ? (value) =>
+                            value === password ||
+                            'Passwords do not match'
+                        : undefined,
                   })}
                 />
                 {errors[field.name as keyof FormData] && (
-                  <p className="text-red-500 text-sm">
+                  <p className="text-red-500 text-sm mt-1">
                     {errors[field.name as keyof FormData]?.message as string}
                   </p>
                 )}
@@ -230,15 +271,15 @@ const RegisterPage: React.FC = () => {
             {hasReferralToken ? (
               <button
                 type="submit"
-                className="w-full bg-gradient-to-r from-pink-700 to-gray-800 text-white font-semibold py-2 rounded-md mt-4 hover:scale-105"
+                className="w-full bg-gradient-to-r from-blue-500 to-purple-700 text-white font-semibold py-2 rounded-md mt-4 hover:scale-105"
                 disabled={loading}
               >
                 {loading ? <Spinner /> : 'Sign Up'}
               </button>
             ) : (
               <div className="w-full bg-red-500 text-white font-semibold py-2 rounded-md mt-4 text-center">
-                Sorry, you are not supposed to register without Referral. Please
-                use the link properly to register.
+                Sorry, you are not supposed to register without a Referral. Use
+                the correct link.
               </div>
             )}
           </form>
@@ -264,7 +305,7 @@ const RegisterPage: React.FC = () => {
             Already have an account?{' '}
             <a
               href="/auth/signin"
-              className="text-pink-700 font-semibold hover:underline"
+              className="text-red-300 font-semibold hover:underline"
             >
               Sign in here
             </a>

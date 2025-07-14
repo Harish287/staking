@@ -128,7 +128,7 @@ function Navigation() {
           <MdOutlineDashboard className=" text-[23px]" /> Dashboard
         </Link>
 
-        <div className="flex">
+        {/* <div className="flex">
           <div className="group relative cursor-pointer">
             <div
               className={`flex justify-center items-center py-[12px] gap-1.5 ${
@@ -177,7 +177,7 @@ function Navigation() {
               </Link>
             </div>
           </div>
-        </div>
+        </div> */}
 
         <div className="flex">
           <div className="group relative cursor-pointer">
@@ -215,6 +215,12 @@ function Navigation() {
                 All Contracts
               </Link>
               <Link
+                href="/admin/stakingcontracts/walletSummary"
+                className="my-2 block border-b border-gray-100 font-semibold   text-[#7668fe] hover:duration-1000 hover:text-black md:mx-2"
+              >
+                Wallet Summary
+              </Link>
+              {/* <Link
                 href="/admin/stakingcontracts/incomeAccountSummary"
                 className="my-2 block border-b border-gray-100 font-semibold   text-[#7668fe] hover:duration-1000 hover:text-black md:mx-2"
               >
@@ -243,7 +249,7 @@ function Navigation() {
                 className="my-2 block border-b border-gray-100 font-semibold   text-[#7668fe] hover:duration-1000 hover:text-black md:mx-2"
               >
                 Restake Wallet Summary
-              </Link>
+              </Link> */}
               <Link
                 href="/admin/stakingcontracts/ClubVolume"
                 className="my-2 block border-b border-gray-100 font-semibold   text-[#7668fe] hover:duration-1000 hover:text-black md:mx-2"
@@ -360,6 +366,12 @@ function Navigation() {
                 className="my-2 block border-b border-gray-100 font-semibold   text-[#7668fe] hover:duration-1000 hover:text-black md:mx-2"
               >
                 admin Metrics
+              </Link>
+                <Link
+                href="/admin/settings/addWallet"
+                className="my-2 block border-b border-gray-100 font-semibold   text-[#7668fe] hover:duration-1000 hover:text-black md:mx-2"
+              >
+               WalletSplit Config
               </Link>
               <Link
                 href="/admin/settings/stakePlans"

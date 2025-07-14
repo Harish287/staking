@@ -85,7 +85,8 @@ function Navigation() {
   const isTransfer = pathname.startsWith('/user/transfers')
   return (
     <div className="bg-white box-border shadow-xl">
-      <nav className="bg-gradient-to-r from-pink-700 to-gray-800 ">
+      {/* bg-gradient-to-r from-pink-700 to-gray-800 */}
+      <nav className=" bg-gradient-to-r from-blue-500 to-purple-700 ">
         <div className=" container m-auto flex h-14 justify-between items-center px-4 md:px-20">
           <Image
             className=" w-[45px] h-[45px] border-[white] border-4 rounded-[60px] items-center flex "
@@ -119,7 +120,7 @@ function Navigation() {
                     <DropdownMenuItem>
                       <Link
                         href="/user/profile"
-                        className="gap-1 flex justify-between items-center border-b border-gray-100 font-semibold text-pink-800 hover:text-pink-700 md:mx-2"
+                        className="gap-1 flex  w-full items-center border-b border-gray-100 font-semibold text-purple-800 hover:text-purple-700 md:mx-2"
                       >
                         <User />
                         My Profile
@@ -130,7 +131,7 @@ function Navigation() {
                     <DropdownMenuItem>
                       <Link
                         href=""
-                        className=" gap-1 flex justify-between items-center  border-b border-gray-100 font-semibold text-pink-800 hover:text-pink-700 md:mx-2"
+                        className=" gap-1 flex  w-full items-center  border-b border-gray-100 font-semibold text-purple-800 hover:text-purple-700 md:mx-2"
                       >
                         <Eye /> Activity
                       </Link>
@@ -142,7 +143,7 @@ function Navigation() {
                       <Link
                         href="/auth/signin"
                         onClick={handleLogout}
-                        className="gap-1 flex justify-between items-center border-b border-gray-100 font-semibold text-pink-800 hover:text-pink-700 md:mx-2"
+                        className="gap-1 flex  w-full items-center border-b border-gray-100 font-semibold text-purple-800 hover:text-purple-700 md:mx-2"
                       >
                         <Power /> Logout
                       </Link>
@@ -200,9 +201,9 @@ function Navigation() {
       >
         <Link
           href="/user/dashboard"
-          className={`flex justify-center text-[14px] items-center py-[12px] gap-[5px] text-pink-800 ${
+          className={`flex justify-center text-[14px] items-center py-[12px] gap-[5px] text-purple-800 ${
             pathname === '/user/dashboard'
-              ? 'border-b-2 border-pink-800 font-semibold'
+              ? 'border-b-2 border-purple-800 font-semibold'
               : ''
           }`}
         >
@@ -212,9 +213,9 @@ function Navigation() {
         <div className="flex">
           <div className="group relative cursor-pointer">
             <div
-              className={`flex items-center justify-center py-[12px] text-pink-800 ${
+              className={`flex items-center justify-center py-[12px] text-purple-800 ${
                 isKaitWalletActive
-                  ? 'border-b-2 border-pink-800 font-semibold'
+                  ? 'border-b-2 border-purple-800 font-semibold'
                   : ''
               }`}
             >
@@ -237,10 +238,10 @@ function Navigation() {
               </span>
             </div>
 
-            <div className="invisible absolute z-50 text-[14px] flex w-max h-auto flex-col bg-gray-100 py-1 px-4 text-pink-800 shadow-xl group-hover:visible">
+            <div className="invisible absolute z-50 text-[14px] flex w-max h-auto flex-col bg-gray-100 py-1 px-4 text-purple-800 shadow-xl group-hover:visible">
               <Link
                 href="/user/kaitwallet/summary "
-                className="my-2 flex border-b items-center border-gray-100  text-pink-800 hover:text-pink-700 md:mx-2"
+                className="my-2 flex border-b items-center border-gray-100  text-purple-800 hover:text-purple-700 md:mx-2"
               >
                 <NotebookText className="w-[14px] mr-[2px]" />
                 Summary
@@ -252,15 +253,15 @@ function Navigation() {
         <div className="flex">
           <div className="group relative cursor-pointer">
             <div
-              className={`flex items-center justify-center py-[12px] text-pink-800 ${
+              className={`flex items-center justify-center py-[12px] text-purple-800 ${
                 isStakingActive
-                  ? 'border-b-2 border-pink-800 font-semibold'
+                  ? 'border-b-2 border-purple-800 font-semibold'
                   : ''
               }`}
             >
               <Link
                 href="#"
-                className="menu-hover text-[14px] font-medium text-pink-800 flex items-center justify-center  gap-[5px]"
+                className="menu-hover text-[14px] font-medium text-purple-800 flex items-center justify-center  gap-[5px]"
               >
                 <GrShareOption className=" text-[14px]" /> Staking Contracts
               </Link>
@@ -277,24 +278,31 @@ function Navigation() {
               </span>
             </div>
 
-            <div className="invisible text-[14px] absolute z-50 flex w-max h-auto flex-col bg-gray-100 py-1 px-4 text-pink-800 shadow-xl group-hover:visible">
+            <div className="invisible text-[14px] absolute z-50 flex w-max h-auto flex-col bg-gray-100 py-1 px-4 text-purple-800 shadow-xl group-hover:visible">
               <Link
                 href="/user/stakingcontracts/newStaking"
-                className="my-2 flex border-b border-gray-100 items-center text-pink-800 hover:text-pink-700 md:mx-2"
+                className="my-2 flex border-b border-gray-100 items-center text-purple-800 hover:text-purple-700 md:mx-2"
               >
                 <ArrowUpFromLine className=" mr-2 w-[15px]" />
                 New Staking
               </Link>
               <Link
                 href="/user/stakingcontracts/yourstakingcontracts"
-                className="my-2 flex border-b border-gray-100 items-center text-pink-800 hover:text-pink-700 md:mx-2"
+                className="my-2 flex border-b border-gray-100 items-center text-purple-800 hover:text-purple-700 md:mx-2"
               >
                 <ArrowUpFromLine className=" mr-2 w-[15px]" /> Your Staking
                 Contracts
               </Link>
               <Link
+                href="/user/stakingcontracts/walletSummary"
+                className="my-2 flex border-b border-gray-100 items-center text-purple-800 hover:text-purple-700 md:mx-2"
+              >
+                <ChartBar className=" mr-2 w-[15px]" />
+                Wallet Summary
+              </Link>
+              {/* <Link
                 href="/user/stakingcontracts/roswalletsummary"
-                className="my-2 flex border-b border-gray-100 items-center text-pink-800 hover:text-pink-700 md:mx-2"
+                className="my-2 flex border-b border-gray-100 items-center text-purple-800 hover:text-purple-700 md:mx-2"
               >
                 <ChartBar className=" mr-2 w-[15px]" />
                 ROS Wallet Summary
@@ -302,48 +310,48 @@ function Navigation() {
 
               <Link
                 href="/user/stakingcontracts/incomewalletsummary"
-                className="my-2 flex border-b border-gray-100 items-center text-pink-800 hover:text-pink-700 md:mx-2"
+                className="my-2 flex border-b border-gray-100 items-center text-purple-800 hover:text-purple-700 md:mx-2"
               >
                 <ChartBar className=" mr-2 w-[15px]" />
                 Income Wallet Summary
               </Link>
               <Link
                 href="/user/stakingcontracts/adhocwalletsummary"
-                className="my-2 flex border-b border-gray-100 items-center text-pink-800 hover:text-pink-700 md:mx-2"
+                className="my-2 flex border-b border-gray-100 items-center text-purple-800 hover:text-purple-700 md:mx-2"
               >
                 <ChartBar className=" mr-2 w-[15px]" />
                 Adhoc Wallet Summary
               </Link>
               <Link
                 href="/user/stakingcontracts/bonuswalletsummary"
-                className="my-2 flex border-b border-gray-100 items-center text-pink-800 hover:text-pink-700 md:mx-2"
+                className="my-2 flex border-b border-gray-100 items-center text-purple-800 hover:text-purple-700 md:mx-2"
               >
                 <ChartBar className=" mr-2 w-[15px]" />
                 Bonus Wallet Summary
               </Link>
-               <Link
+              <Link
                 href="/user/stakingcontracts/restakewalletSummary"
-                className="my-2 flex border-b border-gray-100 items-center text-pink-800 hover:text-pink-700 md:mx-2"
+                className="my-2 flex border-b border-gray-100 items-center text-purple-800 hover:text-purple-700 md:mx-2"
               >
                 <ChartBar className=" mr-2 w-[15px]" />
                 Restake Wallet Summary
-              </Link>
+              </Link> */}
               {/* <Link
                 href="/user/stakingcontracts/incomewithdrawal"
-                className="my-2 block border-b border-gray-100  text-pink-800 hover:text-pink-700 md:mx-2"
+                className="my-2 block border-b border-gray-100  text-purple-800 hover:text-purple-700 md:mx-2"
               >
                 Income-Widthrawal
               </Link> */}
               <Link
                 href="/user/stakingcontracts/roswithdrawal"
-                className="my-2 flex border-b border-gray-100 items-center text-pink-800 hover:text-pink-700 md:mx-2"
+                className="my-2 flex border-b border-gray-100 items-center text-purple-800 hover:text-purple-700 md:mx-2"
               >
                 <Download className=" mr-2 w-[15px]" />
                 ROS - Widthrawal
               </Link>
               <Link
                 href="/user/stakingcontracts/fiatwithdrawal"
-                className="my-2 flex border-b border-gray-100 items-center text-pink-800 hover:text-pink-700 md:mx-2"
+                className="my-2 flex border-b border-gray-100 items-center text-purple-800 hover:text-purple-700 md:mx-2"
               >
                 <Download className=" mr-2 w-[15px]" />
                 Fiat - Widthrawal
@@ -354,9 +362,9 @@ function Navigation() {
 
         <Link
           href="/user/teamsummary"
-          className={`flex justify-center text-[14px] items-center py-[12px] gap-[5px] text-pink-800 ${
+          className={`flex justify-center text-[14px] items-center py-[12px] gap-[5px] text-purple-800 ${
             pathname === '/user/teamsummary'
-              ? 'border-b-2 border-pink-800 font-semibold'
+              ? 'border-b-2 border-purple-800 font-semibold'
               : ''
           }`}
         >
@@ -366,13 +374,13 @@ function Navigation() {
         <div className="flex">
           <div className="group relative cursor-pointer">
             <div
-              className={`flex items-center justify-center py-[12px] text-pink-800 ${
-                isvoucher ? 'border-b-2 border-pink-800 font-semibold' : ''
+              className={`flex items-center justify-center py-[12px] text-purple-800 ${
+                isvoucher ? 'border-b-2 border-purple-800 font-semibold' : ''
               }`}
             >
               <Link
                 href="#"
-                className="menu-hover text-[14px] font-medium text-pink-800 flex items-center justify-center  gap-[5px]"
+                className="menu-hover text-[14px] font-medium text-purple-800 flex items-center justify-center  gap-[5px]"
               >
                 <PiHandbagFill className=" text-[14px]" />
                 Voucher
@@ -390,23 +398,23 @@ function Navigation() {
               </span>
             </div>
 
-            <div className="invisible text-[14px] absolute z-50 flex w-max h-auto flex-col bg-gray-100 py-1 px-4 text-pink-800 shadow-xl group-hover:visible">
+            <div className="invisible text-[14px] absolute z-50 flex w-max h-auto flex-col bg-gray-100 py-1 px-4 text-purple-800 shadow-xl group-hover:visible">
               <Link
                 href="/user/voucher/generate-receipt"
-                className="my-2 flex items-center border-b border-gray-100  text-pink-800 hover:text-pink-700 md:mx-2"
+                className="my-2 flex items-center border-b border-gray-100  text-purple-800 hover:text-purple-700 md:mx-2"
               >
                 <Briefcase className=" mr-2 w-[15px]" /> Generate Recepit
               </Link>
               <Link
                 href="/user/voucher/voucher-wallet-summary"
-                className="my-2 flex items-center border-b border-gray-100  text-pink-800 hover:text-pink-700 md:mx-2"
+                className="my-2 flex items-center border-b border-gray-100  text-purple-800 hover:text-purple-700 md:mx-2"
               >
                 <ChartBar className=" mr-2 w-[15px]" />
                 Voucher Wallet Summary
               </Link>
               <Link
                 href="/user/voucher/receipt-summary"
-                className="my-2 flex items-center border-b border-gray-100  text-pink-800 hover:text-pink-700 md:mx-2"
+                className="my-2 flex items-center border-b border-gray-100  text-purple-800 hover:text-purple-700 md:mx-2"
               >
                 <ChartBar className=" mr-2 w-[15px]" />
                 Receipt Usage
@@ -418,13 +426,13 @@ function Navigation() {
         <div className="flex">
           <div className="group relative cursor-pointer">
             <div
-              className={`flex items-center justify-center py-[12px] text-pink-800 ${
-                isTransfer ? 'border-b-2 border-pink-800 font-semibold' : ''
+              className={`flex items-center justify-center py-[12px] text-purple-800 ${
+                isTransfer ? 'border-b-2 border-purple-800 font-semibold' : ''
               }`}
             >
               <Link
                 href="#"
-                className="menu-hover text-[14px] font-medium text-pink-800 flex items-center justify-center  gap-[5px]"
+                className="menu-hover text-[14px] font-medium text-purple-800 flex items-center justify-center  gap-[5px]"
               >
                 <TbTransfer className=" text-[14px]" /> Transfers
               </Link>
@@ -441,10 +449,10 @@ function Navigation() {
               </span>
             </div>
 
-            <div className="invisible absolute z-50 text-[14px] flex w-max h-auto flex-col bg-gray-100 py-1 px-4 text-pink-800 shadow-xl group-hover:visible">
+            <div className="invisible absolute z-50 text-[14px] flex w-max h-auto flex-col bg-gray-100 py-1 px-4 text-purple-800 shadow-xl group-hover:visible">
               <Link
                 href="/user/transfers/kait-wallet-transfer  "
-                className="my-2 flex items-center border-b border-gray-100  text-pink-800 hover:text-pink-700 md:mx-2"
+                className="my-2 flex items-center border-b border-gray-100  text-purple-800 hover:text-purple-700 md:mx-2"
               >
                 <Image
                   className=" w-[15px] h-[15px]  items-center flex  mr-2"
@@ -455,36 +463,42 @@ function Navigation() {
               </Link>
               <Link
                 href="/user/transfers/mature-wallet-transfer  "
-                className="my-2 flex items-center border-b border-gray-100  text-pink-800 hover:text-pink-700 md:mx-2"
+                className="my-2 flex items-center border-b border-gray-100  text-purple-800 hover:text-purple-700 md:mx-2"
               >
                 <ArrowLeftRight className=" mr-2 w-[15px]" /> Mature Wallet
                 Transfer
               </Link>
               <Link
                 href="/user/transfers/income-wallet-transfer"
-                className="my-2 flex items-center border-b border-gray-100 text-pink-800 hover:text-pink-700 md:mx-2"
+                className="my-2 flex items-center border-b border-gray-100 text-purple-800 hover:text-purple-700 md:mx-2"
               >
                 <Briefcase className=" mr-2 w-[15px]" /> Income Wallet Transfer
               </Link>
               <Link
                 href="/user/transfers/restake-wallet-transfer"
-                className="my-2 flex items-center border-b border-gray-100  text-pink-800 hover:text-pink-700 md:mx-2"
+                className="my-2 flex items-center border-b border-gray-100  text-purple-800 hover:text-purple-700 md:mx-2"
               >
                 <ArrowLeftRight className=" mr-2 w-[15px]" />
                 Restake Wallet Transfer
               </Link>
               <Link
                 href="/user/transfers/ros-wallet-transfer"
-                className="my-2 flex items-center border-b border-gray-100  text-pink-800 hover:text-pink-700 md:mx-2"
+                className="my-2 flex items-center border-b border-gray-100  text-purple-800 hover:text-purple-700 md:mx-2"
               >
                 <ArrowLeftRight className=" mr-2 w-[15px]" /> ROS Wallet
                 Transfer
               </Link>
               <Link
                 href="/user/transfers/adhoc-wallet-transfer"
-                className="my-2 flex items-center border-b border-gray-100  text-pink-800 hover:text-pink-700 md:mx-2"
+                className="my-2 flex items-center border-b border-gray-100  text-purple-800 hover:text-purple-700 md:mx-2"
               >
                 <Briefcase className=" mr-2 w-[15px]" /> Adhoc Wallet Transfer
+              </Link>
+              <Link
+                href=" /user/transfers/super-wallet-transfer"
+                className="my-2 flex items-center border-b border-gray-100  text-purple-800 hover:text-purple-700 md:mx-2"
+              >
+                <Briefcase className=" mr-2 w-[15px]" /> Super Wallet Transfer
               </Link>
             </div>
           </div>
@@ -492,9 +506,9 @@ function Navigation() {
 
         <Link
           href="/user/profile"
-          className={`flex justify-center text-[14px] items-center py-[12px] gap-[5px] text-pink-800 ${
+          className={`flex justify-center text-[14px] items-center py-[12px] gap-[5px] text-purple-800 ${
             pathname === '/user/profile'
-              ? 'border-b-2 border-pink-800 font-semibold'
+              ? 'border-b-2 border-purple-800 font-semibold'
               : ''
           }`}
         >

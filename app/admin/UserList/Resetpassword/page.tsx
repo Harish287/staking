@@ -16,7 +16,7 @@ export default function ResetPasswordForm({ userId }: { userId: string }) {
   const [showConfirmation, setShowConfirmation] = useState(false)
 
   const handleResetPassword = () => {
-    dispatch(resetUserPassword({ userId, newPassword: '' })) 
+    dispatch(resetUserPassword({ userId, newPassword: '' }))
     setShowConfirmation(false)
   }
 
@@ -39,13 +39,13 @@ export default function ResetPasswordForm({ userId }: { userId: string }) {
 
   return (
     <>
-      <div className="p-6 max-w-lg mx-auto bg-gradient-to-r from-pink-700 to-gray-800 shadow-lg rounded-lg">
+      <div className="p-6 max-w-lg mx-auto  bg-gradient-to-r from-blue-500 to-purple-700 shadow-lg rounded-lg">
         <h2 className="text-2xl font-semibold text-center text-white mb-6">
           Reset Password
         </h2>
         <button
           onClick={() => setShowConfirmation(true)}
-          className="w-full bg-gradient-to-r from-pink-700 to-gray-800 shadow-2xl border-2 hover:cursor-pointer text-white py-3 rounded-md font-semibold transition duration-200 ease-in-out transform hover:scale-105 focus:outline-none"
+          className="w-full  bg-gradient-to-r from-blue-500 to-purple-700 shadow-2xl border-2 hover:cursor-pointer text-white py-3 rounded-md font-semibold transition duration-200 ease-in-out transform hover:scale-105 focus:outline-none"
           disabled={loading}
         >
           {loading ? 'Processing...' : 'Reset Password'}

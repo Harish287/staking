@@ -19,6 +19,7 @@ export const fetchUserData = createAsyncThunk(
   }
 )
 
+
 export interface TeamMember {
   name: string | null
   user_name: string | null
@@ -45,10 +46,10 @@ export interface Bank {
 
 export interface ProgressRequirement {
   title: string
-  current: number
+  current: number | string
   required: number
   status: boolean
-  remaining: number
+  remaining: number | string
 }
 
 export interface NextProgress {
@@ -65,6 +66,17 @@ export interface Level {
 export interface LevelInfo {
   total_levels: number
   levels: Level[]
+}
+
+export interface IncomeEligibility {
+  user_max_income_limit: number
+  total_income: number | string
+  available_space: number | string
+}
+
+export interface Verified {
+  email: boolean
+  kyc: boolean
 }
 
 export interface UserData {
@@ -88,21 +100,27 @@ export interface UserData {
   adhoc_transfer: boolean
   suspend: boolean
   transfer: boolean
-  level_income: boolean
+  // level_income: boolean
   credit: boolean
   invested: number
   team_business: number
   kiat_wallet: number
   fiat_wallet: number
   restake_wallet: number
+  income_wallet: number
+  level_income:Number
   ros_wallet: number
   adhoc_wallet: number
+  roi: number
+  roc: number
   vpay_voucher: number
   ecommerce_voucher: number
-  verified: Record<string, any>
+  total_withdraw: number
+  verified: Verified
   next_progress: NextProgress
   level_info: LevelInfo
   club_counts: Record<string, number>
+  income_eligibility: IncomeEligibility
   team_tree: TeamMember[]
 }
 
@@ -117,6 +135,8 @@ const initialState: UserState = {
   loading: false,
   error: null,
 }
+
+// ---------- Slice ----------
 
 const userSlice = createSlice({
   name: 'user',

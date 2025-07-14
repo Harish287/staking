@@ -1,5 +1,4 @@
 'use client'
-
 import { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { AppDispatch, RootState } from '@/store/store'
@@ -7,6 +6,7 @@ import { fetchInvestorDetails } from '@/store/slices/admin/investorSlice'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import TeamTreeMUI from '@/components/materialui/TeamTreeMUI'
+import WalletManipulationDialog from '../walletmanupulatedialog'
 
 import {
   ArrowLeft,
@@ -22,6 +22,7 @@ import {
   CreditCard,
   Power,
   MoreHorizontal,
+  XCircle,
 } from 'lucide-react'
 import Link from 'next/link'
 import { InvestorDetails } from '@/store/slices/admin/investorSlice'
@@ -50,6 +51,15 @@ export default function InvestorDetailsPage({
   const userId = searchParams.get('userId')
   const [open, setOpen] = useState(false)
   const router = useRouter()
+
+  const [walletDialogOpen, setWalletDialogOpen] = useState(false)
+  const [walletUserId, setWalletUserId] = useState('')
+  const [walletType, setWalletType] = useState('')
+  const handleWalletManipulation = (userId: string, type: string) => {
+    setWalletUserId(userId)
+    setWalletType(type)
+    setWalletDialogOpen(true)
+  }
 
   console.log('Is window defined:', typeof window !== 'undefined')
 
@@ -231,7 +241,12 @@ export default function InvestorDetailsPage({
                 </DropdownMenuItem>
                 {['KAIT', 'Income', 'Adhoc', 'ROS', 'Restaking'].map(
                   (wallet) => (
-                    <DropdownMenuItem key={wallet}>
+                    <DropdownMenuItem
+                      key={wallet}
+                      onClick={() =>
+                        handleWalletManipulation(details.user_id, wallet)
+                      }
+                    >
                       <Wallet className="w-4 h-4 mr-2" /> {wallet} Wallet -
                       Manipulate
                     </DropdownMenuItem>
@@ -539,7 +554,6 @@ export default function InvestorDetailsPage({
               <div className="text-sm text-gray-500 ml-2">Balance</div>
               <div className="flex items-center gap-2">
                 <span className="text-red-500">
-                  {' '}
                   <Image
                     src={kaitimg}
                     width={20}
@@ -572,12 +586,20 @@ export default function InvestorDetailsPage({
               </div>
             </div>
             <div className="flex gap-4 border-2 ">
-              <div className="flex items-center ml-2 gap-2">
-                <CheckCircle2 className="h-5 w-5 text-green-500" />
+              <div className="flex items-center gap-1">
+                {details.email_verified ? (
+                  <CheckCircle2 className="w-4 h-4 text-green-500" />
+                ) : (
+                  <XCircle className="w-4 h-4 text-red-500" />
+                )}
                 <span>Email</span>
               </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="h-5 w-5 text-green-500" />
+              <div className="flex items-center gap-1">
+                {details.kyc_verified ? (
+                  <CheckCircle2 className="w-4 h-4 text-green-500" />
+                ) : (
+                  <XCircle className="w-4 h-4 text-red-500" />
+                )}
                 <span>KYC</span>
               </div>
             </div>
@@ -720,6 +742,12 @@ export default function InvestorDetailsPage({
             </div>
           </div>
         </div>
+        <WalletManipulationDialog
+          open={walletDialogOpen}
+          onOpenChange={setWalletDialogOpen}
+          userId={walletUserId}
+          walletType={walletType}
+        />
       </Card>
     </div>
   )

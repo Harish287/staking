@@ -44,7 +44,7 @@ export default function TeamPage() {
         Referral Tree - {data?.full_name ?? 'User'}
       </Typography>
 
-      <div className=" flex items-center bg-gradient-to-r from-pink-700 to-gray-800 p-2 text-white">
+      <div className=" flex items-center  bg-gradient-to-r from-blue-500 to-purple-700 p-2 text-white">
         <Groups2Icon
           className=" ml-2"
           style={{ width: '40px', height: '40px' }}
@@ -54,7 +54,13 @@ export default function TeamPage() {
             Total Team Staking Contracts <br />{' '}
             <span className=" flex items-center">
               {' '}
-              <Image className='' src={Kait} alt="Kait Coin" width={20} height={20} />
+              <Image
+                className=""
+                src={Kait}
+                alt="Kait Coin"
+                width={20}
+                height={20}
+              />
               {totalTeamStake.toLocaleString()}
             </span>
           </h2>

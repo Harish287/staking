@@ -453,10 +453,22 @@ export const fetchKycApplications = createAsyncThunk<
         totalPages: total_pages,
       }
     } catch (error: any) {
+      const detail = error.response?.data?.detail
+
+      // Gracefully handle "No records found" case
+      if (
+        error.response?.status === 404 &&
+        detail === 'No records found'
+      ) {
+        return {
+          applications: [],
+          totalPages: 1,
+        }
+      }
+
       console.error('Error fetching KYC applications:', error)
       return rejectWithValue(
-        error.response?.data?.detail ||
-          'Failed to fetch KYC applications. Please try again.',
+        detail || 'Failed to fetch KYC applications. Please try again.',
       )
     }
   },

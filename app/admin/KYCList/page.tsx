@@ -36,7 +36,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Download, Eye, MoreVertical, SquareCheck, Trash2 } from 'lucide-react'
+import {
+  ChevronLeft,
+  ChevronRight,
+  Download,
+  Eye,
+  MoreVertical,
+  SquareCheck,
+  Trash2,
+} from 'lucide-react'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -110,6 +118,29 @@ const KycApplications = () => {
     router.push(`/admin/KYCList?${params.toString()}`, { scroll: false })
   }, [searchQuery])
 
+  const generatePageNumbers = (
+    total: number,
+    current: number,
+  ): (number | string)[] => {
+    const delta = 2
+    const range = []
+    for (
+      let i = Math.max(2, current - delta);
+      i <= Math.min(total - 1, current + delta);
+      i++
+    ) {
+      range.push(i)
+    }
+
+    if (current - delta > 2) range.unshift('...')
+    if (current + delta < total - 1) range.push('...')
+
+    range.unshift(1)
+    if (total > 1) range.push(total)
+
+    return range
+  }
+
   // const getDisplayStatus = (status: string) => {
   //   if (status === 'approved') return 'Approved'
   //   if (status === 'Rejected') return 'Rejected'
@@ -176,40 +207,40 @@ const KycApplications = () => {
   } = useAppSelector((state: RootState) => state.dropDownOptions)
 
   const handleAction = (action: 'approve' | 'reject') => {
-  if (!selectedUserId) return
-  setActionLoading(true)
+    if (!selectedUserId) return
+    setActionLoading(true)
 
-  dispatch(
-    approveKycApplication({
-      user_id: selectedUserId,
-      action,
-      message,
-    }),
-  )
-    .unwrap()
-    .then(({ user_id, newStatus, message }) => {
-      closeDialog()
+    dispatch(
+      approveKycApplication({
+        user_id: selectedUserId,
+        action,
+        message,
+      }),
+    )
+      .unwrap()
+      .then(({ user_id, newStatus, message }) => {
+        closeDialog()
 
-      // ✅ Refetch without changing the tab
-      dispatch(
-        fetchKycApplications({
-          page: pageParam,
-          page_size: pageSizeParam,
-          status: statusParam,
-          search: searchQuery,
-        }),
-      )
+        // ✅ Refetch without changing the tab
+        dispatch(
+          fetchKycApplications({
+            page: pageParam,
+            page_size: pageSizeParam,
+            status: statusParam,
+            search: searchQuery,
+          }),
+        )
 
-      toast.success(`${message}`)
-    })
-    .catch(() => {
-      toast.error(`${action === 'approve' ? 'Approval' : 'Rejection'} failed`)
-    })
-    .finally(() => setActionLoading(false))
-}
+        toast.success(`${message}`)
+      })
+      .catch(() => {
+        toast.error(`${action === 'approve' ? 'Approval' : 'Rejection'} failed`)
+      })
+      .finally(() => setActionLoading(false))
+  }
 
   return (
-    <div className="bg-blue-100 min-h-screen py-6">
+    <div className="bg-gradient-to-r from-blue-500 to-purple-600 min-h-screen py-6">
       <Card className="p-6 shadow-xl rounded-xl container m-auto w-[90%] bg-white">
         <h2 className="text-2xl font-semibold mb-6">KYC Applications</h2>
 
@@ -225,9 +256,13 @@ const KycApplications = () => {
           onValueChange={(val) => handleTabChange(val.toLowerCase())}
           className="mb-4"
         >
-          <TabsList>
+          <TabsList className="bg-muted p-1 rounded-lg space-x-2">
             {dropDownOptions?.kyc_status?.map((type) => (
-              <TabsTrigger key={type.id} value={type.id.toLowerCase()}>
+              <TabsTrigger
+                key={type.id}
+                value={type.id.toLowerCase()}
+                className="text-sm px-4 py-2 rounded-md transition-all data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-purple-600 data-[state=active]:text-white"
+              >
                 {type.value}
               </TabsTrigger>
             ))}
@@ -347,45 +382,87 @@ const KycApplications = () => {
               </TableBody>
             </Table>
 
-            <div className="flex justify-between items-center mt-4">
-              <div className="flex gap-2">
-                <Button
-                  className="bg-gray-400 text-[14px]"
-                  onClick={() => changePage(Math.max(1, pageParam - 1))}
-                  disabled={pageParam <= 1}
-                >
-                  PREV
-                </Button>
-                <Button
-                  className="bg-gray-400 text-[14px]"
-                  onClick={() =>
-                    changePage(Math.min(totalPages, pageParam + 1))
-                  }
-                  disabled={pageParam >= totalPages}
-                >
-                  NEXT
-                </Button>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-base">Page</span>
-                <Select
-                  value={pageParam.toString()}
-                  onValueChange={(value) => changePage(parseInt(value))}
-                >
-                  <SelectTrigger className="w-20">
-                    <SelectValue placeholder={`Page ${pageParam}`} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                      (p) => (
-                        <SelectItem key={p} value={p.toString()}>
-                          {p}
-                        </SelectItem>
+            <div className="p-6 pb-0 b-0 bg-white">
+              <div className="flex items-center justify-between flex-wrap gap-4">
+                {/* Pagination Controls */}
+                <div className="flex items-center space-x-4">
+                  <Button
+                    variant="outline"
+                    disabled={pageParam === 1}
+                    onClick={() => changePage(pageParam - 1)}
+                  >
+                    <ChevronLeft className="w-4 h-4 mr-1" /> Previous
+                  </Button>
+
+                  <div className="flex items-center space-x-2">
+                    {generatePageNumbers(totalPages, pageParam).map(
+                      (pageNum, idx) => (
+                        <Button
+                          key={idx}
+                          variant={
+                            pageNum === pageParam ? 'default' : 'outline'
+                          }
+                          size="sm"
+                          disabled={pageNum === '...'}
+                          onClick={() =>
+                            typeof pageNum === 'number' && changePage(pageNum)
+                          }
+                          className={
+                            pageNum === pageParam
+                              ? 'bg-gradient-to-r from-blue-500 to-purple-700 text-white'
+                              : ''
+                          }
+                        >
+                          {pageNum}
+                        </Button>
                       ),
                     )}
-                  </SelectContent>
-                </Select>
-                <span className="text-base">of {totalPages}</span>
+                  </div>
+
+                  <Button
+                    variant="outline"
+                    disabled={pageParam === totalPages}
+                    onClick={() => changePage(pageParam + 1)}
+                  >
+                    Next <ChevronRight className="w-4 h-4 ml-1" />
+                  </Button>
+                </div>
+
+                {/* Page Size Dropdown */}
+                <div className="flex items-center space-x-2">
+                  <span className="text-sm text-gray-600">Rows per page:</span>
+                  <Select
+                    value={pageSizeParam.toString()}
+                    onValueChange={(value) => {
+                      const newSize = parseInt(value)
+                      const params = new URLSearchParams(
+                        searchParams.toString(),
+                      )
+                      params.set('page_size', newSize.toString())
+                      params.set('page', '1')
+                      router.push(`/admin/KYCList?${params.toString()}`)
+                    }}
+                  >
+                    <SelectTrigger className="w-24">
+                      <SelectValue placeholder="Page size" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {[10, 20, 50, 100].map((size) => (
+                        <SelectItem key={size} value={size.toString()}>
+                          {size}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Info Summary */}
+                <div className="text-sm text-gray-600">
+                  Page <strong>{pageParam}</strong> of{' '}
+                  <strong>{totalPages}</strong> • Showing{' '}
+                  <strong>{kycApplications.length}</strong> of{' '}
+                  <strong>{kycApplications.length * totalPages}</strong> users
+                </div>
               </div>
             </div>
           </>

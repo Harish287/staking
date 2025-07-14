@@ -70,7 +70,7 @@ export default function AddUserDialog() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button className="bg-indigo-600 hover:bg-indigo-700 text-white flex items-center gap-2">
+        <Button className="bg-gradient-to-r from-blue-500 to-purple-600 hover:bg-indigo-700 text-white flex items-center gap-2">
           <UserPlus className="w-4 h-4" /> Add User
         </Button>
       </DialogTrigger>

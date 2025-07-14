@@ -51,6 +51,25 @@ import VoucherBalanceReducer from './slices/user/voucher/voucherBalanceSlice'
 import voucherSummaryReducer from './slices/user/voucher/voucherSummarySlice'
 import voucherWalletSummaryReducer from './slices/user/voucher/voucherWalletSummary'
 import voucherUsageSummaryReducer from './slices/user/voucher/voucherUsageSummarySlice'
+import WalletSplitReducer from './slices/admin/walletSplitConfigSlice'
+import WalletSplitListReducer from './slices/admin/walletSplitListSlice'
+import WalletSplitUpdateReducer from './slices/admin/walletSplitUpdateSlice'
+import forgotPasswordReducer from './slices/forgetPasswordSlice'
+import clubVolumeReducer from './slices/admin/clubVolumeSlice'
+import AdminUserReducer from './slices/admin/adminUserDataSlice'
+import ClubsyncReducer from './slices/admin/clubSyncSlice'
+import loadWalletReducer from './slices/admin/loadWalletSlice'
+import AdminTransferReducer from './slices/admin/transferSummarySlice'
+import UserWalletSummaryReducer from './slices/user/userWalletSummary'
+import IncomeToSuperTranferReducer from './slices/user/incomeToSuperTransferSlice'
+import AdhocToSuperTranferReducer from './slices/user/adhocToSuperTransferSlice'
+import AdminStakeListReducer from './slices/admin/adminSliceListSlice'
+import AllContractsDownloadReducer from './slices/admin/allcontractsDownload'
+import SuperWalletTransferReducer from './slices/user/superWalletTransferSlice'
+import SendEmailReducer from './slices/admin/SendEmailSlice'
+import registrationStatReducer from './slices/admin/registrationStatSlice'
+import eligibleUsersForUpdateReducer from './slices/admin/eligibleUserForUpdateSlice'
+import updateUserReducer from './slices/admin/updateUserSlice'
 
 export const store = configureStore({
   reducer: {
@@ -98,7 +117,7 @@ export const store = configureStore({
     stakeList: stakeListReducer,
     IncomewalletSummary: IncomewalletSummaryReducer,
     AdhocwalletSummary: AdhocwalletSummaryReducer,
-    RestakewalletSummary:RestakewalletSummaryReducer,
+    RestakewalletSummary: RestakewalletSummaryReducer,
     RoswalletSummary: RoswalletSummaryReducer,
     KaitwalletSummary: KaitwalletSummaryReducer,
     generateVoucher: generateVoucherReducer,
@@ -106,6 +125,25 @@ export const store = configureStore({
     voucherSummary: voucherSummaryReducer,
     voucherWalletSummary: voucherWalletSummaryReducer,
     voucherUsageSummary: voucherUsageSummaryReducer,
+    WalletSplit: WalletSplitReducer,
+    walletSplitList: WalletSplitListReducer,
+    walletSplitUpdate: WalletSplitUpdateReducer,
+    forgotPassword: forgotPasswordReducer,
+    clubVolume: clubVolumeReducer,
+    AdminUser: AdminUserReducer,
+    Clubsync: ClubsyncReducer,
+    loadWallet: loadWalletReducer,
+    AdminTransfer: AdminTransferReducer,
+    UserWalletSummary: UserWalletSummaryReducer,
+    IncomeToSuperTranfer: IncomeToSuperTranferReducer,
+    AdhocToSuperTranfer: AdhocToSuperTranferReducer,
+    AdminStakeList: AdminStakeListReducer,
+    AllContractsDownload: AllContractsDownloadReducer,
+    SuperWalletTransfer: SuperWalletTransferReducer,
+    SendEmail: SendEmailReducer,
+    registrationStat: registrationStatReducer,
+    eligibleUsersForUpdate: eligibleUsersForUpdateReducer,
+    updateUser: updateUserReducer,
   },
 })
 

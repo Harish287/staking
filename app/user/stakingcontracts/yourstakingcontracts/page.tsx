@@ -11,10 +11,6 @@ import {
   CircularProgress,
   Paper,
   Pagination,
-  FormControl,
-  MenuItem,
-  Select,
-  InputLabel,
 } from '@mui/material'
 import image from '../../../../assets/contract1.jpg'
 import Logo from '../../../../assets/logo2x.png'
@@ -46,6 +42,7 @@ const YourStakingContracts = () => {
 
   const handlePageChange = (_: React.ChangeEvent<unknown>, value: number) => {
     setPage(value)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   return (
@@ -108,7 +105,7 @@ const YourStakingContracts = () => {
                   <Box className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
                     {stakeListData.items.map((item) => (
                       <Paper
-                        key={item.reference}
+                        key={item.contract}
                         className="p-4 shadow rounded-lg relative overflow-hidden"
                       >
                         <div
@@ -127,13 +124,13 @@ const YourStakingContracts = () => {
                             fontSize="15px"
                             className="inline-block bg-red-500 px-2 py-1 rounded text-white"
                           >
-                            {item.reference}
+                            {item.contract}
                           </Typography>
                         </div>
 
                         <div className="space-y-1 mt-4 text-center text-sm text-gray-700">
                           <div className="flex justify-center items-center gap-1">
-                            <Typography fontWeight="medium">
+                            <Typography style={{ fontSize:"12px"}} fontWeight="bold">
                               Invested:
                             </Typography>
                             <Image
@@ -142,26 +139,29 @@ const YourStakingContracts = () => {
                               width={12}
                               height={12}
                             />
-                            <Typography fontWeight="medium">
+                            <Typography style={{ fontSize:"12px"}} fontWeight="bold">
                               {item.invested.toLocaleString()}
                             </Typography>
                           </div>
                           <div>
-                            <Typography>{item.description}</Typography>
+                            <Typography style={{ fontSize:"12px"}}>{item.plan}</Typography>
                           </div>
                           <div>
-                            <Typography fontWeight="medium">
+                            <Typography style={{ fontSize:"12px"}}>{item.description}</Typography>
+                          </div>
+                          <div>
+                            <Typography style={{ fontSize:"12px"}} fontWeight="medium">
                               Invested On: {item.invested_on}
                             </Typography>
                           </div>
                           <div>
-                            <Typography>Completed: {item.completed}</Typography>
+                            <Typography style={{ fontSize:"12px", fontWeight:"bold"}}>Completed: {item.completed} Days</Typography>
                           </div>
                           <div>
-                            <Typography>Remaining: {item.remaining}</Typography>
+                            <Typography style={{ fontSize:"12px"}}>Remaining: {item.remaining}</Typography>
                           </div>
                           <div className="flex justify-center items-center gap-1">
-                            <Typography>ROS Earned:</Typography>
+                            <Typography style={{ fontSize:"12px", fontWeight:'bold'}}>ROS Earned:</Typography>
                             <Image
                               src={Logo}
                               alt="Logo"
@@ -175,26 +175,36 @@ const YourStakingContracts = () => {
                     ))}
                   </Box>
 
-                  {stakeListData?.total_pages > 1 && (
-                    <Box display="flex" justifyContent="center" mt={3}>
-                      <FormControl size="small">
-                        <InputLabel id="page-select-label">Page</InputLabel>
-                        <Select
-                          labelId="page-select-label"
-                          value={page}
-                          onChange={(e) => setPage(Number(e.target.value))}
-                          label="Page"
-                        >
-                          {Array.from(
-                            { length: stakeListData.total_pages },
-                            (_, i) => (
-                              <MenuItem key={i + 1} value={i + 1}>
-                                Page {i + 1}
-                              </MenuItem>
-                            ),
-                          )}
-                        </Select>
-                      </FormControl>
+                  {stakeListData?.total_pages && (
+                    <Box mt={4}>
+                      <Box
+                        display="flex"
+                        justifyContent="space-between"
+                        alignItems="center"
+                        flexWrap="wrap"
+                        mb={2}
+                      >
+                        <Typography variant="body2" color="textSecondary">
+                          Page {page} of {stakeListData.total_pages}
+                        </Typography>
+                        <Typography variant="body2" color="textSecondary">
+                          Total: {stakeListData.total}
+                        </Typography>
+                      </Box>
+
+                      <Box display="flex" justifyContent="center">
+                        <Pagination
+                          count={stakeListData.total_pages}
+                          page={page}
+                          onChange={handlePageChange}
+                          color="primary"
+                          shape="rounded"
+                          siblingCount={1}
+                          boundaryCount={1}
+                          showFirstButton
+                          showLastButton
+                        />
+                      </Box>
                     </Box>
                   )}
                 </>

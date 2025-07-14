@@ -29,13 +29,11 @@ export default function StakingContract() {
   const [topMessage, setTopMessage] = useState<string | null>(null)
 
   const dispatch = useDispatch<AppDispatch>()
-  const stakingPlansState = useSelector(
-    (state: RootState) => state.stakingPlans,
-  )
+  const stakingPlansState = useSelector((state: RootState) => state.stakingPlans)
   const plans = stakingPlansState?.plans || []
   const walletSplits = stakingPlansState?.walletSplits || []
   const loading = stakingPlansState?.loading || false
-  const error = stakingPlansState?.error || null
+
   useEffect(() => {
     if (topMessage) {
       const timer = setTimeout(() => setTopMessage(null), 5000)
@@ -62,12 +60,7 @@ export default function StakingContract() {
   }
 
   const handleStakeSubmit = async () => {
-    if (
-      !selectedPlanId ||
-      !stakeAmount ||
-      !selectedWalletSplitId ||
-      !agreedToTerms
-    ) {
+    if (!selectedPlanId || !stakeAmount || !selectedWalletSplitId || !agreedToTerms) {
       toast.error('Please fill in all required fields.')
       return
     }
@@ -79,9 +72,7 @@ export default function StakingContract() {
     }
 
     if (selectedPlanObj && amountNum < selectedPlanObj.min_amount) {
-      toast.error(
-        `Minimum staking amount for this plan is ${selectedPlanObj.min_amount}`,
-      )
+      toast.error(`Minimum staking amount for this plan is ${selectedPlanObj.min_amount}`)
       return
     }
 
@@ -108,6 +99,7 @@ export default function StakingContract() {
       setIsSubmitting(false)
     }
   }
+
   if (loading || isSubmitting) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-white">
@@ -126,11 +118,7 @@ export default function StakingContract() {
         )}
 
         <div className="flex items-center mb-6 gap-2">
-          <Image
-            src={Kait}
-            alt="kait"
-            className="w-[40px] object-cover rounded-lg"
-          />
+          <Image src={Kait} alt="kait" className="w-[40px] object-cover rounded-lg" />
           <h1 className="text-2xl font-bold">Get into the Staking Contract</h1>
         </div>
 
@@ -143,7 +131,7 @@ export default function StakingContract() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            {/* Left Section */}
+            {/* Left Illustration Section */}
             <div className="space-y-4">
               <div className="h-[300px] relative">
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-lg" />
@@ -160,47 +148,46 @@ export default function StakingContract() {
                   Staking is a process in which cryptocurrency holders volunteer
                   to validate blockchain transactions and earn crypto rewards.
                 </p>
-                <p>
-                  It’s like earning interest while holding onto your assets.
-                </p>
+                <p>It’s like earning interest while holding onto your assets.</p>
               </div>
             </div>
 
-            {/* Right Section */}
+            {/* Right Form Section */}
             <div className="space-y-8">
               {/* Plan Selection */}
               <div>
-                <h3 className="text-lg font-semibold text-green-600 mb-2">
-                  Choose the Contract
-                </h3>
+                <h3 className="text-lg font-semibold text-green-600 mb-2">Choose the Contract</h3>
                 <p className="text-sm text-gray-600 mb-4">Select a Package</p>
                 <div className="grid md:grid-cols-2 gap-3">
                   {plans.map((plan) => (
                     <button
                       key={plan.plan_id}
                       onClick={() => setSelectedPlanId(plan.plan_id)}
-                      className={`w-full p-5 rounded-lg text-left transition ${
+                      className={`w-full p-5 rounded-lg text-left transition relative ${
                         selectedPlanId === plan.plan_id
                           ? 'bg-purple-500 text-white hover:bg-purple-600'
                           : 'bg-blue-100 text-gray-700 hover:bg-blue-200'
                       }`}
                     >
-                      <div className="font-bold text-[14px] text-center">
-                        {plan.name}
-                      </div>
+                      {selectedPlanId === plan.plan_id && (
+                        <span className="absolute top-[-5] right-[-5] flex size-3">
+                          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-pink-500 opacity-75"></span>
+                          <span className="relative inline-flex size-3 rounded-full bg-pink-500"></span>
+                        </span>
+                      )}
+
+                      <div className="font-bold text-[14px] text-center">{plan.name}</div>
                       <div className="text-[10px]">{plan.description}</div>
                     </button>
                   ))}
                 </div>
               </div>
 
+              {/* Wallet Split & Balance */}
               {selectedPlanObj && (
                 <>
-                  {/* Wallet Split */}
                   <div>
-                    <h3 className="text-lg font-semibold text-green-600 mb-2">
-                      Stake From
-                    </h3>
+                    <h3 className="text-lg font-semibold text-green-600 mb-2">Stake From</h3>
                     <p className="text-sm text-gray-600 mb-4">
                       Pick your wallet split configuration
                     </p>
@@ -210,10 +197,7 @@ export default function StakingContract() {
                       className="space-y-3"
                     >
                       {walletSplits.map((split) => (
-                        <div
-                          key={split.id}
-                          className="flex items-center space-x-2"
-                        >
+                        <div key={split.id} className="flex items-center space-x-2">
                           <RadioGroupItem value={split.id} id={split.id} />
                           <Label htmlFor={split.id} className="text-sm">
                             {formatWalletSplitLabel(split.value)}
@@ -221,9 +205,33 @@ export default function StakingContract() {
                         </div>
                       ))}
                     </RadioGroup>
+
+                    <h4 className="mt-5 font-bold text-green-600">Wallet Balance</h4>
+                    {selectedWalletSplitId && (() => {
+                      const selectedSplit = walletSplits.find(split => split.id === selectedWalletSplitId)
+                      if (!selectedSplit?.balance) return null
+
+                      return (
+                        <div className="ml-6 mt-3 text-sm flex gap-6 text-gray-800">
+                          {Object.entries(selectedSplit.balance).map(([wallet, amount]) => (
+                            <div key={wallet} className="text-center">
+                              <div className="text-[15px] font-bold mb-1">{wallet}</div>
+                              <div className="flex items-center justify-center gap-1">
+                                <Image
+                                  src={Kait}
+                                  alt="kait"
+                                  className="w-[20px] h-[20px] object-cover rounded-full"
+                                />
+                                <span>{Number(amount).toLocaleString()}</span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )
+                    })()}
                   </div>
 
-                  {/* Amount */}
+                  {/* Amount Input */}
                   <div>
                     <h3 className="text-lg font-semibold text-green-600 mb-2">
                       Amount (KAIT) to stake
@@ -237,21 +245,17 @@ export default function StakingContract() {
                     />
                   </div>
 
-                  {/* Terms and Submit */}
+                  {/* Agreement and Submit */}
                   <div className="space-y-4">
                     <div className="flex items-center space-x-2">
                       <Checkbox
                         id="terms"
                         checked={agreedToTerms}
-                        onCheckedChange={(checked) =>
-                          setAgreedToTerms(!!checked)
-                        }
+                        onCheckedChange={(checked) => setAgreedToTerms(!!checked)}
                       />
                       <Label htmlFor="terms" className="text-sm">
                         I agree to the{' '}
-                        <span className="text-red-500 cursor-pointer">
-                          Terms & Conditions
-                        </span>
+                        <span className="text-red-500 cursor-pointer">Terms & Conditions</span>
                       </Label>
                     </div>
 

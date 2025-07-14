@@ -6,7 +6,7 @@ import Link from 'next/link'
 
 const Footer = () => {
   return (
-    <footer className="w-full border-t bg-gray-50 py-4 ">
+    <footer className=" bottom-0 w-full border-t bg-gray-50 py-4 ">
       <div className="  flex container m-auto flex-col md:flex-row justify-between items-center gap-4 px-4">
         <div className="flex  flex-wrap gap-2">
           <Link href="/user/privacy-policy" passHref>

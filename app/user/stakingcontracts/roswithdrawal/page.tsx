@@ -35,10 +35,15 @@ import Logo from '../../../../assets/logo2x.png'
 import Image from 'next/image'
 import { fetchEligibleBeneficiaries } from '@/store/slices/user/beneficiaryeligible'
 import type { BeneficiaryEligible } from '@/store/slices/user/beneficiaryeligible'
+import { fetchTransferPinStatus } from '@/store/slices/user/transferPinStatusSlice'
+import { unwrapResult } from '@reduxjs/toolkit'
+
+import { useRouter } from 'next/navigation'
+import Cookies from 'js-cookie'
 
 export default function RosWalletSummary() {
   const dispatch = useAppDispatch()
-
+  const router = useRouter()
   const rosState = useAppSelector((state) => state.Roswithdraw)
   const withdrawState = useAppSelector((state) => state.RoswithdrawForm)
   const { success: otpSuccess, error: otpError } = useAppSelector(
@@ -132,10 +137,26 @@ export default function RosWalletSummary() {
     return true
   }
 
-  const handleSendOtp = () => {
+  const handleSendOtp = async () => {
     if (!validateWithdrawForm()) return
-    setSendingOtp(true)
-    dispatch(transferWalletOtp()).finally(() => setSendingOtp(false))
+
+    try {
+      const token = Cookies.get('token') || ''
+      const actionResult = await dispatch(fetchTransferPinStatus(token))
+      const pinStatus: boolean = unwrapResult(actionResult)
+
+      if (!pinStatus) {
+        toast.error('Set your transaction password before withdrawing.')
+        router.push('/user/profile?tab=TRANS.PWD')
+        return
+      }
+
+      setSendingOtp(true)
+      await dispatch(transferWalletOtp()).finally(() => setSendingOtp(false))
+      setOpen(true)
+    } catch (error) {
+      toast.error('Error checking transaction pin status.')
+    }
   }
 
   const handleWithdrawSubmit = (e: React.FormEvent) => {
@@ -177,7 +198,7 @@ export default function RosWalletSummary() {
                 Ros Wallet (Limit of 40,000)
               </Typography>
               <Button
-                className="bg-gradient-to-r from-pink-700 to-gray-800  hover:shadow-xl"
+                className=" bg-gradient-to-r from-blue-500 to-purple-700  hover:shadow-xl"
                 href="/user/beneficiary"
                 style={{ color: 'white' }}
               >
@@ -185,7 +206,7 @@ export default function RosWalletSummary() {
               </Button>
             </div>
 
-            <div className="bg-gradient-to-r from-pink-700 to-gray-800 rounded-2xl flex">
+            <div className=" bg-gradient-to-r from-blue-500 to-purple-700 rounded-2xl flex">
               <div className="flex justify-center items-center p-6 pr-0">
                 <Image src={Logo} alt="Logo" priority width={50} height={50} />
               </div>
@@ -304,7 +325,7 @@ export default function RosWalletSummary() {
 
               <Button
                 variant="contained"
-                className="bg-gradient-to-r from-pink-700 to-gray-800"
+                className=" bg-gradient-to-r from-blue-500 to-purple-700"
                 onClick={handleSendOtp}
                 fullWidth
                 disabled={sendingOtp}
@@ -348,7 +369,7 @@ export default function RosWalletSummary() {
                 <Button
                   type="submit"
                   variant="contained"
-                  className="bg-gradient-to-r from-pink-700 to-gray-800"
+                  className=" bg-gradient-to-r from-blue-500 to-purple-700"
                   disabled={withdrawState.loading}
                 >
                   {withdrawState.loading ? 'Withdrawing...' : 'Confirm'}
@@ -369,19 +390,15 @@ export default function RosWalletSummary() {
             <Typography className="text-red-500">{summaryError}</Typography>
           )}
 
-          {!summaryLoading && !summaryError && items.length === 0 && (
-            <Typography>No transactions found.</Typography>
-          )}
-
-          {!summaryLoading && items.length > 0 && (
+          {!summaryLoading && (
             <TableContainer component={Paper} className="shadow">
               <Table size="small" aria-label="ROS Withdrawal Table">
                 <TableHead>
-                  <TableRow className="bg-pink-100">
+                  <TableRow className="bg-purple-100">
                     <TableCell>Date</TableCell>
                     <TableCell>Status</TableCell>
                     <TableCell>
-                      <div className=" flex items-center">
+                      <div className="flex items-center">
                         <span>Amount</span>
                         <Image
                           src={Logo}
@@ -389,7 +406,7 @@ export default function RosWalletSummary() {
                           priority
                           width={15}
                           height={15}
-                          className=" ml-0.5"
+                          className="ml-0.5"
                         />
                       </div>
                     </TableCell>
@@ -398,29 +415,37 @@ export default function RosWalletSummary() {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {items.map((item, idx) => (
-                    <TableRow key={idx}>
-                      <TableCell>
-                        {new Date(item.date_time).toLocaleString()}
+                  {items.length > 0 ? (
+                    items.map((item, idx) => (
+                      <TableRow key={idx}>
+                        <TableCell>
+                          {new Date(item.date_time).toLocaleString()}
+                        </TableCell>
+                        <TableCell>{item.status}</TableCell>
+                        <TableCell>
+                          <div className="flex items-center">
+                            <span>{item.amount}</span>
+                            <Image
+                              src={Logo}
+                              alt="Logo"
+                              priority
+                              width={15}
+                              height={15}
+                              className="ml-0.5"
+                            />
+                          </div>
+                        </TableCell>
+                        <TableCell>{item.beneficiary_nick_name}</TableCell>
+                        <TableCell>{item.description}</TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={5} align="center">
+                        No transactions found.
                       </TableCell>
-                      <TableCell>{item.status}</TableCell>
-                      <TableCell>
-                        <div className=' flex items-center'>
-                          <span>{item.amount}</span>
-                          <Image
-                            src={Logo}
-                            alt="Logo"
-                            priority
-                            width={15}
-                            height={15}
-                            className=" ml-0.5"
-                          />
-                        </div>
-                      </TableCell>
-                      <TableCell>{item.beneficiary_nick_name}</TableCell>
-                      <TableCell>{item.description}</TableCell>
                     </TableRow>
-                  ))}
+                  )}
                 </TableBody>
               </Table>
             </TableContainer>

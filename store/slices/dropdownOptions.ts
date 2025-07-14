@@ -21,7 +21,9 @@ export interface DropdownOptions {
   ewallet_kinds: DropdownItem[]
   payout_frequencies: DropdownItem[]
   kyc_status: DropdownItem[]
-  fait_transfer_options: DropdownItem[]
+  fiat_transfer_options: DropdownItem[]
+  wallets: DropdownItem[]
+  wallet_filter: DropdownItem[]
 }
 
 interface DropdownOptionsState {
@@ -45,12 +47,12 @@ export const fetchDropdownOptions = createAsyncThunk<
 >('dropdown/fetchOptions', async (_, { rejectWithValue }) => {
   try {
     const response = await axios.get<DropdownOptions>(
-      `${baseURL}context/dropdown-optionst`
+      `${baseURL}context/dropdown-optionst`,
     )
     return response.data
   } catch (err: any) {
     return rejectWithValue(
-      err.response?.data?.message || 'Failed to fetch dropdown options'
+      err.response?.data?.message || 'Failed to fetch dropdown options',
     )
   }
 })

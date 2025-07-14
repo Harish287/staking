@@ -2,12 +2,16 @@ import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit'
 import axios from 'axios'
 
 interface StakeItem {
-  reference: string
+  user:string
+  email:string
+  contract: string
   invested: number
   invested_on: string
   description: string
   completed: number
+  plan:string
   remaining: number
+  total:number
   ros_earned: number
   status: boolean
 }

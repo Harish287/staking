@@ -50,8 +50,12 @@ const FiatTransferForm = () => {
     error: otpError,
   } = useAppSelector((state) => state.TranferwalletOpt)
 
+  const { data: userData, loading: userLoading } = useAppSelector(
+    (state) => state.UserTree,
+  )
   const walletBalance =
-    useAppSelector((state) => state.auth.user?.Fiat_wallet) || 0
+    useAppSelector((state) => userData?.kiat_wallet || '0') || 0
+//mature wallet data pending
 
   const {
     data: dropDownOptions,
@@ -169,7 +173,7 @@ const FiatTransferForm = () => {
       dispatch(resetOtpState())
     }
   }, [otpSuccess, otpError, dispatch])
-    if (otpLoading || transferLoading) {
+  if (otpLoading || transferLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-4 border-t-pink-700 border-b-gray-800 border-l-transparent border-r-transparent"></div>
@@ -183,20 +187,20 @@ const FiatTransferForm = () => {
           <ArrowRightLeft className="mr-2" /> Transfer Maturity Wallet
         </h1>
         <div className="bg-white rounded-lg shadow-lg p-4">
-          <h2 className="text-lg p-2 rounded-[10px] flex  w-fit font-semibold mb-2 bg-gradient-to-r from-pink-700 to-gray-800 text-white">
-                    Maturity Wallet Balance:
-                    <div className=" flex items-center ml-0.5">
-                      <Image
-                        src={Logo}
-                        alt="Logo"
-                        priority
-                        width={15}
-                        height={15}
-                        className=" mr-0.5"
-                      />
-                      <span>{walletBalance}</span>
-                    </div>
-                  </h2>
+          <h2 className="text-lg p-2 rounded-[10px] flex  w-fit font-semibold mb-2  bg-gradient-to-r from-blue-500 to-purple-700 text-white">
+            Maturity Wallet Balance:
+            <div className=" flex items-center ml-0.5">
+              <Image
+                src={Logo}
+                alt="Logo"
+                priority
+                width={15}
+                height={15}
+                className=" mr-0.5"
+              />
+              <span>{walletBalance}</span>
+            </div>
+          </h2>
           <div className="flex flex-col md:flex-row gap-6">
             <div className="md:w-1/3">
               <Image
@@ -213,11 +217,11 @@ const FiatTransferForm = () => {
                   alt="Logo"
                   className="h-[25px] w-[25px] object-fill rounded-md"
                 />{' '}
-                Transfer Fiat Wallet
+                Transfer Mature Wallet
               </h2>
 
               <Autocomplete
-                options={dropDownOptions?.fait_transfer_options || []}
+                options={dropDownOptions?.fiat_transfer_options || []}
                 getOptionLabel={(option) => option.value}
                 onChange={(e, value) =>
                   setForm({ ...form, transfer_mode: value?.id || '' })
@@ -231,7 +235,6 @@ const FiatTransferForm = () => {
                   />
                 )}
               />
-
               <TextField
                 label="Amount"
                 name="amount"

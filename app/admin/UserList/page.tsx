@@ -29,6 +29,8 @@ import {
   Unlock,
   CreditCard,
   Power,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react'
 import {
   DropdownMenu,
@@ -57,6 +59,11 @@ import {
 import ResetPasswordForm from './Resetpassword/page'
 import { fetchDropdownOptions } from '@/store/slices/dropdownOptions'
 import AddUserDialog from './AddUserDialog/page'
+import WalletManipulationDialog from './walletmanupulatedialog'
+import EmailDialog from './SendEmail'
+import { downloadInvestorList } from '@/store/slices/admin/investorSlice'
+import UpdateInvestorDialog from './updateInvestorDilog'
+import { fetchEligibleUsers } from '@/store/slices/user/eligibleUserTransferSlice'
 
 type permissionType =
   | 'transfer'
@@ -70,6 +77,7 @@ type permissionType =
 export default function InvestorList() {
   const dispatch = useDispatch<AppDispatch>()
   const [open, setOpen] = useState(false)
+  const { downloadLoading } = useSelector((state: RootState) => state.investor)
 
   const [selectedUserId, setSelectedUserId] = useState<string>('')
   const handleResetPassword = (userId: string) => {
@@ -85,6 +93,13 @@ export default function InvestorList() {
   const { list, isLoading, error, total } = useSelector(
     (state: RootState) => state.investor,
   )
+  const [emailDialogOpen, setEmailDialogOpen] = useState(false)
+  const [emailUserId, setEmailUserId] = useState('')
+
+  const handleEmailDialogOpen = (userId: string) => {
+    setEmailUserId(userId)
+    setEmailDialogOpen(true)
+  }
 
   const searchParams = useSearchParams()
 
@@ -92,7 +107,7 @@ export default function InvestorList() {
   const [currentPage, setCurrentPage] = useState(pageFromUrl)
 
   const [searchQuery, setSearchQuery] = useState('')
-  const pageSize = 10
+  const [pageSize, setPageSize] = useState(10)
 
   const totalPages = Math.ceil(total / pageSize)
 
@@ -113,7 +128,7 @@ export default function InvestorList() {
         searchQuery,
       }),
     )
-  }, [dispatch, currentPage, searchQuery])
+  }, [dispatch, currentPage, pageSize, searchQuery])
 
   const {
     data: dropDownOptions,
@@ -179,6 +194,73 @@ export default function InvestorList() {
     }
   }
 
+  const handleDownload = async () => {
+    try {
+      const token = localStorage.getItem('token')
+      if (!token) {
+        toast.error('Authorization token is missing')
+        return
+      }
+
+      const blob = await dispatch(
+        downloadInvestorList({
+          token,
+          page: currentPage,
+          page_size: pageSize,
+          search: searchQuery,
+        }),
+      ).unwrap()
+
+      const url = window.URL.createObjectURL(new Blob([blob]))
+      const link = document.createElement('a')
+      link.href = url
+      link.setAttribute('download', 'investor_list.xlsx')
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+      window.URL.revokeObjectURL(url)
+
+      toast.success('Download started!')
+    } catch (error) {
+      console.error('Download error:', error)
+      toast.error('Failed to download investor list')
+    }
+  }
+  const [updateDialogOpen, setUpdateDialogOpen] = useState(false)
+  const [selectedUserToUpdate, setSelectedUserToUpdate] = useState<any>(null)
+
+  const generatePageNumbers = (totalPages: number, currentPage: number) => {
+    const pages: (number | string)[] = []
+    if (totalPages <= 7) {
+      for (let i = 1; i <= totalPages; i++) pages.push(i)
+    } else {
+      if (currentPage <= 4) {
+        pages.push(1, 2, 3, 4, 5, '...', totalPages)
+      } else if (currentPage >= totalPages - 3) {
+        pages.push(
+          1,
+          '...',
+          totalPages - 4,
+          totalPages - 3,
+          totalPages - 2,
+          totalPages - 1,
+          totalPages,
+        )
+      } else {
+        pages.push(
+          1,
+          '...',
+          currentPage - 1,
+          currentPage,
+          currentPage + 1,
+          '...',
+          totalPages,
+        )
+      }
+    }
+    return pages
+  }
+
   const handleViewDetails = async (userId: string) => {
     try {
       const resultAction = await dispatch(fetchInvestorDetails(userId))
@@ -197,9 +279,18 @@ export default function InvestorList() {
   const [activeTab, setActiveTab] = useState('Investor / Users')
 
   const tabs = ['Investor / Users']
+  const [walletDialogOpen, setWalletDialogOpen] = useState(false)
+  const [walletUserId, setWalletUserId] = useState('')
+  const [walletType, setWalletType] = useState('')
+
+  const handleWalletManipulation = (userId: string, type: string) => {
+    setWalletUserId(userId)
+    setWalletType(type)
+    setWalletDialogOpen(true)
+  }
 
   return (
-    <div className="min-h-screen bg-blue-100 p-6">
+    <div className="min-h-screen bg-gradient-to-r from-blue-500 to-purple-600 p-6">
       <Card className="container bg-white mx-auto max-w-7xl">
         <div className="p-6">
           <div className="flex justify-between items-center mb-6">
@@ -207,13 +298,17 @@ export default function InvestorList() {
               Investor User List
             </h1>
             <div className="flex gap-3">
-              <Button variant="outline" className="flex items-center gap-2">
-                <Download className="w-4 h-4" /> Download Users
+              <Button
+                variant="outline"
+                className="flex items-center gap-2 text-white bg-gradient-to-r from-blue-500 to-purple-600"
+                onClick={handleDownload}
+                disabled={downloadLoading}
+              >
+                <Download className="w-4 h-4" />
+                {downloadLoading ? 'Preparing...' : 'Download Users'}
               </Button>
-              {/* <Button className="bg-indigo-600 hover:bg-indigo-700 text-white flex items-center gap-2"> */}
-              {/* <UserPlus className="w-4 h-4" /> Add User */}
+
               <AddUserDialog />
-              {/* </Button> */}
             </div>
           </div>
 
@@ -248,7 +343,7 @@ export default function InvestorList() {
           ) : error ? (
             <div className="text-red-500 text-center py-10">{error}</div>
           ) : (
-            <div className="relative overflow-x-auto z-10">
+            <div className="relative overflow-x-auto z-10 ">
               <table className="w-full relative z-0">
                 <thead>
                   <tr className="border-b text-left text-sm font-medium text-gray-500">
@@ -309,7 +404,7 @@ export default function InvestorList() {
                       <td className="p-4">
                         <div className="flex gap-2">
                           <div className="flex items-center gap-1">
-                            {investor.verified.email ? (
+                            {investor.email_verified ? (
                               <CheckCircle2 className="w-4 h-4 text-green-500" />
                             ) : (
                               <XCircle className="w-4 h-4 text-red-500" />
@@ -317,7 +412,7 @@ export default function InvestorList() {
                             <span>Email</span>
                           </div>
                           <div className="flex items-center gap-1">
-                            {investor.verified.kyc ? (
+                            {investor.kyc_verified ? (
                               <CheckCircle2 className="w-4 h-4 text-green-500" />
                             ) : (
                               <XCircle className="w-4 h-4 text-red-500" />
@@ -384,12 +479,42 @@ export default function InvestorList() {
                               <Eye className="w-4 h-4 mr-2" /> View Details
                             </DropdownMenuItem>
 
-                            <DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => {
+                                const firstName =
+                                  investor.first_name ||
+                                  investor.name?.split(' ')[0] ||
+                                  ''
+                                const lastName =
+                                  investor.last_name ||
+                                  investor.name?.split(' ')[1] ||
+                                  ''
+
+                                setSelectedUserToUpdate({
+                                  user_id: investor.user_id,
+                                  first_name: firstName,
+                                  last_name: lastName,
+                                  email: investor.email || '',
+                                  mobile: investor.mobile || '',
+                                  referral_user_id: investor.referred_by || '',
+                                })
+
+                                dispatch(fetchEligibleUsers(investor.user_id))
+
+                                setUpdateDialogOpen(true)
+                              }}
+                            >
                               <Pencil className="w-4 h-4 mr-2" /> Update User
                             </DropdownMenuItem>
-                            <DropdownMenuItem>
+
+                            <DropdownMenuItem
+                              onClick={() =>
+                                handleEmailDialogOpen(investor.user_id)
+                              }
+                            >
                               <Mail className="w-4 h-4 mr-2" /> Send Email
                             </DropdownMenuItem>
+
                             {[
                               'KAIT',
                               'Income',
@@ -397,11 +522,20 @@ export default function InvestorList() {
                               'ROS',
                               'Restaking',
                             ].map((wallet) => (
-                              <DropdownMenuItem key={wallet}>
+                              <DropdownMenuItem
+                                key={wallet}
+                                onClick={() =>
+                                  handleWalletManipulation(
+                                    investor.user_id,
+                                    wallet,
+                                  )
+                                }
+                              >
                                 <Wallet className="w-4 h-4 mr-2" /> {wallet}{' '}
                                 Wallet - Manipulate
                               </DropdownMenuItem>
                             ))}
+
                             <DropdownMenuItem>
                               <Activity className="w-4 h-4 mr-2" /> Activities
                             </DropdownMenuItem>
@@ -412,164 +546,7 @@ export default function InvestorList() {
                             >
                               <Lock className="w-4 h-4 mr-2" /> Reset Password
                             </DropdownMenuItem>
-                            {/* <DropdownMenuItem
-                              onClick={() =>
-                                handlePermissionChange(
-                                  investor.user_id,
-                                  'transfer',
-                                  !investor.transfer,
-                                )
-                              }
-                            >
-                              {investor.transfer ? (
-                                <>
-                                  <Lock className="w-4 h-4 mr-2" />
-                                  Transfer Disable
-                                </>
-                              ) : (
-                                <>
-                                  <Unlock className="w-4 h-4 mr-2" />
-                                  Transfer Enable
-                                </>
-                              )}
-                            </DropdownMenuItem>
-                            {dropDownOptions?.permission_types?.map((type) => (
-                              <DropdownMenuItem key={type.id} value={type.id}>
-                                {type.value}
-                              </DropdownMenuItem>
-                            ))}
 
-                            <DropdownMenuItem
-                              onClick={() =>
-                                handlePermissionChange(
-                                  investor.user_id,
-                                  'withdraw',
-                                  !investor.withdraw,
-                                )
-                              }
-                            >
-                              {investor.withdraw ? (
-                                <>
-                                  <Lock className="w-4 h-4 mr-2" />
-                                  Withdraw Disable
-                                </>
-                              ) : (
-                                <>
-                                  <Unlock className="w-4 h-4 mr-2" />
-                                  Withdraw Enable
-                                </>
-                              )}
-                            </DropdownMenuItem>
-
-                            <DropdownMenuItem
-                              onClick={() =>
-                                handlePermissionChange(
-                                  investor.user_id,
-                                  'withdraw_staking',
-                                  !investor.withdraw_staking,
-                                )
-                              }
-                            >
-                              {!investor.withdraw_staking ? (
-                                <>
-                                  <Lock className="w-4 h-4 mr-2" />
-                                  Withdraw Staking Disable
-                                </>
-                              ) : (
-                                <>
-                                  <Unlock className="w-4 h-4 mr-2" />
-                                  Withdraw Staking Enable
-                                </>
-                              )}
-                            </DropdownMenuItem>
-
-                            <DropdownMenuItem
-                              onClick={() =>
-                                handlePermissionChange(
-                                  investor.user_id,
-                                  'level_income',
-                                  !investor.level_income,
-                                )
-                              }
-                            >
-                              {investor.level_income ? (
-                                <>
-                                  <Lock className="w-4 h-4 mr-2" />
-                                  Level Income Suspend
-                                </>
-                              ) : (
-                                <>
-                                  <Unlock className="w-4 h-4 mr-2" />
-                                  Level Income Enable
-                                </>
-                              )}
-                            </DropdownMenuItem>
-
-                            <DropdownMenuItem
-                              onClick={() =>
-                                handlePermissionChange(
-                                  investor.user_id,
-                                  'adhoc_income',
-                                  !investor.adhoc_income,
-                                )
-                              }
-                            >
-                              {investor.adhoc_income ? (
-                                <>
-                                  <Lock className="w-4 h-4 mr-2" />
-                                  Adhoc Income Disable
-                                </>
-                              ) : (
-                                <>
-                                  <Unlock className="w-4 h-4 mr-2" />
-                                  Adhoc Income Enable
-                                </>
-                              )}
-                            </DropdownMenuItem>
-
-                            <DropdownMenuItem
-                              onClick={() =>
-                                handlePermissionChange(
-                                  investor.user_id,
-                                  'credit',
-                                  !investor.credit,
-                                )
-                              }
-                            >
-                              {investor.credit ? (
-                                <>
-                                  <CreditCard className="w-4 h-4 mr-2" />
-                                  Remove Credit ID
-                                </>
-                              ) : (
-                                <>
-                                  <CreditCard className="w-4 h-4 mr-2" />
-                                  Set Credit ID
-                                </>
-                              )}
-                            </DropdownMenuItem>
-
-                            <DropdownMenuItem
-                              onClick={() =>
-                                handlePermissionChange(
-                                  investor.user_id,
-                                  'suspend',
-                                  !investor.suspend,
-                                )
-                              }
-                            >
-                              {!investor.suspend ? (
-                                <>
-                                  <Power className="w-4 h-4 mr-2 text-red-600" />
-                                  Activate
-                                </>
-                              ) : (
-                                <>
-                                  <Power className="w-4 h-4 mr-2 text-red-600" />
-                                  Suspend
-                                </>
-                              )}
-                            </DropdownMenuItem> */}
                             {dropDownOptions?.permission_types?.map(
                               ({ id, value }) => {
                                 let label = ''
@@ -681,6 +658,12 @@ export default function InvestorList() {
                     </tr>
                   ))}
                 </tbody>
+
+                <EmailDialog
+                  open={emailDialogOpen}
+                  onClose={() => setEmailDialogOpen(false)}
+                  userId={emailUserId}
+                />
               </table>
               <Dialog open={open} onOpenChange={setOpen}>
                 <DialogContent className="bg-[#F3EAD8] hover:bg-blue-50 transition-colors duration-2000">
@@ -693,143 +676,99 @@ export default function InvestorList() {
             </div>
           )}
 
-          <div className="flex justify-between items-center mt-6 flex-wrap gap-2">
-            <div className="flex gap-2">
-              <Button
-                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                disabled={currentPage <= 1}
-              >
-                PREV
-              </Button>
-              <Button
-                onClick={() =>
-                  setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-                }
-                disabled={currentPage >= totalPages}
-              >
-                NEXT
-              </Button>
-            </div>
-            <div className="text-sm text-gray-600">
-              Total Investors: <strong>{total}</strong>
-            </div>
-            <div className="flex items-center gap-2">
-              <span>Page</span>
-              <Select
-                value={currentPage.toString()}
-                onValueChange={(value) => setCurrentPage(Number(value))}
-              >
-                <SelectTrigger className="w-20">
-                  <SelectValue placeholder={`Page ${currentPage}`} />
-                </SelectTrigger>
-                <SelectContent className="bg-white">
-                  {Array.from({ length: totalPages }, (_, i) => {
-                    const page = i + 1
-                    return (
-                      <SelectItem key={page} value={page.toString()}>
-                        {page}
+          <div className="p-6 pb-0 b-0 bg-white">
+            <div className="flex items-center justify-between flex-wrap gap-4">
+              <div className="flex items-center space-x-4">
+                <Button
+                  variant="outline"
+                  disabled={currentPage === 1}
+                  onClick={() => setCurrentPage(currentPage - 1)}
+                >
+                  <ChevronLeft className="w-4 h-4 mr-1" /> Previous
+                </Button>
+
+                <div className="flex items-center space-x-2">
+                  {generatePageNumbers(totalPages, currentPage).map(
+                    (pageNum, idx) => (
+                      <Button
+                        key={idx}
+                        variant={
+                          pageNum === currentPage ? 'default' : 'outline'
+                        }
+                        size="sm"
+                        disabled={pageNum === '...'}
+                        onClick={() =>
+                          typeof pageNum === 'number' && setCurrentPage(pageNum)
+                        }
+                        className={
+                          pageNum === currentPage
+                            ? 'bg-gradient-to-r from-blue-500 to-purple-700 text-white'
+                            : ''
+                        }
+                      >
+                        {pageNum}
+                      </Button>
+                    ),
+                  )}
+                </div>
+
+                <Button
+                  variant="outline"
+                  disabled={currentPage === totalPages}
+                  onClick={() => setCurrentPage(currentPage + 1)}
+                >
+                  Next <ChevronRight className="w-4 h-4 ml-1" />
+                </Button>
+              </div>
+
+              {/* Page Size Dropdown */}
+              <div className="flex items-center space-x-2">
+                <span className="text-sm text-gray-600">Rows per page:</span>
+                <Select
+                  value={pageSize.toString()}
+                  onValueChange={(value) => {
+                    const size = parseInt(value)
+                    setPageSize(size)
+                    setCurrentPage(1)
+                  }}
+                >
+                  <SelectTrigger className="w-24">
+                    <SelectValue placeholder="Page size" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {[10, 20, 50, 100].map((size) => (
+                      <SelectItem key={size} value={size.toString()}>
+                        {size}
                       </SelectItem>
-                    )
-                  })}
-                </SelectContent>
-              </Select>
-              <span>of {totalPages}</span>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Info Summary */}
+              <div className="text-sm text-gray-600">
+                Page <strong>{currentPage}</strong> of{' '}
+                <strong>{totalPages}</strong> • Showing{' '}
+                <strong>{Math.min(pageSize, total)}</strong> of{' '}
+                <strong>{total}</strong> users
+              </div>
             </div>
           </div>
         </div>
+        <WalletManipulationDialog
+          open={walletDialogOpen}
+          onOpenChange={setWalletDialogOpen}
+          userId={walletUserId}
+          walletType={walletType}
+        />
       </Card>
+      {selectedUserToUpdate && (
+        <UpdateInvestorDialog
+          open={updateDialogOpen}
+          onClose={() => setUpdateDialogOpen(false)}
+          user={selectedUserToUpdate}
+        />
+      )}
     </div>
   )
 }
-// function AddUserDialog() {
-//   return (
-//     <Dialog>
-//       <DialogTrigger asChild>
-//         <Button className="bg-indigo-600 hover:bg-indigo-700 text-white flex items-center gap-2">
-//           <UserPlus className="w-4 h-4" /> Add User
-//         </Button>
-//       </DialogTrigger>
-
-//       <DialogContent className="w-[75vw] !max-w-none bg-white rounded-xl">
-//         <DialogHeader>
-//           <DialogTitle>Add New User</DialogTitle>
-//         </DialogHeader>
-
-//         <form className="space-y-4">
-//           <div>
-//             <label className="block text-sm font-medium mb-1">User Type</label>
-//             <Select>
-//               <SelectTrigger className="w-full">
-//                 <SelectValue placeholder="Regular" />
-//               </SelectTrigger>
-//               <SelectContent className=" bg-white">
-//                 <SelectItem value="regular">Regular</SelectItem>
-//                 <SelectItem value="admin">Admin</SelectItem>
-//               </SelectContent>
-//             </Select>
-//           </div>
-
-//           <div className="grid grid-cols-2 gap-4">
-//             <div>
-//               <label className="block text-sm font-medium mb-1">
-//                 First Name
-//               </label>
-//               <Input placeholder="User First Name" />
-//             </div>
-
-//             <div>
-//               <label className="block text-sm font-medium mb-1">
-//                 Last Name
-//               </label>
-//               <Input placeholder="User Last Name" />
-//             </div>
-
-//             <div>
-//               <label className="block text-sm font-medium mb-1">
-//                 Date Of Birth
-//               </label>
-//               <Input placeholder="Date Of Birth" />
-//             </div>
-
-//             <div>
-//               <label className="block text-sm font-medium mb-1">
-//                 Email Address
-//               </label>
-//               <Input type="email" placeholder="Email address" />
-//             </div>
-//             <div>
-//               <label className="block text-sm font-medium mb-1">Password</label>
-//               <Input placeholder="Automatically generated if blank" />
-//             </div>
-//             <div>
-//               <label className="block text-sm font-medium mb-1">
-//                 Confirm Password
-//               </label>
-//               <Input placeholder="Confirm Password" />
-//             </div>
-//             <div>
-//               <label className="block text-sm font-medium mb-1">
-//                 Mobile Number
-//               </label>
-//               <Input placeholder="Mobile Number" />
-//             </div>
-//           </div>
-
-//           <div className="flex items-center gap-2">
-//             <input type="checkbox" id="verifyEmail" defaultChecked />
-//             <label htmlFor="verifyEmail" className="text-sm">
-//               Required Email Verification
-//             </label>
-//           </div>
-
-//           <Button
-//             type="submit"
-//             className="w-full bg-indigo-600 hover:bg-indigo-700 text-white"
-//           >
-//             Add User
-//           </Button>
-//         </form>
-//       </DialogContent>
-//     </Dialog>
-//   )
-// }

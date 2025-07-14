@@ -142,7 +142,7 @@ const RosWalletTransfer = () => {
     }
   }, [otpSuccess, otpError, dispatch])
   const walletBalance =
-    useAppSelector((state) => state.auth.user?.income_wallet) || 0
+    useAppSelector((state) => state.auth.user?.ros_wallet) || 0
 
   if (otpLoading || loading) {
     return (
@@ -158,7 +158,7 @@ const RosWalletTransfer = () => {
           <ArrowRightLeft className="mr-2" /> Transfer Ros Wallet
         </h1>
         <div className="bg-white rounded-lg shadow-lg p-4">
-          <h2 className="text-lg p-2 rounded-[10px] flex  w-fit font-semibold mb-2 bg-gradient-to-r from-pink-700 to-gray-800 text-white">
+          <h2 className="text-lg p-2 rounded-[10px] flex  w-fit font-semibold mb-2  bg-gradient-to-r from-blue-500 to-purple-700 text-white">
             Ros Wallet Balance:
             <div className=" flex items-center ml-0.5">
               <Image

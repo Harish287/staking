@@ -1,31 +1,33 @@
-// store/slices/investorAPI.ts
-
-import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
+import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit'
 import axios from 'axios'
 
 const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL
 
-interface Investor {
-  withdraw_staking: boolean
-  level_income: boolean
-  adhoc_income: boolean
-  credit: boolean
-  suspend: boolean
+
+export interface Investor {
+  mobile: string
+  last_name: string
+  first_name: string
   user_id: string
   name: string
   referred_by: string
   email: string
   investment: number
   team_business: number
-  verified: {
-    email: boolean
-    kyc: boolean
-  }
+  email_verified: boolean
+  kyc_verified: boolean
   transfer: boolean
   withdraw: boolean
+  withdraw_staking: boolean
+  level_income: boolean
+  adhoc_income: boolean
+  credit: boolean
+  suspend: boolean
 }
 
 export interface InvestorDetails {
+  email_verified: boolean
+  kyc_verified: boolean
   user_id: string
   team_business: string
   invested: string
@@ -40,7 +42,6 @@ export interface InvestorDetails {
     relationship: string
     name: string
     pan: string
-    // relation: string
   }
   nationality: string
   bank: {
@@ -48,10 +49,6 @@ export interface InvestorDetails {
     account_type: string
     bank_name: string
     ifsc_code: string
-    // account: string
-    // ifsc: string
-    // bank: string
-    // type: string
   }
   joining_date: string
   sponsor: string
@@ -71,6 +68,23 @@ export interface InvestorDetails {
   stake_wallet?: number
 }
 
+interface InvestorListResponse {
+  items: Investor[]
+  total: number
+  page: number
+  page_size: number
+  total_pages: number
+}
+
+export interface DownloadInvestorParams {
+  page?: number
+  page_size?: number
+  search?: string
+  token: string
+}
+
+// --- State ---
+
 interface InvestorState {
   list: Investor[]
   isLoading: boolean
@@ -79,6 +93,11 @@ interface InvestorState {
   details: InvestorDetails | null
   detailsLoading: boolean
   detailsError: string | null
+  currentPage: number
+  pageSize: number
+  searchQuery: string
+  downloadLoading: boolean
+  downloadError: string | null
 }
 
 const initialState: InvestorState = {
@@ -89,14 +108,13 @@ const initialState: InvestorState = {
   details: null,
   detailsLoading: false,
   detailsError: null,
+  currentPage: 1,
+  pageSize: 10,
+  searchQuery: '',
+  downloadLoading: false,
+  downloadError: null,
 }
-interface InvestorListResponse {
-  items: Investor[]
-  total: number
-  page: number
-  page_size: number
-  total_pages: number
-}
+
 
 export const fetchInvestorList = createAsyncThunk<
   { data: Investor[]; total: number },
@@ -110,7 +128,7 @@ export const fetchInvestorList = createAsyncThunk<
     let url = `${baseURL}user/investor_list?page=${page}&page_size=${page_size}`
 
     if (searchQuery) {
-      url += `&search=${searchQuery}`
+      url += `&search=${encodeURIComponent(searchQuery)}`
     }
 
     const res = await axios.get<InvestorListResponse>(url, {
@@ -135,38 +153,69 @@ export const fetchInvestorDetails = createAsyncThunk<
   InvestorDetails,
   string,
   { rejectValue: string }
->(
-  'investorDetails/fetchInvestorDetails',
-  async (userId, { rejectWithValue }) => {
-    try {
-      const token = localStorage.getItem('token')
+>('investorDetails/fetch', async (userId, thunkAPI) => {
+  try {
+    const token = localStorage.getItem('token')
 
-      if (!token) {
-        return rejectWithValue('Authorization token is missing.')
-      }
-
-      const encodedUserId = encodeURIComponent(userId)
-
-      const response = await axios.get(
-        `${baseURL}user/investor?user_id=${encodedUserId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            Accept: 'application/json',
-          },
-        },
-      )
-
-      return response.data
-    } catch (error: any) {
-      const errorMessage =
-        error.response?.data?.message ||
-        error.message ||
-        'Failed to fetch investor details'
-      return rejectWithValue(errorMessage)
+    if (!token) {
+      return thunkAPI.rejectWithValue('Authorization token is missing.')
     }
-  },
-)
+
+    const response = await axios.get(
+      `${baseURL}user/investor?user_id=${encodeURIComponent(userId)}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: 'application/json',
+        },
+      },
+    )
+
+    return response.data
+  } catch (error: any) {
+    return thunkAPI.rejectWithValue(
+      error.response?.data?.message ||
+        error.message ||
+        'Failed to fetch investor details',
+    )
+  }
+})
+
+export const downloadInvestorList = createAsyncThunk<
+  Blob,
+  DownloadInvestorParams,
+  { rejectValue: string }
+>('investor/download', async (params, { rejectWithValue }) => {
+  try {
+    const { token, ...query } = params
+    const searchParams = new URLSearchParams()
+
+    Object.entries(query).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        searchParams.append(key, value.toString())
+      }
+    })
+
+    const response = await axios.get(
+      `${baseURL}user/investor_list/download?${searchParams}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: 'application/json',
+        },
+        responseType: 'blob',
+      },
+    )
+
+    return response.data
+  } catch (err: any) {
+    return rejectWithValue(
+      err?.response?.data?.detail || err.message || 'Download failed',
+    )
+  }
+})
+
+// --- Slice ---
 
 const investorSlice = createSlice({
   name: 'investor',
@@ -178,7 +227,6 @@ const investorSlice = createSlice({
       state.detailsError = null
     },
   },
-
   extraReducers: (builder) => {
     builder
       .addCase(fetchInvestorList.pending, (state) => {
@@ -189,10 +237,10 @@ const investorSlice = createSlice({
         state.isLoading = false
         state.list = action.payload.data
         state.total = action.payload.total
-
-        console.log('Total investors:', action.payload.total)
+        state.currentPage = action.meta.arg.page
+        state.pageSize = action.meta.arg.page_size
+        state.searchQuery = action.meta.arg.searchQuery
       })
-
       .addCase(fetchInvestorList.rejected, (state, action) => {
         state.isLoading = false
         state.error = action.payload || 'Failed to fetch investor list'
@@ -209,9 +257,23 @@ const investorSlice = createSlice({
       })
       .addCase(fetchInvestorDetails.rejected, (state, action) => {
         state.detailsLoading = false
-        state.detailsError = action.payload as string
+        state.detailsError =
+          action.payload || 'Failed to fetch investor details'
+      })
+
+      .addCase(downloadInvestorList.pending, (state) => {
+        state.downloadLoading = true
+        state.downloadError = null
+      })
+      .addCase(downloadInvestorList.fulfilled, (state) => {
+        state.downloadLoading = false
+      })
+      .addCase(downloadInvestorList.rejected, (state, action) => {
+        state.downloadLoading = false
+        state.downloadError = action.payload || 'Download failed'
       })
   },
 })
 
+export const { resetInvestorDetails } = investorSlice.actions
 export default investorSlice.reducer

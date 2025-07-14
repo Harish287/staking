@@ -41,7 +41,7 @@ export const fetchVoucherSummary = createAsyncThunk(
   'voucher/summary',
   async (
     { page = 1, page_size = 10 }: { page: number; page_size: number },
-    { rejectWithValue }
+    { rejectWithValue },
   ) => {
     try {
       const token = Cookies.get('token')
@@ -54,9 +54,11 @@ export const fetchVoucherSummary = createAsyncThunk(
       })
       return response.data
     } catch (err: any) {
-      return rejectWithValue(err.response?.data?.detail || 'Failed to fetch summary')
+      return rejectWithValue(
+        err.response?.data?.detail || 'Failed to fetch summary',
+      )
     }
-  }
+  },
 )
 
 const voucherSummarySlice = createSlice({
@@ -79,7 +81,14 @@ const voucherSummarySlice = createSlice({
       })
       .addCase(fetchVoucherSummary.rejected, (state, action) => {
         state.loading = false
-        state.error = action.payload as string
+
+        if ((action.payload as string) === 'No records found') {
+          state.items = []
+          state.total = 0
+          state.error = null
+        } else {
+          state.error = action.payload as string
+        }
       })
   },
 })

@@ -1,6 +1,8 @@
 'use client'
 
-import { Card } from '@/components/ui/card'
+import { useEffect, useState } from 'react'
+import { useAppDispatch, useAppSelector } from '@/store/hooks'
+import { fetchDashboardStats } from '@/store/slices/admin/adminUserDataSlice'
 import {
   CircleDollarSign,
   Users,
@@ -16,208 +18,339 @@ import {
   YAxis,
   CartesianGrid,
   ResponsiveContainer,
+  BarChart,
+  Tooltip,
+  Bar,
+  Cell,
 } from 'recharts'
-
-const registrationData = [
-  { day: 'Thu', value: 45 },
-  { day: 'Fri', value: 62 },
-  { day: 'Sat', value: 35 },
-  { day: 'Sun', value: 28 },
-  { day: 'Mon', value: 38 },
-  { day: 'Tue', value: 35 },
-  { day: 'Wed', value: 30 },
-  { day: 'Thu', value: 35 },
-  { day: 'Fri', value: 28 },
-  { day: 'Sat', value: 28 },
-  { day: 'Sun', value: 18 },
-  { day: 'Mon', value: 50 },
-  { day: 'Tue', value: 75 },
-  { day: 'Wed', value: 20 },
-  { day: 'Thu', value: 30 },
-]
+import { Card } from '@/components/ui/card'
+import toast from 'react-hot-toast'
+import Link from 'next/link'
+import Image from 'next/image'
+import Logo from '@/assets/logo2x.png'
+import Chart from './chart'
 
 export default function Dashboard() {
+  const dispatch = useAppDispatch()
+  const { data, loading, error } = useAppSelector((state) => state.AdminUser)
+  const [activeTab, setActiveTab] = useState<'kyc' | 'user'>('user')
+  const [kaitactiveTab, setkaitActiveTab] = useState<
+    'USDT' | 'OTHERS' | 'CORPORATE'
+  >('USDT')
+
+  useEffect(() => {
+    dispatch(fetchDashboardStats())
+  }, [dispatch])
+
+  useEffect(() => {
+    if (error) {
+      toast.error(error)
+    }
+  }, [error])
+
+  const UsersGraph = [
+    { label: 'Last Day', value: data?.users.last_day_users },
+    { label: 'Last Week', value: data?.users.last_week_users },
+    { label: 'Last Month', value: data?.users.last_month_users },
+    { label: 'Last Year', value: data?.users.last_year_users },
+  ]
+
+  const registrationData = [
+    { label: 'Last Day', value: data?.users?.last_day_users },
+    { label: 'Last Week', value: data?.users?.last_week_users },
+    { label: 'Last Month', value: data?.users?.last_month_users },
+    { label: 'Last Year', value: data?.users?.last_year_users },
+  ]
+  const kycPercentage =
+    (data?.users?.total_users ?? 0) > 0
+      ? Math.round(
+          ((data?.users?.kyc_completed ?? 0) /
+            (data?.users?.total_users ?? 1)) *
+            100,
+        )
+      : 0
+
+  const totalUserPercentage =
+    (data?.users?.total_active_users ?? 0) > 0
+      ? Math.round(
+          ((data?.users?.total_active_users ?? 0) /
+            (data?.users?.total_users ?? 1)) *
+            100,
+        )
+      : 0
+  const [expandedClub, setExpandedClub] = useState('basic')
+  const [selected, setSelected] = useState<null | (typeof registrationData)[0]>(
+    null,
+  )
+
   return (
-        <div className="p-6 space-y-6 bg-blue-100">
-
-    <div className="min-h-screen  rounded-2xl bg-white dark:bg-gray-900/50 p-8">
-      <div className="max-w-7xl mx-auto space-y-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {/* Total Contracts Card */}
-          <Card className="p-6">
-            <div className="space-y-4">
-              <div className="flex justify-between items-center">
-                <h2 className="text-sm text-gray-500 dark:text-gray-400">
-                  TOTAL CONTRACTS
-                </h2>
-                <CircleDollarSign className="text-red-500 h-4 w-4" />
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-3xl font-semibold">310,041,347</span>
-              </div>
-              <button className="text-violet-500 text-sm">VIEW</button>
-            </div>
-          </Card>
-
-          {/* Total Users Card */}
-          <Card className="p-6">
-            <div className="space-y-4">
-              <div className="flex justify-between items-center">
-                <h2 className="text-sm text-gray-500 dark:text-gray-400">
-                  TOTAL USERS
-                </h2>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">
-                    KYC
-                  </span>
-                  <span className="text-xs bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">
-                    USER
-                  </span>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-3xl font-semibold">24,472</span>
-                <span className="text-sm bg-blue-100 dark:bg-blue-900/30 text-blue-600 px-2 py-0.5 rounded">
-                  90%
-                </span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-500">
-                  181 since last week
-                </span>
-                <button className="text-violet-500 text-sm">VIEW</button>
-              </div>
-            </div>
-          </Card>
-
-          {/* KAIT Wallet Card */}
-          <Card className="p-6">
-            <div className="space-y-4">
-              <div className="flex justify-between items-center">
-                <h2 className="text-sm text-gray-500 dark:text-gray-400">
-                  KAIT WALLET
-                </h2>
-                <div className="flex gap-2">
-                  <span className="text-xs bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">
-                    USDT
-                  </span>
-                  <span className="text-xs bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">
-                    OTHERS
-                  </span>
-                  <span className="text-xs bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">
-                    CORPORATE
-                  </span>
-                </div>
-              </div>
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <CircleDollarSign className="text-red-500 h-4 w-4" />
-                  <span className="text-2xl font-semibold">171,057,527</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <CircleDollarSign className="text-red-500 h-4 w-4" />
-                  <span className="text-2xl font-semibold">0</span>
-                </div>
-              </div>
-            </div>
-          </Card>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Important Metrics Card */}
-          <Card className="p-6">
-            <div className="space-y-6">
-              <div className="flex justify-between items-center">
-                <h2 className="font-medium">Important Metrics</h2>
-                <button className="text-violet-500 text-sm flex items-center gap-1">
-                  VIEW ALL
-                  <span className="text-lg">&gt;</span>
-                </button>
-              </div>
+    <div className="p-6 space-y-6 min-h-screen bg-gradient-to-r from-blue-600 to-purple-600 text-black">
+      <div className="min-h-screen  rounded-2xl  dark:bg-gray-900/50 p-8">
+        <div className="max-w-7xl mx-auto space-y-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {/* Total Contracts Card */}
+            <Card className="p-6 bg-white dark:bg-gray-900/50 rounded-2xl shadow-lg transition-transform hover:scale-[1.02] hover:shadow-2xl">
               <div className="space-y-4">
-                {[
-                  {
-                    label: 'Total ROI',
-                    value: '118,079,430',
-                    status: 'success',
-                  },
-                  {
-                    label: 'Total Level',
-                    value: '86,319,651',
-                    status: 'success',
-                  },
-                  {
-                    label: 'Total Earnings',
-                    value: '204,399,082',
-                    status: 'success',
-                  },
-                  {
-                    label: 'Total Withdraw',
-                    value: '76,208,917',
-                    status: 'warning',
-                  },
-                  {
-                    label: 'Total Balance',
-                    value: '5,162,012',
-                    status: 'warning',
-                  },
-                ].map((metric, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg"
-                  >
-                    <span className="text-gray-600 dark:text-gray-300">
-                      {metric.label}
-                    </span>
-                    <div className="flex items-center gap-3">
-                      <div className="flex items-center gap-1">
-                        <CircleDollarSign className="text-red-500 h-4 w-4" />
-                        <span>{metric.value}</span>
-                      </div>
-                      {metric.status === 'success' ? (
-                        <CheckCircle className="text-green-500 h-5 w-5" />
-                      ) : (
-                        <AlertCircle className="text-yellow-500 h-5 w-5" />
-                      )}
-                    </div>
-                  </div>
-                ))}
+                <div className="flex justify-between items-center">
+                  <h2 className="text-sm text-gray-500 dark:text-gray-400">
+                    TOTAL CONTRACTS
+                  </h2>
+                  <Image
+                    alt="KAIT Logo"
+                    src={Logo}
+                    width={24}
+                    height={24}
+                    className="object-contain"
+                  />{' '}
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-3xl font-semibold">
+                    {data?.stakes.total_contracts}
+                  </span>
+                </div>
+                <Link href="/admin/stakingcontracts/allcontracts" passHref>
+                  <button className="text-white  hover:cursor-pointer text-sm bg-gradient-to-r from-purple-500 to-blue-500 px-4 py-1 rounded-full shadow hover:scale-105 transition-all">
+                    VIEW
+                  </button>
+                </Link>
               </div>
-            </div>
-          </Card>
+            </Card>
 
-          {/* Registration Statistics Card */}
-          <Card className="p-6">
-            <div className="space-y-6">
-              <div className="flex justify-between items-center">
-                <h2 className="font-medium">Registration Statistics</h2>
-                <select className="bg-transparent border-none text-sm text-gray-500">
-                  <option>15 DAYS</option>
-                  <option>30 DAYS</option>
-                  <option>60 DAYS</option>
-                </select>
+            {/* Total Users Card */}
+            <Card className="p-6 bg-white">
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <h2 className="text-sm text-gray-500 dark:text-gray-400">
+                    TOTAL USERS
+                  </h2>
+
+                  {/* Tabs */}
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setActiveTab('kyc')}
+                      className={`text-xs px-3 py-1 rounded transition ${
+                        activeTab === 'kyc'
+                          ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white'
+                          : 'bg-gray-100 dark:bg-gray-800 text-gray-700'
+                      }`}
+                    >
+                      KYC
+                    </button>
+                    <button
+                      onClick={() => setActiveTab('user')}
+                      className={`text-xs px-3 py-1 rounded transition ${
+                        activeTab === 'user'
+                          ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white'
+                          : 'bg-gray-100 dark:bg-gray-800 text-gray-700'
+                      }`}
+                    >
+                      USER
+                    </button>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <span className="text-3xl font-semibold">
+                    {activeTab === 'kyc'
+                      ? data?.users?.kyc_completed
+                      : data?.users?.total_users}
+                  </span>
+                  <span className="text-sm bg-blue-100 dark:bg-blue-900/30 text-blue-600 px-2 py-0.5 rounded">
+                    {activeTab === 'kyc' ? kycPercentage : totalUserPercentage}%
+                  </span>
+                </div>
+
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-500">
+                    {activeTab === 'kyc' ? (
+                      <>
+                        <div>
+                          KYC Completed:
+                          <strong>{data?.users?.kyc_completed}</strong>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div>
+                          Last Week New Users:{' '}
+                          <strong>{data?.users?.last_week_users}</strong>
+                        </div>
+                      </>
+                    )}
+                  </span>
+
+                  <Link
+                    href={
+                      activeTab === 'kyc'
+                        ? '/admin/KYCList?page=1'
+                        : '/admin/UserList?page=1'
+                    }
+                  >
+                    <button className="text-white text-sm bg-gradient-to-r from-purple-500 to-blue-500 px-4 py-1 rounded-full shadow hover:scale-105 transition-all hover:cursor-pointer">
+                      VIEW
+                    </button>
+                  </Link>
+                </div>
               </div>
-              <div className="h-[300px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={registrationData}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                    <XAxis dataKey="day" axisLine={false} tickLine={false} />
-                    <YAxis axisLine={false} tickLine={false} />
-                    <Line
-                      type="monotone"
-                      dataKey="value"
-                      stroke="#4F46E5"
-                      strokeWidth={2}
-                      dot={false}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
+            </Card>
+
+            <Card className="p-6 bg-white">
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <h2 className="text-sm text-gray-500 dark:text-gray-400">
+                    KAIT WALLET
+                  </h2>
+                  <div className="flex gap-2">
+                    <span className="text-xs bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">
+                      USDT
+                    </span>
+                    <span className="text-xs bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">
+                      OTHERS
+                    </span>
+                    <span className="text-xs bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">
+                      CORPORATE
+                    </span>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Image
+                      alt="KAIT Logo"
+                      src={Logo}
+                      width={24}
+                      height={24}
+                      className="object-contain"
+                    />{' '}
+                    <span className="text-2xl font-semibold">171,057,527</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Image
+                      alt="KAIT Logo"
+                      src={Logo}
+                      width={24}
+                      height={24}
+                      className="object-contain"
+                    />{' '}
+                    <span className="text-2xl font-semibold">0</span>
+                  </div>
+                </div>
               </div>
+            </Card>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <Card className="p-6 col-span-2 bg-white">
+              <div className="space-y-4">
+                <h2 className="text-sm text-gray-500 dark:text-gray-400">
+                  Total {data?.users.total_users} Members
+                </h2>
+
+                <div className="flex flex-wrap gap-2">
+                  {Object.entries(data?.clubs || {}).map(([clubName]) => (
+                    <button
+                      key={clubName}
+                      onClick={() => setExpandedClub(clubName)}
+                      className={`px-4 py-2 rounded-full text-sm font-medium transition ${
+                        expandedClub === clubName
+                          ? 'bg-violet-600 text-white'
+                          : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200'
+                      }`}
+                    >
+                      {clubName}
+                    </button>
+                  ))}
+                </div>
+
+                {expandedClub && (
+                  <div className="mt-4 text-center text-lg font-semibold text-gray-800 dark:text-gray-100">
+                    {expandedClub}:{' '}
+                    {data?.clubs?.[expandedClub as keyof typeof data.clubs]}{' '}
+                    members
+                  </div>
+                )}
+              </div>
+            </Card>
+
+            <Card className="p-6 bg-white">
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <h2 className="text-sm text-gray-500 dark:text-gray-400">
+                    Total Paid Members
+                  </h2>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <span className="text-3xl font-semibold">
+                    {data?.stakes.total_users_with_contracts}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-gray-500 dark:text-gray-400">
+                    Staked Members
+                  </span>
+                </div>
+              </div>
+            </Card>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Card className="p-6 bg-white">
+              <div className="space-y-6">
+                <div className="flex justify-between items-center">
+                  <h2 className="font-medium">Important Metrics</h2>
+
+                  <Link href={'/admin/stakingcontracts/walletSummary'}>
+                    <button className="text-white  hover:cursor-pointer text-sm bg-gradient-to-r from-purple-500 to-blue-500 px-4 py-1 rounded-full shadow hover:scale-105 transition-all">
+                      VIEW
+                       {/* <span className="text-lg">&gt;</span> */}
+                    </button>
+                  </Link>
+                </div>
+
+                <div className="space-y-4">
+                  {data?.metrics &&
+                    [
+                      { key: 'total_roi', label: 'Total ROI' },
+                      { key: 'total_level', label: 'Total Level' },
+                      { key: 'total_earnings', label: 'Total Earnings' },
+                      { key: 'total_withdraw', label: 'Total Withdraw' },
+                      { key: 'total_balance', label: 'Total Balance' },
+                    ].map((metric, index) => (
+                      <div
+                        key={index}
+                        className="grid grid-cols-2 items-center gap-10 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg"
+                      >
+                        <span className="text-gray-600 dark:text-gray-300 text-left">
+                          {metric.label}
+                        </span>
+                        <div className="flex items-center justify-start gap-2 text-left">
+                          <Image
+                            alt="KAIT Logo"
+                            src={Logo}
+                            width={24}
+                            height={24}
+                            className="object-contain"
+                          />
+                          <span>
+                            {Number(
+                              data.metrics[
+                                metric.key as keyof typeof data.metrics
+                              ],
+                            ).toLocaleString()}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              </div>
+            </Card>
+
+            <div className="">
+              <Chart />
             </div>
-          </Card>
+          </div>
         </div>
       </div>
-    </div>
     </div>
   )
 }

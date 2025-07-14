@@ -38,6 +38,12 @@ export default function BeneficiaryListPage() {
     dispatch(fetchBeneficiaries())
   }, [dispatch])
 
+  useEffect(() => {
+    if (error && error !== 'No user found') {
+      toast.error(error)
+    }
+  }, [error])
+
   const handleMenuClick = (
     e: React.MouseEvent<HTMLButtonElement>,
     beneficiary_id: string,
@@ -93,8 +99,10 @@ export default function BeneficiaryListPage() {
 
         {loading ? (
           <p>Loading...</p>
-        ) : error ? (
-          <p className="text-red-500">{error}</p>
+        ) : items.length === 0 ? (
+          <p className="text-center py-10 text-gray-500 text-lg font-medium">
+            No beneficiary users found.
+          </p>
         ) : (
           <table className="min-w-full text-sm border border-gray-200 rounded overflow-hidden">
             <thead className="bg-gray-100 text-gray-700 text-left">

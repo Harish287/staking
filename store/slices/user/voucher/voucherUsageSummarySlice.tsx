@@ -10,7 +10,7 @@ export const fetchVoucherUsageSummary = createAsyncThunk(
     { rejectWithValue },
   ) => {
     try {
-  const token =
+      const token =
         typeof window !== 'undefined' ? localStorage.getItem('token') || '' : ''
       const response = await axios.get(
         `${baseURL}voucher/usage/summary?page=${page}&page_size=${page_size}`,
@@ -80,7 +80,19 @@ const voucherUsageSummarySlice = createSlice({
       })
       .addCase(fetchVoucherUsageSummary.rejected, (state, action) => {
         state.loading = false
-        state.error = action.payload as string
+        const error = action.payload as string
+        if (
+          error === 'No records found' ||
+          error.includes('400') ||
+          error.includes('404')
+        ) {
+          state.items = []
+          state.error = null
+          state.total = 0
+          state.total_pages = 0
+        } else {
+          state.error = error
+        }
       })
   },
 })
