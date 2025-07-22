@@ -223,7 +223,7 @@ export default function InvestorDetailsPage({
                 <span className="text-gray-400">› {details.user_name}</span>
               </h1>
             </div>
-            <DropdownMenu>
+            <DropdownMenu> 
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="h-8 w-8 p-0">
                   <MoreHorizontal className="h-4 w-4" />
@@ -231,7 +231,7 @@ export default function InvestorDetailsPage({
               </DropdownMenuTrigger>
               <DropdownMenuContent
                 align="end"
-                className="bg-white z-50 max-h-80 overflow-y-auto"
+                 className="bg-white z-50 max-h-80 overflow-y-auto"
               >
                 <DropdownMenuItem>
                   <Pencil className="w-4 h-4 mr-2" /> Update User

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { CheckCheck, Copy, QrCode } from 'lucide-react'
+import { CheckCheck, ClipboardCopy, Copy, QrCode } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -21,6 +21,8 @@ import BankAccountPage from './bankAccount'
 import ReferralComponent from '../components/referralComponent'
 import Transactionpass from './transactionpass'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { fetchUserData } from '@/store/slices/user/userTreeDataReducer'
+import { verifyKYCStatus } from '@/store/slices'
 
 export default function ProfileDetails() {
   const router = useRouter()
@@ -36,12 +38,27 @@ export default function ProfileDetails() {
     setTimeout(() => setCopied(false), 2000)
   }
 
-
   const dispatch = useDispatch<AppDispatch>()
   const { userprofile, isLoading, error } = useSelector(
     (state: RootState) => state.profile.profile,
   )
 
+    useEffect(() => {
+      dispatch(fetchUserData())
+      dispatch(verifyKYCStatus())
+    }, [dispatch])
+
+  const { data: userData, loading: userLoading } = useAppSelector(
+    (state) => state.UserTree,
+  )
+
+  const handleCopy = () => {
+    if (userData?.wallet) {
+      navigator.clipboard.writeText(userData.wallet)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    }
+  }
   const { user } = useSelector((state: RootState) => state.auth)
   const { kycVerified } = useAppSelector((state) => state.auth)
 
@@ -120,14 +137,14 @@ export default function ProfileDetails() {
   if (isLoading)
     return (
       <div className="flex items-center justify-center min-h-screen">
-      <div className="animate-spin rounded-full h-12 w-12 border-4 border-t-pink-700 border-b-gray-800 border-l-transparent border-r-transparent"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-t-pink-700 border-b-gray-800 border-l-transparent border-r-transparent"></div>
       </div>
     )
   if (error) return <div>Error: {error}</div>
   if (!userprofile) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-      <div className="animate-spin rounded-full h-12 w-12 border-4 border-t-pink-700 border-b-gray-800 border-l-transparent border-r-transparent"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-t-pink-700 border-b-gray-800 border-l-transparent border-r-transparent"></div>
       </div>
     )
   }
@@ -166,7 +183,7 @@ export default function ProfileDetails() {
                 {[
                   'PERSONAL',
                   'NOMINEE',
-                  'SETTINGS',
+                  // 'SETTINGS',
                   'PASSWORD',
                   'TRANS.PWD',
                   'BANK',
@@ -191,7 +208,7 @@ export default function ProfileDetails() {
                     <label className="text-sm text-gray-600">First Name</label>
                     <Input
                       onChange={(e) => setFirstName(e.target.value)}
-                      defaultValue={userprofile?.first_name} 
+                      defaultValue={userprofile?.first_name}
                     />
                   </div>
 
@@ -219,7 +236,7 @@ export default function ProfileDetails() {
                       Mobile Number
                     </label>
                     <Input
-                      defaultValue={userprofile?.mobile} 
+                      defaultValue={userprofile?.mobile}
                       readOnly
                       className="bg-gray-50"
                     />
@@ -261,7 +278,7 @@ export default function ProfileDetails() {
             </Tabs>
           </div>
         </Card>
-
+        {/* 
         <Card className="p-6">
           <div className="space-y-4">
             <h2 className="text-2xl font-semibold">Two-Factor Verification</h2>
@@ -283,7 +300,7 @@ export default function ProfileDetails() {
               </div>
             </div>
           </div>
-        </Card>
+        </Card> */}
       </div>
 
       <div className="space-y-6">
@@ -310,27 +327,28 @@ export default function ProfileDetails() {
           </div>
         </Card>
 
-        <Card className="p-6">
-          <div className="space-y-4">
-            <h2 className="text-xl font-semibold">Receiving Wallet</h2>
-            <div className="flex items-center justify-between">
-              <div className="text-sm text-gray-600 break-all">
-                0xb9fa443eb0a29245f4c838d49a9656b793f3e644
-              </div>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() =>
-                  copyToClipboard('0xb9fa443eb0a29245f4c838d49a9656b793f3e644')
-                }
-              >
-                <Copy className="h-4 w-4" />
-              </Button>
-            </div>
-            <div className="flex justify-center">
-              <QrCode className="h-32 w-32 text-gray-800" />
-            </div>
+        <Card className="bg-white p-4 flex flex-col gap-2 overflow-hidden">
+          <h2 className="text-lg font-semibold text-gray-700">
+            Wallet Address
+          </h2>
+          <div className="flex items-center gap-2 border border-purple-700 shadow-xl shadow-purple-300 rounded px-3 py-2 w-full overflow-hidden">
+            <span
+              className="text-[15px] whitespace-nowrap overflow-hidden text-ellipsis flex-1"
+              title={userData?.wallet}
+            >
+              {userData?.wallet || '—'}
+            </span>
+            <button
+              onClick={handleCopy}
+              className="flex items-center px-3 py-1  bg-gradient-to-r from-blue-500 to-purple-700  hover:cursor-pointer text-white rounded-md hover:bg-blue-700"
+              title="Copy"
+            >
+              <ClipboardCopy size={20} />
+            </button>
           </div>
+          {copied && (
+            <span className="text-sm text-green-600 mt-1">Copied!</span>
+          )}
         </Card>
 
         <Card className="p-6">

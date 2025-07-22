@@ -367,6 +367,8 @@ import FiatWalletImg from '@/assets/fiatwallet.jpg'
 import { useRouter } from 'next/navigation'
 import { fetchTransferPinStatus } from '@/store/slices/user/transferPinStatusSlice'
 import { unwrapResult } from '@reduxjs/toolkit'
+import { fetchUserData } from '@/store/slices/user/userTreeDataReducer'
+import { fetchWalletBalance } from '@/store/slices/user/TransferBalanceSlice'
 
 const IncomeToSuperTransferForm = () => {
   const dispatch = useAppDispatch()
@@ -383,12 +385,17 @@ const IncomeToSuperTransferForm = () => {
     error: otpError,
   } = useAppSelector((state) => state.TranferwalletOpt)
 
-  const { data: userData, loading: userLoading } = useAppSelector(
-    (state) => state.UserTree,
-  )
-  const walletBalance =
-    useAppSelector((state) => userData?.fiat_wallet || '0') || 0
-    // income wallet data pending
+  const userData = useAppSelector((state) => state.UserTree.data)
+
+  const {
+    balances,
+    loading,
+    error: adhocerror,
+  } = useAppSelector((state) => state.transferBalance)
+
+  useEffect(() => {
+    dispatch(fetchWalletBalance('IncomeWallet'))
+  }, [dispatch])
 
   const [openDialog, setOpenDialog] = useState(false)
   const [form, setForm] = useState({
@@ -478,7 +485,7 @@ const IncomeToSuperTransferForm = () => {
         </h1>
 
         <div className="bg-white rounded-lg shadow-lg p-4">
-          <h2 className="text-lg p-2 rounded-md font-semibold mb-2 w-fit bg-gradient-to-r from-blue-500 to-purple-700 text-white flex items-center">
+          <h2 className="text-lg p-2 rounded-md font-semibold w-fit bg-gradient-to-r from-blue-500 to-purple-700 text-white flex items-center">
             Income Wallet Balance:
             <Image
               src={Logo}
@@ -487,11 +494,22 @@ const IncomeToSuperTransferForm = () => {
               height={20}
               className="ml-2 mr-1"
             />
-            {walletBalance}
+            {Number(balances?.IncomeWallet?.total ?? 0).toLocaleString()}
           </h2>
-
+          <span className="text-[12px] p-2 rounded-md font-semibold mb-2 w-fit  text-black flex items-center">
+            Available To Withdraw:
+            <Image
+              src={Logo}
+              alt="Logo"
+              width={14}
+              height={14}
+              className="ml-2 mr-1"
+            />
+            {Number(
+              balances?.IncomeWallet?.max_allowed_to_withdraw ?? 0,
+            ).toLocaleString()}
+          </span>
           <div className="flex flex-col md:flex-row gap-6">
-            {/* Wallet Image */}
             <div className="md:w-1/3">
               <Image
                 src={FiatWalletImg}

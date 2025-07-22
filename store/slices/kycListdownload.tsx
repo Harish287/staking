@@ -24,7 +24,7 @@ export const downloadKycDocument = createAsyncThunk<
           headers: {
             Authorization: `Bearer ${token}`,
           },
-          responseType: 'blob', // Important to get file as binary
+          responseType: 'blob', 
         },
       )
 
@@ -63,7 +63,8 @@ const initialState: KycState = {
   loading: false,
   error: null,
   kycApplications: [],
-  totalPages: 0
+  totalPages: 0,
+  statuses: {}, 
 }
 
 const kycSlice = createSlice({

@@ -109,8 +109,9 @@ export default function VoucherPage() {
   }, [success, error, message, dispatch])
 
   const handleSendOtp = () => {
-    if (!amount || Number(amount) <= 0) {
-      toast.error('Please enter a valid amount')
+    const amountValue = Number(amount)
+    if (!amount || isNaN(amountValue) || amountValue <= 100) {
+      toast.error('Amount must be more than ₹100')
       return
     }
 

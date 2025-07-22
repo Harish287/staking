@@ -378,6 +378,7 @@ import FiatWalletImg from '@/assets/fiatwallet.jpg'
 import { useRouter } from 'next/navigation'
 import { fetchTransferPinStatus } from '@/store/slices/user/transferPinStatusSlice'
 import { unwrapResult } from '@reduxjs/toolkit'
+import { fetchWalletBalance } from '@/store/slices/user/TransferBalanceSlice'
 
 const AdhocToSuperTransferForm = () => {
   const dispatch = useAppDispatch()
@@ -394,11 +395,11 @@ const AdhocToSuperTransferForm = () => {
     error: otpError,
   } = useAppSelector((state) => state.TranferwalletOpt)
 
-  const { data: userData, loading: userLoading } = useAppSelector(
-    (state) => state.UserTree,
-  )
-  const walletBalance =
-    useAppSelector((state) => userData?.restake_wallet || '0') || 0
+  const {
+    balances,
+    loading,
+    error: adhocerror,
+  } = useAppSelector((state) => state.transferBalance)
 
   const [openDialog, setOpenDialog] = useState(false)
   const [form, setForm] = useState({
@@ -461,6 +462,10 @@ const AdhocToSuperTransferForm = () => {
   }
 
   useEffect(() => {
+    dispatch(fetchWalletBalance('AdhocWallet'))
+  }, [dispatch])
+
+  useEffect(() => {
     if (success) {
       toast.success('Transfer successful')
       dispatch(resetTransferState())
@@ -488,7 +493,7 @@ const AdhocToSuperTransferForm = () => {
         </h1>
 
         <div className="bg-white rounded-lg shadow-lg p-4">
-          <h2 className="text-lg p-2 rounded-md font-semibold mb-2 w-fit bg-gradient-to-r from-blue-500 to-purple-700 text-white flex items-center">
+          <h2 className="text-lg p-2 rounded-md font-semibold w-fit bg-gradient-to-r from-blue-500 to-purple-700 text-white flex items-center">
             Adhoc Wallet Balance:
             <Image
               src={Logo}
@@ -497,8 +502,21 @@ const AdhocToSuperTransferForm = () => {
               height={20}
               className="ml-2 mr-1"
             />
-            {walletBalance}
+            {Number(balances?.AdhocWallet?.total ?? 0).toLocaleString()}
           </h2>
+          <span className="text-[12px] p-2 rounded-md font-semibold mb-2 w-fit  text-black flex items-center">
+            Available To Withdraw:
+            <Image
+              src={Logo}
+              alt="Logo"
+              width={14}
+              height={14}
+              className="ml-2 mr-1"
+            />
+            {Number(
+              balances?.AdhocWallet?.max_allowed_to_withdraw ?? 0,
+            ).toLocaleString()}
+          </span>
 
           <div className="flex flex-col md:flex-row gap-6">
             {/* Wallet Image */}
@@ -521,25 +539,23 @@ const AdhocToSuperTransferForm = () => {
                 Transfer Adhoc Wallet
               </h2>
 
-              <div className=" mt-5">
-                <TextField
-                  style={{ marginTop: '20px' }}
-                  label="Mode of Transfer"
-                  value="Super Wallet"
-                  fullWidth
-                  disabled
-                />
-                <TextField
-                  style={{ marginTop: '20px' }}
-                  label="Amount"
-                  name="amount"
-                  type="number"
-                  value={form.amount}
-                  onChange={handleChange}
-                  fullWidth
-                  required
-                />
-              </div>
+              <TextField
+                label="Mode of Transfer"
+                value="Super Wallet"
+                fullWidth
+                disabled
+                style={{ marginBottom: '15px' }}
+              />
+              <TextField
+                label="Amount"
+                name="amount"
+                type="number"
+                value={form.amount}
+                onChange={handleChange}
+                fullWidth
+                required
+                style={{ marginBottom: '15px' }}
+              />
 
               <Button
                 type="button"
@@ -564,6 +580,7 @@ const AdhocToSuperTransferForm = () => {
                     fullWidth
                     margin="normal"
                     required
+                    style={{ marginBottom: '15px' }}
                   />
                   <TextField
                     label="Transaction Pin"
@@ -574,6 +591,7 @@ const AdhocToSuperTransferForm = () => {
                     fullWidth
                     margin="normal"
                     required
+                    style={{ marginBottom: '15px' }}
                   />
                 </DialogContent>
                 <DialogActions>

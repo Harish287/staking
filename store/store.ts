@@ -3,7 +3,7 @@ import authReducer from './slices/index'
 import tokenAuthReducer from './slices/tokenAuth'
 import profileReducer from './slices/profileSlice'
 import nomineeReducer from './slices/nomineeslice'
-import Kyc from './slices/kycList'
+import KycdownloadReducer from './slices/kycListdownload'
 import bankReducer from './slices/user/bankSlice'
 import investorReducer from './slices/admin/investorSlice'
 import updateUserPermission from './slices/admin/permisionSlice'
@@ -70,14 +70,14 @@ import SendEmailReducer from './slices/admin/SendEmailSlice'
 import registrationStatReducer from './slices/admin/registrationStatSlice'
 import eligibleUsersForUpdateReducer from './slices/admin/eligibleUserForUpdateSlice'
 import updateUserReducer from './slices/admin/updateUserSlice'
-
+import transferBalanceReducer from './slices/user/TransferBalanceSlice'
 export const store = configureStore({
   reducer: {
     auth: authReducer,
     tokenAuth: tokenAuthReducer,
     profile: profileReducer,
     nominee: nomineeReducer,
-    kyc: Kyc,
+    Kycdownload: KycdownloadReducer,
     kyclist: KycListSlice,
     fetchKycData: kycSlice,
     BankAccount: bankReducer,
@@ -144,6 +144,7 @@ export const store = configureStore({
     registrationStat: registrationStatReducer,
     eligibleUsersForUpdate: eligibleUsersForUpdateReducer,
     updateUser: updateUserReducer,
+    transferBalance: transferBalanceReducer,
   },
 })
 

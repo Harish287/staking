@@ -25,6 +25,8 @@ import FiatWalletImg from '../../../../assets/fiatwallet.jpg'
 import Image from 'next/image'
 import { ArrowRightLeft } from 'lucide-react'
 import Logo from '../../../../assets/logo2x.png'
+import { fetchUserData } from '@/store/slices/user/userTreeDataReducer'
+import { fetchWalletBalance } from '@/store/slices/user/TransferBalanceSlice'
 
 const RestakeWalletTransfer = () => {
   const dispatch = useAppDispatch()
@@ -38,6 +40,16 @@ const RestakeWalletTransfer = () => {
     error: otpError,
     loading: otpLoading,
   } = useAppSelector((state) => state.TranferwalletOpt)
+
+  const {
+    balances,
+    loading: balanceloading,
+    error: adhocerror,
+  } = useAppSelector((state) => state.transferBalance)
+
+  useEffect(() => {
+    dispatch(fetchWalletBalance('ReStakeWallet'))
+  }, [dispatch])
 
   const [amount, setAmount] = useState<number>(0)
   const [otp, setOtp] = useState('')
@@ -141,11 +153,6 @@ const RestakeWalletTransfer = () => {
       dispatch(resetOtpState())
     }
   }, [otpSuccess, otpError, dispatch])
-  const { data: userData, loading: userLoading } = useAppSelector(
-    (state) => state.UserTree,
-  )
-  const walletBalance =
-    useAppSelector((state) => userData?.restake_wallet || '0') || 0
 
   if (otpLoading || loading) {
     return (
@@ -172,9 +179,22 @@ const RestakeWalletTransfer = () => {
                 height={15}
                 className=" mr-0.5"
               />
-              <span>{walletBalance}</span>
+              {Number(balances?.ReStakeWallet?.total ?? 0).toLocaleString()}
             </div>
           </h2>
+          <span className="text-[12px] p-2 rounded-md font-semibold mb-2 w-fit  text-black flex items-center">
+            Available To Withdraw:
+            <Image
+              src={Logo}
+              alt="Logo"
+              width={14}
+              height={14}
+              className="ml-2 mr-1"
+            />
+            {Number(
+              balances?.ReStakeWallet?.max_allowed_to_withdraw ?? 0,
+            ).toLocaleString()}
+          </span>
           <div className="flex flex-col md:flex-row gap-6 pb-6">
             {/* Image */}
             <div className="md:w-1/3 flex items-center text-center">

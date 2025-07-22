@@ -361,12 +361,12 @@ function Navigation() {
             </div>
 
             <div className="invisible absolute z-50 text-sm flex w-max h-auto flex-col bg-gray-100 py-1 px-4 text-gray-800 shadow-xl group-hover:visible">
-              <Link
+              {/* <Link
                 href="/admin/settings/adminMetrics"
                 className="my-2 block border-b border-gray-100 font-semibold   text-[#7668fe] hover:duration-1000 hover:text-black md:mx-2"
               >
                 admin Metrics
-              </Link>
+              </Link> */}
                 <Link
                 href="/admin/settings/addWallet"
                 className="my-2 block border-b border-gray-100 font-semibold   text-[#7668fe] hover:duration-1000 hover:text-black md:mx-2"

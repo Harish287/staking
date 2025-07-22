@@ -27,6 +27,8 @@ import toast from 'react-hot-toast'
 import Image from 'next/image'
 import WalletImage from '../../../../assets/fiatwallet.jpg'
 import Logo from '../../../../assets/logo2x.png'
+import { fetchUserData } from '@/store/slices/user/userTreeDataReducer'
+import { fetchWalletBalance } from '@/store/slices/user/TransferBalanceSlice'
 
 const SuperWalletTransfer = () => {
   const dispatch = useAppDispatch()
@@ -44,9 +46,19 @@ const SuperWalletTransfer = () => {
     error: otpError,
   } = useAppSelector((state) => state.TranferwalletOpt)
 
+  const {
+    balances,
+    loading: balanceLoading,
+    error: adhocerror,
+  } = useAppSelector((state) => state.transferBalance)
+
+  useEffect(() => {
+    dispatch(fetchWalletBalance('SuperWallet'))
+  }, [dispatch])
+
   const [wallet, setWallet] = useState<
-    'AdhocWallet' | 'IncomeWallet' | 'SuperWallet'
-  >('AdhocWallet')
+    'SuperWallet' | 'IncomeWallet' | 'SuperWallet'
+  >('SuperWallet')
 
   const [openDialog, setOpenDialog] = useState(false)
   const [selectedUser, setSelectedUser] = useState<any>(null)
@@ -94,7 +106,7 @@ const SuperWalletTransfer = () => {
   }, [otpSuccess, otpError, dispatch])
 
   const resetForm = () => {
-    setWallet('AdhocWallet')
+    setWallet('SuperWallet')
     setSelectedUser(null)
     setForm({
       receiver_user_id: '',
@@ -178,6 +190,33 @@ const SuperWalletTransfer = () => {
           <ArrowRightLeft className="mr-2" /> Super Wallet Transfer
         </h1>
         <div className="bg-white rounded-lg shadow-lg p-4">
+          <h2 className="text-lg p-2 rounded-[10px] flex  w-fit font-semibold mb-2  bg-gradient-to-r from-blue-500 to-purple-700 text-white">
+            Super Wallet Balance:
+            <div className=" flex items-center ml-0.5">
+              <Image
+                src={Logo}
+                alt="Logo"
+                priority
+                width={15}
+                height={15}
+                className=" mr-0.5"
+              />
+              {Number(balances?.SuperWallet?.total ?? 0).toLocaleString()}
+            </div>
+          </h2>
+          <span className="text-[12px] p-2 rounded-md font-semibold mb-2 w-fit  text-black flex items-center">
+            Available To Withdraw:
+            <Image
+              src={Logo}
+              alt="Logo"
+              width={14}
+              height={14}
+              className="ml-2 mr-1"
+            />
+            {Number(
+              balances?.SuperWallet?.max_allowed_to_withdraw ?? 0,
+            ).toLocaleString()}
+          </span>
           <div className="flex flex-col md:flex-row gap-6">
             <div className="md:w-1/3">
               <Image
@@ -205,13 +244,13 @@ const SuperWalletTransfer = () => {
                 onChange={(e) =>
                   setWallet(
                     e.target.value as
-                      | 'AdhocWallet'
+                      | 'SuperWallet'
                       | 'IncomeWallet'
                       | 'SuperWallet',
                   )
                 }
               >
-                <MenuItem value="AdhocWallet">My Adhoc Wallet</MenuItem>
+                <MenuItem value="SuperWallet">My Adhoc Wallet</MenuItem>
                 <MenuItem value="IncomeWallet">My Income Wallet</MenuItem>
                 <MenuItem value="SuperWallet">Others Super Wallet</MenuItem>
               </TextField>
@@ -285,6 +324,7 @@ const SuperWalletTransfer = () => {
             fullWidth
             value={form.otp}
             onChange={handleChange}
+            style={{ marginBottom: '20px' }}
           />
           <TextField
             label="Transaction PIN"

@@ -74,6 +74,7 @@ const TransferSummary = () => {
     updatedEmails = emails,
     updatedWalletFilter = walletFilter,
     updatedPage = page,
+    overridePageSize?: number,
   ) => {
     dispatch(
       fetchTransferSummary({
@@ -82,7 +83,7 @@ const TransferSummary = () => {
         emails: updatedEmails,
         wallet_filter: updatedWalletFilter,
         page: updatedPage,
-        page_size: pageSize,
+        page_size: overridePageSize ?? pageSize, 
       }),
     )
   }
@@ -756,18 +757,21 @@ const TransferSummary = () => {
                 <span className="text-sm text-gray-600">Rows per page:</span>
                 <FormControl size="small">
                   <Select
-                    value={pageSize}
+                    value={String(pageSize)}
                     onChange={(e) => {
                       const newSize = Number(e.target.value)
-                      dispatch(setPageSize(newSize))
                       setPage(1)
-                      applyFilter(
-                        wallets,
-                        transactionTypes,
-                        emails,
-                        walletFilter,
-                        1,
-                      )
+                      dispatch(setPageSize(newSize))
+                      setTimeout(() => {
+                        applyFilter(
+                          wallets,
+                          transactionTypes,
+                          emails,
+                          walletFilter,
+                          1,
+                          newSize,
+                        )
+                      }, 0)
                     }}
                     style={{ minWidth: 80 }}
                   >

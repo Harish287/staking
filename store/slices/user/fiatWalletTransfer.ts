@@ -37,7 +37,7 @@ export const initiateFiatTransfer = createAsyncThunk(
   ) => {
     try {
       const response = await axios.post(
-        `${baseURL}transfer/intiate/fait`,
+        `${baseURL}transfer/intiate/fiat`,
         new URLSearchParams({
           otp,
           transaction_pin,

@@ -75,7 +75,7 @@ const ForgotPasswordPage = () => {
           <Button
             type="submit"
             disabled={loading}
-            className="w-full  bg-gradient-to-r from-blue-500 to-purple-700"
+            className="w-full  bg-gradient-to-r from-blue-500 to-purple-700 mt-5"
           >
             {loading ? <Spinner /> : 'Send Reset Link'}
           </Button>

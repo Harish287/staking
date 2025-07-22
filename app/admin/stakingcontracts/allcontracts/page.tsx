@@ -103,6 +103,7 @@ const StakeListPage = () => {
   const getStatusIcon = (matured: boolean) => {
     return matured ? <CheckCircle size={16} /> : <Clock size={16} />
   }
+  const [pageSize, setPageSize] = useState(10)
 
   const getPlanColor = (plan: string) => {
     const colors = {
@@ -131,9 +132,6 @@ const StakeListPage = () => {
               <h1 className="text-4xl flex items-center gap-1 font-bold text-white mb-2">
                 Stake Contracts
               </h1>
-              {/* <p className="text-white/80 mt-1">
-                Monitor and manage all staking activities
-              </p> */}
             </div>
           </div>
 
@@ -328,12 +326,7 @@ const StakeListPage = () => {
                           <span>User</span>
                         </div>
                       </th>
-                      {/* <th className="px-2 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                        <div className="flex items-center space-x-2">
-                          <Mail size={14} />
-                          <span>Contact</span>
-                        </div>
-                      </th> */}
+
                       <th className="px-2 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                         <div className="flex items-center space-x-2">
                           <FileText size={14} />
@@ -557,81 +550,6 @@ const StakeListPage = () => {
             </div>
           )}
 
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="flex flex-col sm:flex-row items-center justify-between mt-8 bg-white rounded-xl p-4 shadow-sm border border-gray-100 gap-4">
-              {/* Left: page info */}
-              <div className="text-sm text-gray-600">
-                Showing page {page} of {totalPages}
-              </div>
-
-              {/* Middle: page buttons */}
-              <div className="flex items-center space-x-2">
-                <button
-                  onClick={() => handlePageChange(page - 1)}
-                  disabled={page === 1}
-                  className="flex items-center space-x-1 px-3 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <ChevronLeft size={16} />
-                  <span>Previous</span>
-                </button>
-
-                <div className="flex items-center space-x-1">
-                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                    const pageNum = i + 1
-                    return (
-                      <button
-                        key={pageNum}
-                        onClick={() => handlePageChange(pageNum)}
-                        className={`w-10 h-10 rounded-lg font-medium transition-colors ${
-                          page === pageNum
-                            ? 'bg-gradient-to-r from-blue-500 to-purple-700 text-white'
-                            : 'text-gray-600 hover:bg-gray-100'
-                        }`}
-                      >
-                        {pageNum}
-                      </button>
-                    )
-                  })}
-                </div>
-
-                <button
-                  onClick={() => handlePageChange(page + 1)}
-                  disabled={page === totalPages}
-                  className="flex items-center space-x-1 px-3 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <span>Next</span>
-                  <ChevronRight size={16} />
-                </button>
-              </div>
-
-              {/* Right: select page size */}
-              <div className="flex items-center space-x-2 text-sm">
-                <span>Rows per page:</span>
-                <select
-                  className="border border-gray-200 rounded-md px-2 py-1"
-                  value={10} // replace with actual pageSize state if needed
-                  onChange={(e) => {
-                    const newSize = parseInt(e.target.value)
-                    dispatch(
-                      fetchStakeList({
-                        stake_status: stakeStatus,
-                        page: 1,
-                        page_size: newSize,
-                      }),
-                    )
-                  }}
-                >
-                  {[10, 20, 50, 100].map((size) => (
-                    <option key={size} value={size}>
-                      {size}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-          )}
-
           {/* Empty State */}
           {filteredItems.length === 0 && !loading && (
             <div className="text-center py-12 bg-white rounded-xl shadow-sm border border-gray-100">
@@ -650,6 +568,79 @@ const StakeListPage = () => {
           )}
         </>
       )}
+      {/* Pagination */}
+      <div className="flex flex-col sm:flex-row items-center justify-between mt-8 bg-white rounded-xl p-4 shadow-sm border border-gray-100 gap-4">
+        {/* Left: page info */}
+        <div className="text-sm text-gray-600">
+          Showing page {page} of {totalPages || 1}
+        </div>
+
+        {/* Middle: page buttons */}
+        <div className="flex items-center space-x-2">
+          <button
+            onClick={() => handlePageChange(page - 1)}
+            disabled={page === 1}
+            className="flex items-center space-x-1 px-3 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <ChevronLeft size={16} />
+            <span>Previous</span>
+          </button>
+
+          <div className="flex items-center space-x-1">
+            {Array.from({ length: Math.min(5, totalPages || 1) }, (_, i) => {
+              const pageNum = i + 1
+              return (
+                <button
+                  key={pageNum}
+                  onClick={() => handlePageChange(pageNum)}
+                  className={`w-10 h-10 rounded-lg font-medium transition-colors ${
+                    page === pageNum
+                      ? 'bg-gradient-to-r from-blue-500 to-purple-700 text-white'
+                      : 'text-gray-600 hover:bg-gray-100'
+                  }`}
+                >
+                  {pageNum}
+                </button>
+              )
+            })}
+          </div>
+
+          <button
+            onClick={() => handlePageChange(page + 1)}
+            disabled={page === totalPages}
+            className="flex items-center space-x-1 px-3 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <span>Next</span>
+            <ChevronRight size={16} />
+          </button>
+        </div>
+
+        {/* Right: select page size */}
+        <div className="flex items-center space-x-2 text-sm">
+          <span>Rows per page:</span>
+          <select
+            className="border border-gray-200 rounded-md px-2 py-1"
+            value={pageSize}
+            onChange={(e) => {
+              const newSize = parseInt(e.target.value)
+              setPageSize(newSize)
+              dispatch(
+                fetchStakeList({
+                  stake_status: stakeStatus,
+                  page: 1,
+                  page_size: newSize,
+                }),
+              )
+            }}
+          >
+            {[10, 20, 50, 100].map((size) => (
+              <option key={size} value={size}>
+                {size}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
     </div>
   )
 }

@@ -19,12 +19,14 @@ import {
   transferWalletOtp,
 } from '@/store/slices/user/TransferWalletOtpSlice'
 import { fetchTransferPinStatus } from '@/store/slices/user/transferPinStatusSlice'
+import { fetchUserData } from '@/store/slices/user/userTreeDataReducer'
 import { useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
 import FiatWalletImg from '../../../../assets/fiatwallet.jpg'
 import Image from 'next/image'
 import { ArrowRightLeft } from 'lucide-react'
 import Logo from '../../../../assets/logo2x.png'
+import { fetchWalletBalance } from '@/store/slices/user/TransferBalanceSlice'
 
 const RosWalletTransfer = () => {
   const dispatch = useAppDispatch()
@@ -38,6 +40,8 @@ const RosWalletTransfer = () => {
     error: otpError,
     loading: otpLoading,
   } = useAppSelector((state) => state.TranferwalletOpt)
+
+  const userLoading = useAppSelector((state) => state.UserTree.loading)
 
   const [amount, setAmount] = useState<number>(0)
   const [otp, setOtp] = useState('')
@@ -96,16 +100,14 @@ const RosWalletTransfer = () => {
   }
 
   useEffect(() => {
-    if (error && typeof error === 'string' && error.trim()) {
-      toast.error(error)
-    }
-  }, [error])
-
-  useEffect(() => {
     if (success) {
-      toast.success('Ros successful!')
+      toast.success('ROS Transfer Successful!')
+      setAmount(0)
+      setOtp('')
+      setTransactionPin('')
+      dispatch(fetchUserData()) // ✅ Re-fetch wallet balance
     }
-  }, [success])
+  }, [success, dispatch])
 
   useEffect(() => {
     if (success || error) {
@@ -141,16 +143,24 @@ const RosWalletTransfer = () => {
       dispatch(resetOtpState())
     }
   }, [otpSuccess, otpError, dispatch])
-  const walletBalance =
-    useAppSelector((state) => state.auth.user?.ros_wallet) || 0
 
-  if (otpLoading || loading) {
+  const {
+    balances,
+    loading: balanceloading,
+    error: adhocerror,
+  } = useAppSelector((state) => state.transferBalance)
+  useEffect(() => {
+    dispatch(fetchWalletBalance('RosWallet'))
+  }, [dispatch])
+
+  if (otpLoading || loading || userLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-4 border-t-pink-700 border-b-gray-800 border-l-transparent border-r-transparent"></div>
       </div>
     )
   }
+
   return (
     <div className="pt-5 bg-[#F3EAD8] pb-[20px] transition-colors duration-2000 px-4 sm:px-6 lg:px-8">
       <div className="container mx-auto">
@@ -158,20 +168,33 @@ const RosWalletTransfer = () => {
           <ArrowRightLeft className="mr-2" /> Transfer Ros Wallet
         </h1>
         <div className="bg-white rounded-lg shadow-lg p-4">
-          <h2 className="text-lg p-2 rounded-[10px] flex  w-fit font-semibold mb-2  bg-gradient-to-r from-blue-500 to-purple-700 text-white">
+          <h2 className="text-lg p-2 rounded-[10px] flex w-fit font-semibold mb-2 bg-gradient-to-r from-blue-500 to-purple-700 text-white">
             Ros Wallet Balance:
-            <div className=" flex items-center ml-0.5">
+            <div className="flex items-center ml-1">
               <Image
                 src={Logo}
                 alt="Logo"
                 priority
                 width={15}
                 height={15}
-                className=" mr-0.5"
+                className="mr-1"
               />
-              <span>{walletBalance}</span>
+              {Number(balances?.RosWallet?.total ?? 0).toLocaleString()}
             </div>
           </h2>
+          <span className="text-[12px] p-2 rounded-md font-semibold mb-2 w-fit  text-black flex items-center">
+            Available To Withdraw:
+            <Image
+              src={Logo}
+              alt="Logo"
+              width={14}
+              height={14}
+              className="ml-2 mr-1"
+            />
+            {Number(
+              balances?.RosWallet?.max_allowed_to_withdraw ?? 0,
+            ).toLocaleString()}
+          </span>
           <div className="flex flex-col md:flex-row gap-6 pb-6">
             {/* Image */}
             <div className="md:w-1/3 flex items-center text-center">
@@ -185,11 +208,7 @@ const RosWalletTransfer = () => {
             {/* Form */}
             <div className="w-full md:w-1/3 rounded-lg flex flex-col justify-center items-center">
               <h2 className="text-xl flex items-center gap-1 font-semibold mb-4">
-                <Image
-                  src={Logo}
-                  alt="Logo"
-                  className="rounded-md h-[25px] w-[25px] object-fill"
-                />
+                <Image src={Logo} alt="Logo" className="h-[25px] w-[25px]" />
                 Transfer Ros Wallet
               </h2>
 
@@ -204,7 +223,6 @@ const RosWalletTransfer = () => {
               />
 
               <Button
-                type="button"
                 variant="contained"
                 style={{ background: 'green' }}
                 onClick={handleStartRos}
@@ -223,17 +241,17 @@ const RosWalletTransfer = () => {
               </h3>
               <div className="space-y-4 text-sm text-gray-700">
                 {[
-                  'Make Sure the email id of transferee is correct and right, we are not responsible for wrong Transfer',
-                  'Transfer is only happened to your Downline, no Cross line',
-                  'Ros Wallet can be transfered either your KAIT Wallet or Others Ros Wallet',
-                  'Minimum of 500 KAIT to be transferable...',
-                  'Deduction of 10% apply out of which 2% for Admin Charges and 8% for Adhoc Leadership Income',
+                  'Make sure the email id of transferee is correct and right, we are not responsible for wrong transfer.',
+                  'Transfer only happens to your Downline (no Cross line).',
+                  'Ros Wallet can be transferred either to your KAIT Wallet or other’s Ros Wallet.',
+                  'Minimum of 500 KAIT to be transferable.',
+                  '10% deduction: 2% Admin Charges + 8% Adhoc Leadership Income.',
                 ].map((rule, idx) => (
                   <div key={idx} className="flex items-start gap-2">
                     <span className="font-semibold bg-blue-300 text-white px-2 py-0.5">
                       {idx + 1}
                     </span>
-                    <span className=" text-[12px]">{rule}</span>
+                    <span className="text-[12px]">{rule}</span>
                   </div>
                 ))}
               </div>
@@ -241,9 +259,9 @@ const RosWalletTransfer = () => {
           </div>
         </div>
 
-        {/* OTP Modal */}
+        {/* OTP Dialog */}
         <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
-          <DialogTitle>Confirm Ros</DialogTitle>
+          <DialogTitle>Confirm Transfer</DialogTitle>
           <DialogContent>
             <TextField
               label="OTP"

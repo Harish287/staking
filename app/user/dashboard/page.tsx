@@ -492,8 +492,8 @@ function UserDashboard() {
 
                 <div className="mt-4 space-y-4">
                   {userData?.next_progress?.progress.map((item, idx) => {
-                    const total = item.required || 1
-                    const current = item.current || 0
+                    const total = Number(item.required) || 1
+                    const current = Number(item.current) || 0
                     const remaining = total - current
                     const currentPercent = Math.min(
                       (current / total) * 100,

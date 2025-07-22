@@ -5,7 +5,24 @@ import { useDispatch, useSelector } from 'react-redux'
 import { fetchKycData } from '@/store/slices/admin/kycDetails'
 import { RootState, AppDispatch } from '@/store/store'
 import { useSearchParams } from 'next/navigation'
-import { ArrowLeft, MoreVertical, Download } from 'lucide-react'
+import { 
+  ArrowLeft, 
+  MoreVertical, 
+  Download, 
+  User, 
+  Mail, 
+  Phone, 
+  Calendar, 
+  MapPin, 
+  CreditCard,
+  FileText,
+  Eye,
+  X,
+  CheckCircle,
+  XCircle, 
+  Clock,
+  Building
+} from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import {
@@ -14,7 +31,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { downloadKycDocument } from '@/store/slices/kycList'
+import { downloadKycDocument } from '@/store/slices/kycListdownload'
 import Link from 'next/link'
 
 const KycDetailsPage = () => {
@@ -65,6 +82,28 @@ const KycDetailsPage = () => {
     )
   }
 
+  const getStatusColor = (status: string) => {
+    switch (status?.toLowerCase()) {
+      case 'approved':
+        return 'bg-green-100 text-green-800 border-green-200'
+      case 'rejected':
+        return 'bg-red-100 text-red-800 border-red-200'
+      default:
+        return 'bg-yellow-100 text-yellow-800 border-yellow-200'
+    }
+  }
+
+  const getStatusIcon = (status: string) => {
+    switch (status?.toLowerCase()) {
+      case 'approved':
+        return <CheckCircle size={16} />
+      case 'rejected':
+        return <XCircle size={16} />
+      default:
+        return <Clock size={16} />
+    }
+  }
+
   useEffect(() => {
     if (userId && token) {
       dispatch(fetchKycData({ user_id: userId, token }))
@@ -73,206 +112,383 @@ const KycDetailsPage = () => {
 
   if (status === 'loading') {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
+      <div className="min-h-screen bg-gradient-to-br from-blue-500 via-purple-600 to-purple-700 flex items-center justify-center p-4">
+        <div className="bg-white/20 backdrop-blur-sm rounded-2xl p-8 border border-white/30 shadow-xl">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white mx-auto mb-4"></div>
+          <p className="text-white font-medium text-center">Loading KYC details...</p>
+        </div>
       </div>
     )
   }
 
   if (status === 'failed') {
     return (
-      <div className="flex items-center justify-center min-h-screen text-red-500">
-        Error: {typeof error === 'string' ? error : error?.detail}
+      <div className="min-h-screen bg-gradient-to-br from-blue-500 via-purple-600 to-purple-700 flex items-center justify-center p-4">
+        <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-8 border border-white/20 shadow-xl max-w-md w-full">
+          <div className="text-center">
+            <XCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">Error Loading Data</h3>
+            <p className="text-red-600 text-sm">
+              {typeof error === 'string' ? error : error?.detail}
+            </p>
+            <Link href="/admin/KYCList">
+              <Button className="mt-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white">
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back to KYC List
+              </Button>
+            </Link>
+          </div>
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <Card className="max-w-5xl mx-auto">
-        <div className="p-6">
-          {/* Header */}
-          <div className="flex justify-between items-center mb-8">
-            <div className="flex items-center gap-4">
-              <Button variant="ghost" className="p-2">
-                <Link href="http://localhost:3000/admin/KYCList">
-                  <ArrowLeft className="h-5 w-5" />
-                </Link>
-              </Button>
-              <h1 className="text-xl font-semibold text-indigo-900">
-                KYC Information of {kycData?.first_name} {kycData?.last_name}
-              </h1>
-            </div>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon">
-                  <MoreVertical className="h-5 w-5" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem>Download Details</DropdownMenuItem>
-                <DropdownMenuItem>Print</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-
-          <div className="grid grid-cols-4 gap-6 p-4 bg-gray-50 rounded-lg mb-8">
-            <div>
-              <div className="text-sm text-gray-500">Submitted By</div>
-              <div className="font-medium">{kycData?.user_name}</div>
-            </div>
-            <div>
-              <div className="text-sm text-gray-500">Checked By</div>
-              <div className="font-medium">{kycData?.kyc_reviewed_by}</div>
-            </div>
-            <div>
-              <div className="text-sm text-gray-500">Checked On</div>
-              <div className="font-medium">{kycData?.kyc_reviewed_at}</div>
-            </div>
-            <div>
-              <div className="text-sm text-gray-500">Status</div>
-              <span
-                className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium 
-    ${
-      kycData?.kyc_status === 'Approved'
-        ? 'bg-green-100 text-green-800'
-        : kycData?.kyc_status === 'Rejected'
-          ? 'bg-red-100 text-red-800'
-          : 'bg-yellow-100 text-yellow-800'
-    }`}
+    <div className="min-h-screen bg-gradient-to-br from-blue-500 via-purple-600 to-purple-700 p-4 lg:p-6">
+      {/* Header Section */}
+      <div className="mb-8">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-8 space-y-4 lg:space-y-0">
+          <div className="flex items-center space-x-4">
+            <Link href="/admin/KYCList">
+              <Button 
+                variant="ghost" 
+                className="p-3 bg-white/20 backdrop-blur-sm border border-white/30 rounded-xl hover:bg-white/30 transition-all shadow-lg text-white"
               >
-                {kycData?.kyc_status?.toUpperCase()}
-              </span>
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+            </Link>
+            <div className="p-4 bg-white/20 backdrop-blur-sm rounded-2xl shadow-lg border border-white/30">
+              <User className="text-white" size={28} />
             </div>
-          </div>
-
-          {/* Personal Information */}
-          <div className="mb-8">
-            <h2 className="text-lg font-medium mb-4">PERSONAL INFORMATION</h2>
-            <div className="grid grid-cols-1 gap-4">
-              {[
-                { label: 'First Name', value: kycData?.first_name },
-                { label: 'Last Name', value: kycData?.last_name },
-                { label: 'Email Address', value: kycData?.email },
-                { label: 'Phone Number', value: kycData?.mobile },
-                { label: 'Date of Birth', value: kycData?.dob },
-                {
-                  label: 'Address',
-                  value: `${kycData?.address_1}, ${kycData?.address_2}`,
-                },
-                {
-                  label: 'State & City',
-                  value: ` ${kycData?.state}, ${kycData?.city} `,
-                },
-                { label: 'Postal Code ', value: kycData?.postal_code },
-
-                { label: 'Country of Residence', value: kycData?.country },
-              ].map((field, index) => (
-                <div key={index} className="grid grid-cols-3 border-b py-3">
-                  <div className="text-gray-600">{field.label}</div>
-                  <div className="col-span-2">{field.value}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-          <h2 className="text-lg font-medium mt-8 mb-4">BANK INFORMATION</h2>
-          <div className="grid grid-cols-1 gap-4">
-            {[
-              { label: 'Bank Name', value: kycData?.bank_data?.bank_name },
-              {
-                label: 'Account Type',
-                value: kycData?.bank_data?.account_type,
-              },
-              {
-                label: 'Account Number',
-                value: kycData?.bank_data?.account_no,
-              },
-              { label: 'IFSC Code', value: kycData?.bank_data?.ifsc_code },
-            ].map((field, index) => (
-              <div key={index} className="grid grid-cols-3 border-b py-3">
-                <div className="text-gray-600">{field.label}</div>
-                <div className="col-span-2">{field.value || '—'}</div>
-              </div>
-            ))}
-          </div>
-
-          {kycData?.kyc_files && kycData.kyc_files.length > 0 && (
             <div>
-              <h2 className="text-lg font-medium mb-4 mt-5">
-                UPLOADED DOCUMENTS
-              </h2>
-              <div className="grid grid-cols-3 gap-6">
-                {kycData.kyc_files.map((file, index) => (
-                  <div key={index} className="border rounded-lg p-4">
-                    <h3 className="font-medium mb-2">{file.file_name}</h3>
-                    <div
-                      className="aspect-video bg-gray-100 rounded-lg mb-2 cursor-pointer"
-                      onClick={() => openZoom(file.file)}
-                    >
-                      <img
-                        src={`data:image/png;base64,${file.file}`}
-                        alt={file.file_name}
-                        className="w-full h-full object-cover rounded-lg"
-                      />
-                    </div>
-                    <div className="text-sm text-gray-500">
-                      {file.file_name}
-                    </div>
-
-                    <Button
-                      variant="link"
-                      className="text-blue-600 text-xs hover:text-blue-800"
-                      onClick={() => {
-                        const mimeType = getMimeTypeFromFileName(file.file_name)
-                        const byteCharacters = atob(file.file)
-                        const byteNumbers = Array.from(byteCharacters).map(
-                          (c) => c.charCodeAt(0),
-                        )
-                        const byteArray = new Uint8Array(byteNumbers)
-                        const blob = new Blob([byteArray], { type: mimeType })
-
-                        const blobUrl = URL.createObjectURL(blob)
-
-                        const link = document.createElement('a')
-                        link.href = blobUrl
-                        link.download =
-                          file.file_name_download ||
-                          file.file_name ||
-                          'document'
-                        link.click()
-
-                        URL.revokeObjectURL(blobUrl)
-                      }}
-                    >
-                      <Download className="h-4 w-4 mr-1" />
-                      Download
-                    </Button>
-                  </div>
-                ))}
-              </div>
+              <h1 className="text-3xl lg:text-4xl font-bold text-white mb-2">
+                KYC Details
+              </h1>
+              <p className="text-white/80 text-lg">
+                {kycData?.first_name} {kycData?.last_name}
+              </p>
             </div>
-          )}
+          </div>
 
-          {/* Zoom Modal */}
-          {isZoomOpen && selectedImage && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-              <div className="relative bg-white p-4 rounded-lg max-w-4xl max-h-full overflow-auto">
-                <button
-                  className="absolute hover:cursor-pointer top-2 right-1 text-black shadow-2xs bg-gray-50 p-2 w-10 h-10 rounded-3xl"
-                  onClick={closeZoom}
-                >
-                  ✖
-                </button>
-                <img
-                  src={`data:image/jpeg;base64,${selectedImage}`}
-                  alt="Zoomed Image"
-                  className="max-w-full max-h-[90vh] object-contain"
-                />
-              </div>
-            </div>
-          )}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button 
+                variant="ghost" 
+                className="p-3 bg-white/20 backdrop-blur-sm border border-white/30 rounded-xl hover:bg-white/30 transition-all shadow-lg text-white"
+              >
+                <MoreVertical className="h-5 w-5" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="bg-white">
+              <DropdownMenuItem>
+                <Download className="w-4 h-4 mr-2" />
+                Download Details
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <FileText className="w-4 h-4 mr-2" />
+                Print
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
-      </Card>
+
+        {/* Status Overview Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <div className="bg-white/15 backdrop-blur-md border border-white/20 rounded-2xl p-6 text-white shadow-xl hover:bg-white/20 transition-all">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-white/70 text-sm font-medium mb-1">Submitted By</p>
+                <p className="text-xl font-bold">{kycData?.user_name || '—'}</p>
+              </div>
+              <div className="p-3 bg-white/20 rounded-xl">
+                <User className="text-white" size={20} />
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white/15 backdrop-blur-md border border-white/20 rounded-2xl p-6 text-white shadow-xl hover:bg-white/20 transition-all">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-white/70 text-sm font-medium mb-1">Reviewed By</p>
+                <p className="text-xl font-bold">{kycData?.kyc_reviewed_by || 'Pending'}</p>
+              </div>
+              <div className="p-3 bg-white/20 rounded-xl">
+                <Eye className="text-white" size={20} />
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white/15 backdrop-blur-md border border-white/20 rounded-2xl p-6 text-white shadow-xl hover:bg-white/20 transition-all">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-white/70 text-sm font-medium mb-1">Reviewed On</p>
+                <p className="text-xl font-bold">{kycData?.kyc_reviewed_at || 'Pending'}</p>
+              </div>
+              <div className="p-3 bg-white/20 rounded-xl">
+                <Calendar className="text-white" size={20} />
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white/15 backdrop-blur-md border border-white/20 rounded-2xl p-6 text-white shadow-xl hover:bg-white/20 transition-all">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-white/70 text-sm font-medium mb-1">Status</p>
+                <div className="flex items-center space-x-2">
+                  {getStatusIcon(kycData?.kyc_status || '')}
+                  <span className="text-xl font-bold capitalize">
+                    {kycData?.kyc_status || 'Pending'}
+                  </span>
+                </div>
+              </div>
+              <div className="p-3 bg-white/20 rounded-xl">
+                <CheckCircle className="text-white" size={20} />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Personal Information */}
+        <div className="lg:col-span-2">
+          <Card className="shadow-xl rounded-2xl bg-white/95 backdrop-blur-sm border border-white/20 mb-6">
+            <div className="p-6">
+              <div className="flex items-center space-x-3 mb-6">
+                <div className="p-2 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg">
+                  <User className="text-white" size={20} />
+                </div>
+                <h2 className="text-xl font-semibold text-gray-900">Personal Information</h2>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <div className="flex items-center space-x-3 p-4 bg-gray-50 rounded-xl">
+                    <User className="text-gray-500" size={18} />
+                    <div>
+                      <p className="text-sm text-gray-500">First Name</p>
+                      <p className="font-medium text-gray-900">{kycData?.first_name || '—'}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center space-x-3 p-4 bg-gray-50 rounded-xl">
+                    <User className="text-gray-500" size={18} />
+                    <div>
+                      <p className="text-sm text-gray-500">Last Name</p>
+                      <p className="font-medium text-gray-900">{kycData?.last_name || '—'}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center space-x-3 p-4 bg-gray-50 rounded-xl">
+                    <Mail className="text-gray-500" size={18} />
+                    <div>
+                      <p className="text-sm text-gray-500">Email Address</p>
+                      <p className="font-medium text-gray-900">{kycData?.email || '—'}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center space-x-3 p-4 bg-gray-50 rounded-xl">
+                    <Phone className="text-gray-500" size={18} />
+                    <div>
+                      <p className="text-sm text-gray-500">Phone Number</p>
+                      <p className="font-medium text-gray-900">{kycData?.mobile || '—'}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="flex items-center space-x-3 p-4 bg-gray-50 rounded-xl">
+                    <Calendar className="text-gray-500" size={18} />
+                    <div>
+                      <p className="text-sm text-gray-500">Date of Birth</p>
+                      <p className="font-medium text-gray-900">{kycData?.dob || '—'}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start space-x-3 p-4 bg-gray-50 rounded-xl">
+                    <MapPin className="text-gray-500 mt-1" size={18} />
+                    <div>
+                      <p className="text-sm text-gray-500">Address</p>
+                      <p className="font-medium text-gray-900">
+                        {kycData?.address_1 && kycData?.address_2 
+                          ? `${kycData.address_1}, ${kycData.address_2}` 
+                          : kycData?.address_1 || kycData?.address_2 || '—'}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center space-x-3 p-4 bg-gray-50 rounded-xl">
+                    <MapPin className="text-gray-500" size={18} />
+                    <div>
+                      <p className="text-sm text-gray-500">City & State</p>
+                      <p className="font-medium text-gray-900">
+                        {kycData?.city && kycData?.state 
+                          ? `${kycData.city}, ${kycData.state}` 
+                          : kycData?.city || kycData?.state || '—'}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center space-x-3 p-4 bg-gray-50 rounded-xl">
+                    <MapPin className="text-gray-500" size={18} />
+                    <div>
+                      <p className="text-sm text-gray-500">Country & Postal Code</p>
+                      <p className="font-medium text-gray-900">
+                        {kycData?.country && kycData?.postal_code 
+                          ? `${kycData.country}, ${kycData.postal_code}` 
+                          : kycData?.country || kycData?.postal_code || '—'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </Card>
+
+          {/* Bank Information */}
+          <Card className="shadow-xl rounded-2xl bg-white/95 backdrop-blur-sm border border-white/20">
+            <div className="p-6">
+              <div className="flex items-center space-x-3 mb-6">
+                <div className="p-2 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg">
+                  <Building className="text-white" size={20} />
+                </div>
+                <h2 className="text-xl font-semibold text-gray-900">Bank Information</h2>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="flex items-center space-x-3 p-4 bg-gray-50 rounded-xl">
+                  <Building className="text-gray-500" size={18} />
+                  <div>
+                    <p className="text-sm text-gray-500">Bank Name</p>
+                    <p className="font-medium text-gray-900">{kycData?.bank_data?.bank_name || '—'}</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center space-x-3 p-4 bg-gray-50 rounded-xl">
+                  <CreditCard className="text-gray-500" size={18} />
+                  <div>
+                    <p className="text-sm text-gray-500">Account Type</p>
+                    <p className="font-medium text-gray-900">{kycData?.bank_data?.account_type || '—'}</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center space-x-3 p-4 bg-gray-50 rounded-xl">
+                  <CreditCard className="text-gray-500" size={18} />
+                  <div>
+                    <p className="text-sm text-gray-500">Account Number</p>
+                    <p className="font-medium text-gray-900">{kycData?.bank_data?.account_no || '—'}</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center space-x-3 p-4 bg-gray-50 rounded-xl">
+                  <Building className="text-gray-500" size={18} />
+                  <div>
+                    <p className="text-sm text-gray-500">IFSC Code</p>
+                    <p className="font-medium text-gray-900">{kycData?.bank_data?.ifsc_code || '—'}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </Card>
+        </div>
+
+        {/* Documents Section */}
+        <div className="lg:col-span-1">
+          <Card className="shadow-xl rounded-2xl bg-white/95 backdrop-blur-sm border border-white/20">
+            <div className="p-6">
+              <div className="flex items-center space-x-3 mb-6">
+                <div className="p-2 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg">
+                  <FileText className="text-white" size={20} />
+                </div>
+                <h2 className="text-xl font-semibold text-gray-900">Documents</h2>
+              </div>
+
+              {kycData?.kyc_files && kycData.kyc_files.length > 0 ? (
+                <div className="space-y-4">
+                  {kycData.kyc_files.map((file, index) => (
+                    <div key={index} className="border border-gray-200 rounded-xl p-4 hover:shadow-md transition-all">
+                      <h3 className="font-medium text-gray-900 mb-3">{file.file_name}</h3>
+                      <div
+                        className="aspect-video bg-gray-100 rounded-lg mb-3 cursor-pointer overflow-hidden hover:shadow-lg transition-all"
+                        onClick={() => openZoom(file.file)}
+                      >
+                        <img
+                          src={`data:image/png;base64,${file.file}`}
+                          alt={file.file_name}
+                          className="w-full h-full object-cover rounded-lg hover:scale-105 transition-transform"
+                        />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-500 truncate">{file.file_name}</span>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="ml-2 hover:bg-gradient-to-r hover:from-blue-500 hover:to-purple-600 hover:text-white transition-all"
+                          onClick={() => {
+                            const mimeType = getMimeTypeFromFileName(file.file_name)
+                            const byteCharacters = atob(file.file)
+                            const byteNumbers = Array.from(byteCharacters).map(
+                              (c) => c.charCodeAt(0),
+                            )
+                            const byteArray = new Uint8Array(byteNumbers)
+                            const blob = new Blob([byteArray], { type: mimeType })
+
+                            const blobUrl = URL.createObjectURL(blob)
+
+                            const link = document.createElement('a')
+                            link.href = blobUrl
+                            link.download =
+                              file.file_name_download ||
+                              file.file_name ||
+                              'document'
+                            link.click()
+
+                            URL.revokeObjectURL(blobUrl)
+                          }}
+                        >
+                          <Download className="h-3 w-3 mr-1" />
+                          Download
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <p className="text-gray-500">No documents uploaded</p>
+                </div>
+              )}
+            </div>
+          </Card>
+        </div>
+      </div>
+
+      {/* Zoom Modal */}
+      {isZoomOpen && selectedImage && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="relative bg-white rounded-2xl shadow-2xl max-w-6xl max-h-[90vh] overflow-hidden">
+            <div className="absolute top-4 right-4 z-10">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={closeZoom}
+                className="bg-white/90 backdrop-blur-sm hover:bg-white rounded-full p-2 shadow-lg"
+              >
+                <X className="h-5 w-5" />
+              </Button>
+            </div>
+            <div className="p-4">
+              <img
+                src={`data:image/jpeg;base64,${selectedImage}`}
+                alt="Zoomed Document"
+                className="max-w-full max-h-[80vh] object-contain rounded-lg"
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

@@ -245,7 +245,7 @@ const LoginPage: React.FC = () => {
               </label>
 
               <a
-                href="/auth/forgot-Password"
+                href="/auth/forgot_Password"
                 className="text-sm text-pink-200 hover:text-white hover:underline"
               >
                 Forgot Password?

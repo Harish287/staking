@@ -490,18 +490,21 @@ export default function InvestorList() {
                                   investor.name?.split(' ')[1] ||
                                   ''
 
-                                setSelectedUserToUpdate({
+                                const updatedUser = {
                                   user_id: investor.user_id,
                                   first_name: firstName,
                                   last_name: lastName,
                                   email: investor.email || '',
                                   mobile: investor.mobile || '',
                                   referral_user_id: investor.referred_by || '',
-                                })
+                                }
 
+                                setSelectedUserToUpdate(updatedUser)
                                 dispatch(fetchEligibleUsers(investor.user_id))
 
-                                setUpdateDialogOpen(true)
+                                setTimeout(() => {
+                                  setUpdateDialogOpen(true)
+                                }, 0)
                               }}
                             >
                               <Pencil className="w-4 h-4 mr-2" /> Update User
@@ -764,6 +767,7 @@ export default function InvestorList() {
       </Card>
       {selectedUserToUpdate && (
         <UpdateInvestorDialog
+          key={selectedUserToUpdate.user_id} 
           open={updateDialogOpen}
           onClose={() => setUpdateDialogOpen(false)}
           user={selectedUserToUpdate}

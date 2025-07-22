@@ -80,6 +80,7 @@ export interface Verified {
 }
 
 export interface UserData {
+  super_wallet:number
   user_id: string
   user_role: string
   full_name: string

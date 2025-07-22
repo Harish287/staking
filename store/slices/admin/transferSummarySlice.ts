@@ -70,29 +70,39 @@ export const fetchTransferSummary = createAsyncThunk(
       const token = localStorage.getItem('token')
       const searchParams = new URLSearchParams()
 
-      params.wallets?.forEach(wallet => searchParams.append('wallets', wallet))
-      params.transaction_types?.forEach(type => searchParams.append('transaction_types', type))
-      params.wallet_filter?.forEach(filter => searchParams.append('wallet_filter', filter))
-      params.emails?.forEach(email => searchParams.append('emails', email))
+      params.wallets?.forEach((wallet) =>
+        searchParams.append('wallets', wallet),
+      )
+      params.transaction_types?.forEach((type) =>
+        searchParams.append('transaction_types', type),
+      )
+      params.wallet_filter?.forEach((filter) =>
+        searchParams.append('wallet_filter', filter),
+      )
+      params.emails?.forEach((email) => searchParams.append('emails', email))
       if (params.page) searchParams.append('page', String(params.page))
-      if (params.page_size) searchParams.append('page_size', String(params.page_size))
+      if (params.page_size)
+        searchParams.append('page_size', String(params.page_size))
 
-      const response = await axios.get(`${baseURL}wallet/summary/admin?${searchParams.toString()}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          Accept: 'application/json',
+      const response = await axios.get(
+        `${baseURL}wallet/summary/admin?${searchParams.toString()}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: 'application/json',
+          },
         },
-      })
+      )
 
       return response.data
     } catch (error: any) {
       return rejectWithValue(
         error?.response?.data?.detail ||
-        error?.response?.data?.message ||
-        'Failed to fetch transfer summary'
+          error?.response?.data?.message ||
+          'Failed to fetch transfer summary',
       )
     }
-  }
+  },
 )
 
 export const downloadTransferSummary = createAsyncThunk(
@@ -104,16 +114,22 @@ export const downloadTransferSummary = createAsyncThunk(
       wallet_filter?: string[]
       emails?: string[]
     },
-    { rejectWithValue }
+    { rejectWithValue },
   ) => {
     try {
       const token = localStorage.getItem('token')
       const searchParams = new URLSearchParams()
 
-      params.wallets?.forEach(wallet => searchParams.append('wallets', wallet))
-      params.transaction_types?.forEach(type => searchParams.append('transaction_types', type))
-      params.wallet_filter?.forEach(filter => searchParams.append('wallet_filter', filter))
-      params.emails?.forEach(email => searchParams.append('emails', email))
+      params.wallets?.forEach((wallet) =>
+        searchParams.append('wallets', wallet),
+      )
+      params.transaction_types?.forEach((type) =>
+        searchParams.append('transaction_types', type),
+      )
+      params.wallet_filter?.forEach((filter) =>
+        searchParams.append('wallet_filter', filter),
+      )
+      params.emails?.forEach((email) => searchParams.append('emails', email))
 
       const response = await axios.get(
         `${baseURL}wallet/summary/download/admin?${searchParams.toString()}`,
@@ -123,7 +139,7 @@ export const downloadTransferSummary = createAsyncThunk(
             Accept: 'application/octet-stream',
           },
           responseType: 'blob',
-        }
+        },
       )
 
       const blob = new Blob([response.data], {
@@ -139,11 +155,11 @@ export const downloadTransferSummary = createAsyncThunk(
     } catch (error: any) {
       return rejectWithValue(
         error?.response?.data?.message ||
-        error?.response?.data?.detail ||
-        'Failed to download transfer summary'
+          error?.response?.data?.detail ||
+          'Failed to download transfer summary',
       )
     }
-  }
+  },
 )
 
 // 5. Slice
@@ -153,7 +169,7 @@ const transferSummarySlice = createSlice({
   reducers: {
     setFilters: (
       state,
-      action: PayloadAction<TransferSummaryState['filters']>
+      action: PayloadAction<TransferSummaryState['filters']>,
     ) => {
       state.filters = action.payload
       state.page = 1
@@ -209,11 +225,7 @@ const transferSummarySlice = createSlice({
 })
 
 // 6. Exports
-export const {
-  setFilters,
-  setPage,
-  setPageSize,
-  clearTransferErrors,
-} = transferSummarySlice.actions
+export const { setFilters, setPage, setPageSize, clearTransferErrors } =
+  transferSummarySlice.actions
 
 export default transferSummarySlice.reducer
