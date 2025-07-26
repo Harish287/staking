@@ -1,19 +1,245 @@
+
+// 'use client'
+
+// import * as React from 'react'
+// import { styled, alpha } from '@mui/material/styles'
+// import { SimpleTreeView } from '@mui/x-tree-view/SimpleTreeView'
+// import { TreeItem, treeItemClasses } from '@mui/x-tree-view/TreeItem'
+// import {
+//   Tooltip,
+//   TextField,
+// } from '@mui/material'
+// import {
+//   IndeterminateCheckBoxRounded as CollapseIcon,
+//   AddBoxRounded as ExpandIcon,
+//   EmojiEvents,
+//   Diamond as DiamondIcon,
+//   MilitaryTech as MilitaryTechIcon,
+//   Grade as GradeIcon,
+// } from '@mui/icons-material'
+// import { User } from 'lucide-react'
+
+// interface TeamMember {
+//   name: string | null
+//   id: string | null
+//   user_name: string | null
+//   email: string | null
+//   club: string
+//   level: number
+//   total_staking: number
+//   team_staking: number
+//   children: TeamMember[]
+// }
+
+// interface TeamTreeMUIProps {
+//   team: TeamMember[]
+//   onUserClick?: (user_id: string, user: TeamMember) => void
+//   fetchUserChildren: (user_id: string) => Promise<TeamMember[]>
+// }
+
+// const CustomTreeItem = styled(TreeItem)(({ theme }) => ({
+//   position: 'relative',
+//   [`& .${treeItemClasses.content}`]: {
+//     padding: theme.spacing(0.5, 1),
+//     margin: theme.spacing(0.2, 0),
+//     position: 'relative',
+//   },
+//   [`& .${treeItemClasses.groupTransition}`]: {
+//     marginLeft: 15,
+//     paddingLeft: 18,
+//     borderLeft: `1px dashed ${alpha(theme.palette.text.primary, 0.4)}`,
+//     position: 'relative',
+//   },
+//   [`& .${treeItemClasses.content}::before`]: {
+//     content: '""',
+//     position: 'absolute',
+//     top: '50%',
+//     left: -18,
+//     width: 18,
+//     height: 1,
+//     backgroundColor: alpha(theme.palette.text.primary, 0.4),
+//   },
+// }))
+
+// const TeamTreeMUI: React.FC<TeamTreeMUIProps> = ({
+//   team,
+//   onUserClick,
+//   fetchUserChildren,
+// }) => {
+//   const [query, setQuery] = React.useState('')
+//   const [treeData, setTreeData] = React.useState<TeamMember[]>([])
+//   const [expandedItems, setExpandedItems] = React.useState<string[]>([])
+//   const [loadedNodes, setLoadedNodes] = React.useState<Set<string>>(new Set())
+
+//   React.useEffect(() => {
+//     setTreeData(team)
+//   }, [team])
+
+// const handleToggle = async (nodeId: string, member: TeamMember) => {
+//   const isExpanded = expandedItems.includes(nodeId)
+
+//   if (!isExpanded) {
+//     setExpandedItems((prev) => [...prev, nodeId])
+
+//     if (!loadedNodes.has(nodeId)) {
+//       const children = await fetchUserChildren(member.id || '')
+
+//       const updateTree = (nodes: TeamMember[]): TeamMember[] =>
+//         nodes.map((node) => {
+//           if (node.id === member.id) {
+//             return { ...node, children: children ?? [] }
+//           } else if (node.children?.length) {
+//             return { ...node, children: updateTree(node.children) }
+//           }
+//           return node
+//         })
+
+//       const updated = updateTree(treeData)
+//       setTreeData(updated)
+//       setLoadedNodes((prev) => new Set(prev).add(nodeId))
+//     }
+//   } else {
+//     setExpandedItems((prev) => prev.filter((id) => id !== nodeId))
+//   }
+// }
+
+//   const renderTree = (member: TeamMember, parentId = ''): React.ReactNode => {
+//     const nodeId = parentId ? `${parentId}-${member.id}` : member.id || ''
+
+//     const label = (
+//       <span className="gap-1 flex items-center text-[12px]">
+//         {getClubIcon(member.club)}
+
+//         <Tooltip
+//           title={
+//             <div className="text-xs p-1">
+//               <div>Level: L{member.level}</div>
+//               <div>Club: {member.club}</div>
+//               <div>Name: {member.name}</div>
+//               <div>Email: {member.email}</div>
+//               <div>Total Staking: {member.total_staking}</div>
+//               <div>Team Staking: {member.team_staking}</div>
+//             </div>
+//           }
+//           placement="bottom"
+//           arrow
+//         >
+//           <div>
+//             <span className="cursor-pointer text-black hover:underline">
+//               Level: L{member.level} -
+//             </span>
+//             <span className="cursor-pointer text-blue-600 hover:underline">
+//               [Id:{member.user_name}]
+//             </span>
+//           </div>
+//         </Tooltip>
+//       </span>
+//     )
+
+//     return (
+//       <CustomTreeItem
+//         key={nodeId}
+//         itemId={nodeId}
+//         label={label}
+//         onClick={(e) => {
+//           e.stopPropagation()
+//           handleToggle(nodeId, member)
+//         }}
+//       >
+//         {expandedItems.includes(nodeId) &&
+//           member.children?.map((child) => renderTree(child, nodeId))}
+//       </CustomTreeItem>
+//     )
+//   }
+
+//   const getClubIcon = (club: string) => {
+//     const iconProps = {
+//       sx: { width: 30, height: 30 },
+//       className:
+//         'bg-white w-5 h-5 rounded-2xl border-4',
+//     }
+
+//     switch (club) {
+//       case 'Basic':
+//         return <User className="w-[30px] h-[30px] text-gray-600 border-gray-600 border-4 rounded-2xl" />
+//       case 'Bronze':
+//         return <MilitaryTechIcon {...iconProps} className="text-amber-700 border-amber-700" />
+//       case 'Silver':
+//         return <MilitaryTechIcon {...iconProps} className="text-gray-500 border-gray-500" />
+//       case 'Gold':
+//         return <MilitaryTechIcon {...iconProps} className="text-yellow-500 border-yellow-500" />
+//       case 'Platinum':
+//         return <GradeIcon {...iconProps} className="text-gray-400 border-gray-500" />
+//       case 'Diamond':
+//         return <DiamondIcon {...iconProps} className="text-amber-700 border-amber-700" />
+//       case 'Double Diamond':
+//         return <DiamondIcon {...iconProps} className="text-gray-500" />
+//       case 'Triple Diamond':
+//         return <DiamondIcon {...iconProps} className="text-yellow-500 border-yellow-500" />
+//       case 'Kait King':
+//         return <EmojiEvents {...iconProps} className="text-yellow-600 border-yellow-600" />
+//       default:
+//         return <User className="w-[30px] h-[30px] text-gray-600 border-gray-600 border-4 rounded-2xl" />
+//     }
+//   }
+
+//   return (
+//     <div>
+//       <TextField
+//         fullWidth
+//         variant="outlined"
+//         size="small"
+//         placeholder="Search name, email or username"
+//         value={query}
+//         onChange={(e) => setQuery(e.target.value)}
+//         sx={{ mb: 2 }}
+//       />
+
+//       <SimpleTreeView
+//         aria-label="Team Tree"
+//         expandedItems={expandedItems}
+//         slots={{
+//           expandIcon: ExpandIcon,
+//           collapseIcon: CollapseIcon,
+//           endIcon: ExpandIcon,
+//         }}
+//         sx={{
+//           overflowX: 'auto',
+//           minHeight: 270,
+//           flexGrow: 1,
+//           width: '100%',
+//         }}
+//       >
+//         {treeData.map((member, index) => renderTree(member, `${index}`))}
+//       </SimpleTreeView>
+//     </div>
+//   )
+// }
+
+// export default TeamTreeMUI
+
+
+
+'use client'
+
 import * as React from 'react'
-import IndeterminateCheckBoxRoundedIcon from '@mui/icons-material/IndeterminateCheckBoxRounded'
-import DisabledByDefaultRoundedIcon from '@mui/icons-material/DisabledByDefaultRounded'
-import AddBoxRoundedIcon from '@mui/icons-material/AddBoxRounded'
 import { styled, alpha } from '@mui/material/styles'
 import { SimpleTreeView } from '@mui/x-tree-view/SimpleTreeView'
 import { TreeItem, treeItemClasses } from '@mui/x-tree-view/TreeItem'
+import { Tooltip, TextField, CircularProgress, Box } from '@mui/material'
+import {
+  IndeterminateCheckBoxRounded as CollapseIcon,
+  AddBoxRounded as ExpandIcon,
+  EmojiEvents,
+  Diamond as DiamondIcon,
+  MilitaryTech as MilitaryTechIcon,
+  Grade as GradeIcon,
+} from '@mui/icons-material'
 import { User } from 'lucide-react'
-import { Tooltip, TextField } from '@mui/material'
-import { EmojiEvents } from '@mui/icons-material'
-import DiamondIcon from '@mui/icons-material/Diamond'
-import MilitaryTechIcon from '@mui/icons-material/MilitaryTech'
-import GradeIcon from '@mui/icons-material/Grade'
 
 interface TeamMember {
   name: string | null
+  id: string | null
   user_name: string | null
   email: string | null
   club: string
@@ -25,6 +251,8 @@ interface TeamMember {
 
 interface TeamTreeMUIProps {
   team: TeamMember[]
+  onUserClick?: (user_id: string, user: TeamMember) => void
+  fetchUserChildren: (user_id: string) => Promise<TeamMember[]>
 }
 
 const CustomTreeItem = styled(TreeItem)(({ theme }) => ({
@@ -51,133 +279,181 @@ const CustomTreeItem = styled(TreeItem)(({ theme }) => ({
   },
 }))
 
-function ExpandIcon(props: React.PropsWithoutRef<typeof AddBoxRoundedIcon>) {
-  return <AddBoxRoundedIcon {...props} sx={{ opacity: 0.8 }} />
-}
-
-function CollapseIcon(
-  props: React.PropsWithoutRef<typeof IndeterminateCheckBoxRoundedIcon>,
-) {
-  return <IndeterminateCheckBoxRoundedIcon {...props} sx={{ opacity: 0.8 }} />
-}
-
-function EndIcon(
-  props: React.PropsWithoutRef<typeof DisabledByDefaultRoundedIcon>,
-) {
-  return <DisabledByDefaultRoundedIcon {...props} sx={{ opacity: 0.3 }} />
-}
-
-const filterTeam = (members: TeamMember[], query: string): TeamMember[] => {
-  if (!query) return members
-
-  return members
-    .map((member) => {
-      const name = member.name || ''
-      const username = member.user_name || ''
-      const email = member.email || ''
-
-      const matched =
-        name.toLowerCase().includes(query) ||
-        username.toLowerCase().includes(query) ||
-        email.toLowerCase().includes(query)
-
-      const filteredChildren = filterTeam(member.children || [], query)
-
-      if (matched || filteredChildren.length > 0) {
-        return {
-          ...member,
-          children: filteredChildren,
-        }
-      }
-
-      return null
-    })
-    .filter((m): m is TeamMember => m !== null)
-}
-
-const renderTree = (member: TeamMember, idPrefix = '0'): React.ReactNode => {
-  const label = (
-    <span className="gap-1 flex items-center text-[12px]">
-      {member.club === 'Basic' ? (
-        <User className="w-4 h-4" />
-      ) : member.club === 'Bronze' ? (
-        <MilitaryTechIcon
-          sx={{ width: 30, height: 30 }}
-          className="text-amber-700"
-        />
-      ) : member.club === 'Silver' ? (
-        <MilitaryTechIcon
-          sx={{ width: 30, height: 30 }}
-          className="text-gray-500"
-        />
-      ) : member.club === 'Gold' ? (
-        <MilitaryTechIcon
-          sx={{ width: 30, height: 30 }}
-          className="text-yellow-500"
-        />
-      ) : member.club === 'Platinum' ? (
-        <GradeIcon sx={{ width: 30, height: 30 }} className="text-gray-400" />
-      ) : member.club === 'Diamond' ? (
-        <DiamondIcon
-          sx={{ width: 30, height: 30 }}
-          className="text-amber-700"
-        />
-      ) : member.club === 'Double Diamond' ? (
-        <DiamondIcon sx={{ width: 30, height: 30 }} className="text-gray-500" />
-      ) : member.club === 'Triple Diamond' ? (
-        <DiamondIcon
-          sx={{ width: 30, height: 30 }}
-          className="text-yellow-500"
-        />
-      ) : member.club === 'Kait King' ? (
-        <EmojiEvents
-          sx={{ width: 30, height: 30 }}
-          className="text-yellow-600"
-        />
-      ) : (
-        <User className="w-4 h-4" />
-      )}
-
-      {member.level !== 0 && <div>Level: L{member.level}</div>}
-
-      <Tooltip
-        title={
-          <div className="text-xs p-1">
-            {member.level !== 0 && <div>Level: L{member.level}</div>}
-            {member.club && <div>Club: {member.club}</div>}
-            <div>Name: {member.name}</div>
-            <div>Email: {member.email}</div>
-            <div>Total Staking: {member.total_staking}</div>
-            <div>Team Staking: {member.team_staking}</div>
-          </div>
-        }
-        placement="bottom"
-        arrow
-      >
-        <span className="cursor-pointer text-blue-600">
-          [Id:{member.user_name}]
-        </span>
-      </Tooltip>
-    </span>
-  )
-
-  const nodeId = `${idPrefix}-${member.user_name}`
-
-  return (
-    <CustomTreeItem key={nodeId} itemId={nodeId} label={label}>
-      {member.children?.map((child, idx) =>
-        renderTree(child, `${nodeId}-${idx}`),
-      )}
-    </CustomTreeItem>
-  )
-}
-
-export default function TeamTreeMUI({ team }: TeamTreeMUIProps) {
+const TeamTreeMUI: React.FC<TeamTreeMUIProps> = ({
+  team,
+  onUserClick,
+  fetchUserChildren,
+}) => {
   const [query, setQuery] = React.useState('')
+  const [treeData, setTreeData] = React.useState<TeamMember[]>([])
+  const [expandedItems, setExpandedItems] = React.useState<string[]>([])
+  const [loadedNodes, setLoadedNodes] = React.useState<Set<string>>(new Set())
+  const [loadingNode, setLoadingNode] = React.useState<string | null>(null)
 
-  const filtered = React.useMemo(() => {
-    return filterTeam(team, query.toLowerCase())
-  }, [team, query])
+  React.useEffect(() => {
+    // Initialize only once
+    if (treeData.length === 0 && team.length > 0) {
+      const ensureChildren = (nodes: TeamMember[]): TeamMember[] =>
+        nodes.map((node) => ({
+          ...node,
+          children: node.children ?? [],
+        }))
+      setTreeData(ensureChildren(team))
+    }
+  }, [team])
+
+  const handleToggle = async (nodeId: string, member: TeamMember) => {
+    const isExpanded = expandedItems.includes(nodeId)
+
+    if (!isExpanded) {
+      setExpandedItems((prev) => [...prev, nodeId])
+
+      if (!loadedNodes.has(nodeId)) {
+        setLoadingNode(nodeId)
+        const children = await fetchUserChildren(member.id || '')
+        setLoadingNode(null)
+
+        if (!children || children.length === 0) return
+
+        const updateTree = (nodes: TeamMember[]): TeamMember[] =>
+          nodes.map((node) => {
+            if (node.id === member.id) {
+              return { ...node, children: children ?? [] }
+            } else if (node.children?.length) {
+              return { ...node, children: updateTree(node.children) }
+            }
+            return { ...node, children: node.children ?? [] }
+          })
+
+        const updated = updateTree(treeData)
+        setTreeData(updated)
+        setLoadedNodes((prev) => new Set(prev).add(nodeId))
+      }
+    } else {
+      setExpandedItems((prev) => prev.filter((id) => id !== nodeId))
+    }
+  }
+
+  const renderTree = (member: TeamMember, parentId = ''): React.ReactNode => {
+    const nodeId = parentId ? `${parentId}-${member.id}` : member.id || ''
+
+    const label = (
+      <span className="gap-1 flex items-center text-[12px]">
+        {getClubIcon(member.club)}
+
+        <Tooltip
+          title={
+            <div className="text-xs p-1">
+              <div>Level: L{member.level}</div>
+              <div>Club: {member.club}</div>
+              <div>Name: {member.name}</div>
+              <div>Email: {member.email}</div>
+              <div>Total Staking: {member.total_staking}</div>
+              <div>Team Staking: {member.team_staking}</div>
+            </div>
+          }
+          placement="bottom"
+          arrow
+        >
+          <div>
+            <span className="cursor-pointer text-black hover:underline">
+              Level: L{member.level} -
+            </span>
+            <span className="cursor-pointer text-blue-600 hover:underline">
+              [Id:{member.user_name}]
+            </span>
+          </div>
+        </Tooltip>
+      </span>
+    )
+
+    return (
+      <CustomTreeItem
+        key={nodeId}
+        itemId={nodeId}
+        label={label}
+        onClick={(e) => {
+          e.stopPropagation()
+          handleToggle(nodeId, member)
+        }}
+      >
+        {expandedItems.includes(nodeId) &&
+          (loadingNode === nodeId ? (
+            <Box className="p-2">
+              <CircularProgress size={20} />
+            </Box>
+          ) : (
+            member.children?.map((child) => renderTree(child, nodeId))
+          ))}
+      </CustomTreeItem>
+    )
+  }
+
+  const getClubIcon = (club: string) => {
+    const iconProps = {
+      sx: { width: 30, height: 30 },
+      className: 'bg-white w-5 h-5 rounded-2xl border-4',
+    }
+
+    switch (club) {
+      case 'Basic':
+        return (
+          <User className="w-[30px] h-[30px] text-gray-600 border-gray-600 border-4 rounded-2xl" />
+        )
+      case 'Bronze':
+        return (
+          <MilitaryTechIcon
+            {...iconProps}
+            className="text-amber-700 border-amber-700"
+          />
+        )
+      case 'Silver':
+        return (
+          <MilitaryTechIcon
+            {...iconProps}
+            className="text-gray-500 border-gray-500"
+          />
+        )
+      case 'Gold':
+        return (
+          <MilitaryTechIcon
+            {...iconProps}
+            className="text-yellow-500 border-yellow-500"
+          />
+        )
+      case 'Platinum':
+        return (
+          <GradeIcon {...iconProps} className="text-gray-400 border-gray-500" />
+        )
+      case 'Diamond':
+        return (
+          <DiamondIcon
+            {...iconProps}
+            className="text-amber-700 border-amber-700"
+          />
+        )
+      case 'Double Diamond':
+        return <DiamondIcon {...iconProps} className="text-gray-500" />
+      case 'Triple Diamond':
+        return (
+          <DiamondIcon
+            {...iconProps}
+            className="text-yellow-500 border-yellow-500"
+          />
+        )
+      case 'Kait King':
+        return (
+          <EmojiEvents
+            {...iconProps}
+            className="text-yellow-600 border-yellow-600"
+          />
+        )
+      default:
+        return (
+          <User className="w-[30px] h-[30px] text-gray-600 border-gray-600 border-4 rounded-2xl" />
+        )
+    }
+  }
 
   return (
     <div>
@@ -191,23 +467,31 @@ export default function TeamTreeMUI({ team }: TeamTreeMUIProps) {
         sx={{ mb: 2 }}
       />
 
-      <SimpleTreeView  
-        aria-label="Team Tree"
-        defaultExpandedItems={['0']}
-        slots={{
-          expandIcon: ExpandIcon,
-          collapseIcon: CollapseIcon,
-          endIcon: EndIcon,
-        }}
-        sx={{
-          overflowX: 'auto',
-          minHeight: 270,
-          flexGrow: 1,
-          width: '100%',
-        }}
-      >
-        {filtered.map((member, index) => renderTree(member, `${index}`))}
-      </SimpleTreeView>
+      {treeData.length === 0 && loadingNode === null ? (
+        <Box className="p-4 w-full flex justify-center">
+          <CircularProgress size={24} />
+        </Box>
+      ) : (
+        <SimpleTreeView
+          aria-label="Team Tree"
+          expandedItems={expandedItems}
+          slots={{
+            expandIcon: ExpandIcon,
+            collapseIcon: CollapseIcon,
+            endIcon: ExpandIcon,
+          }}
+          sx={{
+            overflowX: 'auto',
+            minHeight: 270,
+            flexGrow: 1,
+            width: '100%',
+          }}
+        >
+          {treeData.map((member, index) => renderTree(member, `${index}`))}
+        </SimpleTreeView>
+      )}
     </div>
   )
 }
+
+export default TeamTreeMUI

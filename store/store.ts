@@ -71,6 +71,8 @@ import registrationStatReducer from './slices/admin/registrationStatSlice'
 import eligibleUsersForUpdateReducer from './slices/admin/eligibleUserForUpdateSlice'
 import updateUserReducer from './slices/admin/updateUserSlice'
 import transferBalanceReducer from './slices/user/TransferBalanceSlice'
+import userTreeIdReducer from './slices/admin/usertreeSlice'
+
 export const store = configureStore({
   reducer: {
     auth: authReducer,
@@ -145,6 +147,7 @@ export const store = configureStore({
     eligibleUsersForUpdate: eligibleUsersForUpdateReducer,
     updateUser: updateUserReducer,
     transferBalance: transferBalanceReducer,
+    userTreeId: userTreeIdReducer,
   },
 })
 

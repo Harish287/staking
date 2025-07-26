@@ -23,6 +23,7 @@ export interface approveKycApplication {
 }
 
 export interface AuthState {
+
   verifiedUsername: any
   suggestedUsernames: any
   isAuthenticated: boolean

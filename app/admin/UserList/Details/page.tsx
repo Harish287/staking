@@ -37,6 +37,10 @@ import toast from 'react-hot-toast'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import Image from 'next/image'
 import kaitimg from '../../../../assets/logo2x.png'
+import { fetchUserTree } from '@/store/slices/admin/usertreeSlice'
+import { CircularProgress } from '@mui/material'
+import { buildTeamTree } from '@/utils/TeamBuilders'
+import { TeamMember } from '@/components/materialui/TreeWrap'
 
 export default function InvestorDetailsPage({
   params,
@@ -61,7 +65,33 @@ export default function InvestorDetailsPage({
     setWalletDialogOpen(true)
   }
 
-  console.log('Is window defined:', typeof window !== 'undefined')
+  const token =
+    typeof window !== 'undefined' ? localStorage.getItem('token') : ''
+  const rootUserId = searchParams.get('userId') || ''
+  const [filterUserId, setFilterUserId] = useState(rootUserId)
+
+  const {
+    data: userTree,
+    loading,
+    error,
+  } = useSelector((state: RootState) => state.userTreeId)
+
+  useEffect(() => {
+    if (rootUserId && filterUserId && token) {
+      dispatch(
+        fetchUserTree({
+          root_user_id: rootUserId,
+          filter_user_id: filterUserId,
+          token,
+        }),
+      )
+    }
+  }, [rootUserId, filterUserId, token])
+
+  const handleUserClick = (user_id: string) => {
+    setFilterUserId(user_id)
+  }
+  const teamWithChildren = buildTeamTree(userTree)
 
   useEffect(() => {
     console.log('Route id:', userId)
@@ -69,6 +99,28 @@ export default function InvestorDetailsPage({
       dispatch(fetchInvestorDetails(userId))
     }
   }, [userId, dispatch])
+
+  const handleFetchUserChildren = async (
+    user_id: string,
+  ): Promise<TeamMember[]> => {
+    try {
+      const token = localStorage.getItem('token')
+      if (!token) return []
+
+      const result = await dispatch(
+        fetchUserTree({
+          root_user_id: rootUserId,
+          filter_user_id: user_id,
+          token,
+        }),
+      ).unwrap()
+
+      return buildTeamTree(result)
+    } catch (error) {
+      console.error('Failed to fetch user children:', error)
+      return []
+    }
+  }
 
   if (detailsLoading) {
     return (
@@ -223,7 +275,7 @@ export default function InvestorDetailsPage({
                 <span className="text-gray-400">› {details.user_name}</span>
               </h1>
             </div>
-            <DropdownMenu> 
+            <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="h-8 w-8 p-0">
                   <MoreHorizontal className="h-4 w-4" />
@@ -231,7 +283,7 @@ export default function InvestorDetailsPage({
               </DropdownMenuTrigger>
               <DropdownMenuContent
                 align="end"
-                 className="bg-white z-50 max-h-80 overflow-y-auto"
+                className="bg-white z-50 max-h-80 overflow-y-auto"
               >
                 <DropdownMenuItem>
                   <Pencil className="w-4 h-4 mr-2" /> Update User
@@ -729,16 +781,22 @@ export default function InvestorDetailsPage({
 
           <div className="mt-8">
             <h2 className="text-lg font-medium mb-4">TEAM INFORMATION</h2>
-            <div className="bg-gray-50 p-4 rounded-lg">
-              {details.team_tree?.length > 0 ? (
-                <TeamTreeMUI
-                  team={
-                    Array.isArray(details.team_tree) ? details.team_tree : []
-                  }
-                />
-              ) : (
-                <p className="text-sm text-gray-500">No team data available.</p>
-              )}
+            <div className="bg-gray-50 p-4 rounded-lg min-h-[300px]">
+              {/* {loading ? (
+                <div className="flex items-center gap-2 text-sm text-gray-500">
+                  <CircularProgress size={16} /> Loading team tree...
+                </div>
+              ) : error ? (
+                <p className="text-sm text-red-500">Error: {error}</p>
+              ) : userTree.length > 0 ? ( */}
+              <TeamTreeMUI
+                team={teamWithChildren}
+                onUserClick={handleUserClick}
+                fetchUserChildren={handleFetchUserChildren}
+              />
+              {/* ) : (
+                 <p className="text-sm text-gray-500">No team data available.</p>
+               )}  */}
             </div>
           </div>
         </div>
