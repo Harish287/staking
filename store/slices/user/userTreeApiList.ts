@@ -1,8 +1,12 @@
+// store/slices/user/userTreeApiList.ts
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit'
 import axios from 'axios'
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
+
 export interface UserTreeNode {
-  parent_id: null
+  user_id: string
+  parent_id: string | null
   id: string
   name: string
   user_name: string | null
@@ -25,25 +29,33 @@ const initialState: UserTreeState = {
   error: null,
 }
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
-
 export const fetchUserTree = createAsyncThunk<
   UserTreeNode[],
-  { root_user_id: string; filter_user_id: string; token: string }
->('userTree/fetchUserTree', async ({ root_user_id, filter_user_id, token }, { rejectWithValue }) => {
-  try {
-    const response = await axios.get<UserTreeNode[]>(`${BASE_URL}user/user_tree`, {
-      params: { root_user_id, filter_user_id },
-      headers: {
-        Authorization: `Bearer ${token}`,
-        Accept: 'application/json',
-      },
-    })
-    return response.data
-  } catch (error: any) {
-    return rejectWithValue(error.response?.data?.message || 'Failed to fetch user tree')
+  { root_user_id: string; filter_user_id: string; token: string },
+  { rejectValue: string }
+>(
+  'userTree/fetchUserTree',
+  async ({ root_user_id, filter_user_id, token }, { rejectWithValue }) => {
+    if (!API_BASE_URL) {
+      return rejectWithValue('API base URL is not defined')
+    }
+
+    try {
+      const response = await axios.get<UserTreeNode[]>(`${API_BASE_URL}user/user_tree`, {
+        params: { root_user_id, filter_user_id },
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: 'application/json',
+        },
+      })
+      return response.data
+    } catch (error: any) {
+      return rejectWithValue(
+        error?.response?.data?.message || error?.message || 'Failed to fetch user tree'
+      )
+    }
   }
-})
+)
 
 const userTreeSlice = createSlice({
   name: 'userTree',
@@ -67,7 +79,7 @@ const userTreeSlice = createSlice({
       })
       .addCase(fetchUserTree.rejected, (state, action) => {
         state.loading = false
-        state.error = action.payload as string
+        state.error = action.payload ?? 'Unknown error'
       })
   },
 })

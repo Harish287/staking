@@ -3,24 +3,9 @@ import axios from 'axios'
 
 const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL
 
-export const fetchUserData = createAsyncThunk(
-  'user/fetchData',
-  async (_, { rejectWithValue }) => {
-    try {
-      const res = await axios.get(`${baseURL}user/data`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-      })
-      return res.data
-    } catch (err: any) {
-      return rejectWithValue(err.response?.data || 'Error fetching user data')
-    }
-  }
-)
-
-
 export interface TeamMember {
+  id:string
+  user_id: string
   name: string | null
   user_name: string | null
   email: string | null
@@ -31,99 +16,100 @@ export interface TeamMember {
   children: TeamMember[]
 }
 
-export interface Nominee {
-  name: string | null
-  pan: string | null
-  relationship: string | null
-}
-
-export interface Bank {
-  bank_name: string | null
-  account_type: 'savings' | 'current' | null
-  account_no: string | null
-  ifsc_code: string | null
-}
-
-export interface ProgressRequirement {
-  title: string
-  current: number | string
-  required: number
-  status: boolean
-  remaining: number | string
-}
-
-export interface NextProgress {
-  next_club: string
-  progress: ProgressRequirement[]
-}
-
-export interface Level {
+interface Level {
   level: number
-  total_users: number
-  total_volume: string
+  total_staking: number
+  user_count: number
+  total_volume: number
 }
 
-export interface LevelInfo {
-  total_levels: number
+interface LevelInfo {
   levels: Level[]
 }
 
-export interface IncomeEligibility {
-  user_max_income_limit: number
-  total_income: number | string
-  available_space: number | string
-}
-
-export interface Verified {
+interface Verified {
   email: boolean
   kyc: boolean
 }
 
 export interface UserData {
-  super_wallet:number
-  user_id: string
-  user_role: string
-  full_name: string
-  user_name: string
+  id: string
+  name: string
   email: string
-  mobile: string
-  wallet: string
-  dob: string
-  nominee: Nominee
-  nationality: string
-  bank: Bank
-  joining_date: string
-  sponsor: string
-  total_members: number
-  withdraw: boolean
-  withdraw_staking: boolean
-  adhoc_income: boolean
-  adhoc_transfer: boolean
-  suspend: boolean
-  transfer: boolean
-  // level_income: boolean
-  credit: boolean
-  invested: number
-  team_business: number
-  kiat_wallet: number
-  fiat_wallet: number
-  restake_wallet: number
-  income_wallet: number
-  level_income:Number
-  ros_wallet: number
-  adhoc_wallet: number
-  roi: number
-  roc: number
-  vpay_voucher: number
-  ecommerce_voucher: number
-  total_withdraw: number
+  user_name: string
   verified: Verified
-  next_progress: NextProgress
+  club: string
+  total_staking: number
+  team_staking: number
+  referral_code: string
+  sponsor_name: string
+  sponsor_username: string
+  sponsor_email: string
   level_info: LevelInfo
-  club_counts: Record<string, number>
-  income_eligibility: IncomeEligibility
   team_tree: TeamMember[]
 }
+
+export const fetchUserData = createAsyncThunk<
+  UserData,
+  string | undefined,
+  { rejectValue: string }
+>('user/fetchData', async (user_id, { rejectWithValue }) => {
+  try {
+    const res = await axios.get(`${baseURL}user/data`, {
+      params: user_id ? { user_id } : {},
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+    })
+
+    const response = res.data
+
+    const normalizeTeamTree = (members: any[]): TeamMember[] => {
+      return members.map((member) => ({
+        id: member.id,
+        user_id: member.id,
+        name: member.name,
+        user_name: member.user_name,
+        email: member.email,
+        club: member.club,
+        level: member.level,
+        total_staking: member.total_staking,
+        team_staking: member.team_staking,
+        children: member.children ? normalizeTeamTree(member.children) : [],
+      }))
+    }
+
+    const normalizedData: UserData = {
+      id: response.id,
+      name: response.name,
+      email: response.email,
+      user_name: response.user_name,
+      verified: {
+        email: response.email_verified,
+        kyc: response.kyc_verified,
+      },
+      club: response.club,
+      total_staking: response.total_staking,
+      team_staking: response.team_staking,
+      referral_code: response.referral_code,
+      sponsor_name: response.sponsor_name,
+      sponsor_username: response.sponsor_username,
+      sponsor_email: response.sponsor_email,
+      level_info: {
+        levels:
+          response.level_info?.levels?.map((lvl: any) => ({
+            ...lvl,
+            total_volume: lvl.total_staking,
+          })) || [],
+      },
+      team_tree: normalizeTeamTree(response.team_tree || []),
+    }
+
+    return normalizedData
+  } catch (err: any) {
+    return rejectWithValue(err.response?.data || 'Error fetching user data')
+  }
+})
 
 interface UserState {
   data: UserData | null
@@ -136,8 +122,6 @@ const initialState: UserState = {
   loading: false,
   error: null,
 }
-
-// ---------- Slice ----------
 
 const userSlice = createSlice({
   name: 'user',
@@ -155,7 +139,7 @@ const userSlice = createSlice({
       })
       .addCase(fetchUserData.rejected, (state, action) => {
         state.loading = false
-        state.error = action.payload as string
+        state.error = action.payload || 'Something went wrong'
       })
   },
 })

@@ -16,6 +16,7 @@ interface TeamTreeWrapperProps {
   token?: string
 }
 
+// Fix: recursive function to convert flat UserTreeNode[] to TeamMember[]
 const buildTree = (nodes: UserTreeNode[]): TeamMember[] => {
   if (!Array.isArray(nodes) || nodes.length === 0) return []
 

@@ -72,6 +72,7 @@ import eligibleUsersForUpdateReducer from './slices/admin/eligibleUserForUpdateS
 import updateUserReducer from './slices/admin/updateUserSlice'
 import transferBalanceReducer from './slices/user/TransferBalanceSlice'
 import userTreeIdReducer from './slices/admin/usertreeSlice'
+import userTreeApiListIdReducer from './slices/user/userTreeApiList'
 
 export const store = configureStore({
   reducer: {
@@ -148,6 +149,7 @@ export const store = configureStore({
     updateUser: updateUserReducer,
     transferBalance: transferBalanceReducer,
     userTreeId: userTreeIdReducer,
+    userTreeApiListId:userTreeApiListIdReducer
   },
 })
 

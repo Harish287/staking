@@ -51,7 +51,7 @@ const CLUB_TYPES = [
 
 const ClubVolume = () => {
   const dispatch = useAppDispatch()
-  const [month, setMonth] = useState<number | ''>('')
+  const [month, setMonth] = useState<number | ''>(new Date().getMonth() + 1)
   const [emailInput, setEmailInput] = useState('')
   const [clubTypes, setClubTypes] = useState<string[]>([])
   const [page, setPage] = useState(1)
@@ -724,4 +724,3 @@ const ClubVolume = () => {
 }
 
 export default ClubVolume
-
