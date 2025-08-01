@@ -41,7 +41,7 @@ export const fetchStakeList = createAsyncThunk(
   'stake/list',
   async (
     params: { stake_status?: string; page?: number; page_size?: number },
-    { rejectWithValue },
+    { rejectWithValue }
   ) => {
     try {
       const { stake_status = 'any', page = 1, page_size = 10 } = params
@@ -53,10 +53,23 @@ export const fetchStakeList = createAsyncThunk(
       })
       return res.data as StakeListResponse
     } catch (err: any) {
+      if (err.response?.status === 404) {
+        // You can return an empty data structure instead of rejecting
+        return {
+          total: 0,
+          page: 1,
+          page_size: 10,
+          total_pages: 1,
+          items: [],
+        } as StakeListResponse
+      }
+
+      // For other errors, reject with error message
       return rejectWithValue(err.response?.data || 'Error fetching stake list')
     }
-  },
+  }
 )
+
 
 const stakeListSlice = createSlice({
   name: 'stakeList',

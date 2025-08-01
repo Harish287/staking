@@ -21,7 +21,6 @@ import {
   DollarSign,
   Filter,
   RefreshCw,
-  Download,
   Eye,
   ArrowUpRight,
   ArrowDownLeft,
@@ -458,7 +457,8 @@ const WalletSummaryPage = () => {
         </Card>
 
         {/* Pagination */}
-        {total > page_size && (
+        {total > page_size &&
+         (
           <Card className="p-6 bg-white/95 backdrop-blur-sm shadow-2xl border-0">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4">
@@ -469,7 +469,7 @@ const WalletSummaryPage = () => {
                   className="flex items-center space-x-2 disabled:opacity-50"
                 >
                   <ChevronLeft className="w-4 h-4" />
-                  <span>Previous</span>
+                  {/* <span>Previous</span> */}
                 </Button>
 
                 <div className="flex items-center space-x-2">
@@ -502,7 +502,7 @@ const WalletSummaryPage = () => {
                   onClick={() => handlePagination(page + 1)}
                   className="flex items-center space-x-2 disabled:opacity-50"
                 >
-                  <span>Next</span>
+                  {/* <span>Next</span> */}
                   <ChevronRight className="w-4 h-4" />
                 </Button>
               </div>

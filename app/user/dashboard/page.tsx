@@ -62,7 +62,7 @@ function UserDashboard() {
   const { data: userData, loading: userLoading } = useAppSelector(
     (state) => state.UserTree,
   )
-  const latestBalance = userData?.restake_wallet || '0'
+  const latestBalance = userData?.wallets?.restake_wallet || '0'
 
   useEffect(() => {
     dispatch(fetchUserData())
@@ -92,7 +92,7 @@ function UserDashboard() {
 
   const handleCopy = () => {
     if (userData?.wallet) {
-      navigator.clipboard.writeText(userData.wallet)
+      navigator.clipboard.writeText(userData?.wallet)
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
     }
@@ -335,10 +335,10 @@ function UserDashboard() {
                         className="object-contain"
                       />
                       <CountUp
-                        end={Math.max(
-                          userData?.kiat_wallet ?? 0,
-                          userData?.invested ?? 0,
-                        )}
+                        end={
+                          (userData?.wallets?.kiat_wallet ?? 0) +
+                          (userData?.total_staking ?? 0)
+                        }
                         duration={1.5}
                         separator=","
                       />
@@ -347,9 +347,9 @@ function UserDashboard() {
 
                   <div className="w-full h-3 rounded-full bg-gray-200 overflow-hidden flex">
                     {(() => {
-                      const invested = userData?.invested ?? 0
-                      const wallet = userData?.kiat_wallet ?? 0
-                      const total = Math.max(wallet, invested)
+                      const invested = userData?.total_staking ?? 0
+                      const wallet = userData?.wallets?.kiat_wallet ?? 0
+                      const total = Math.max(wallet + invested)
 
                       const investedPercent = total
                         ? Math.min((invested / total) * 100, 100)
@@ -393,7 +393,7 @@ function UserDashboard() {
                         className="object-contain"
                       />
                       <CountUp
-                        end={userData?.invested ?? 0}
+                        end={userData?.total_staking ?? 0}
                         duration={1.5}
                         separator=","
                       />
@@ -410,7 +410,7 @@ function UserDashboard() {
                         className="object-contain"
                       />
                       <CountUp
-                        end={Math.max(userData?.kiat_wallet ?? 0, 0)}
+                        end={Math.max(userData?.wallets?.kiat_wallet ?? 0, 0)}
                         duration={1.5}
                         separator=","
                       />
@@ -426,7 +426,7 @@ function UserDashboard() {
 
             <Card className="bg-white p-4 flex flex-col gap-4 overflow-hidden">
               <h4 className="text-base font-semibold text-gray-700">
-                Your Team Metrics – Total of {userData?.total_members ?? 0}{' '}
+                Your Team Metrics – Total of {userData?.total_users ?? 0}{' '}
                 Members
               </h4>
 
@@ -486,7 +486,7 @@ function UserDashboard() {
                   flex gap-1"
                   >
                     <Siren color="red" className=" h-5 w-5 " /> To Achive the
-                    Target of {userData?.next_progress.next_club || '—'}
+                    Target of {userData?.next_progress?.next_club || '—'}
                   </CardDescription>
                 </div>
 

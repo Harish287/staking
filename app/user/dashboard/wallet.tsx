@@ -203,13 +203,13 @@ const AnimatedWallets = () => {
   const data = [
     {
       title: 'KAIT Wallet',
-      amount: (Number(userData?.kiat_wallet) || 0).toLocaleString(),
+      amount: (Number(userData?.wallets?.kiat_wallet) || 0).toLocaleString(),
       list: 'View Wallet',
       onClickList: [() => router.push('/user/kaitwallet/summary')],
     },
     {
       title: 'Total Staking',
-      amount: (Number(userData?.invested) || 0).toLocaleString(),
+      amount: (Number(userData?.total_staking) || 0).toLocaleString(),
       list: ['New Staking', 'All Staking'],
       onClickList: [
         () => router.push('/user/stakingcontracts/yourstakingcontracts'),
@@ -217,7 +217,7 @@ const AnimatedWallets = () => {
     },
     {
       title: 'Regular - ROS',
-      amount: (Number(userData?.roi) || 0).toLocaleString(),
+      amount: (Number(userData?.wallets?.roi) || 0).toLocaleString(),
       list: ['Summary', 'Re-Stake'],
       onClickList: [
         () =>
@@ -228,7 +228,7 @@ const AnimatedWallets = () => {
     },
     {
       title: 'Fixed - ROS',
-      amount: (Number(userData?.roc) || 0).toLocaleString(),
+      amount: (Number(userData?.wallets?.roc) || 0).toLocaleString(),
       list: 'Summary',
       onClickList: [
         () =>
@@ -239,7 +239,7 @@ const AnimatedWallets = () => {
     },
     {
       title: 'Income Wallet',
-      amount: (Number(userData?.income_wallet) || 0).toLocaleString(),
+      amount: (Number(userData?.wallets?.income_wallet) || 0).toLocaleString(),
       list: 'Summary',
       onClickList: [
         () =>
@@ -250,13 +250,13 @@ const AnimatedWallets = () => {
     },
     {
       title: 'Adhoc Wallet',
-      amount: (Number(userData?.adhoc_wallet) || 0).toLocaleString(),
+      amount: (Number(userData?.wallets?.adhoc_wallet) || 0).toLocaleString(),
       list: 'Summary',
       onClickList: [() => router.push('/user/transfers/adhoc-wallet-transfer')],
     },
     {
       title: 'Total Earnings',
-      amount: (Number(userData?.level_income) || 0).toLocaleString(),
+      amount: (Number(userData?.wallets?.income_wallet) || 0).toLocaleString(),
       list: 'Summary',
       onClickList: [
         () =>
@@ -267,13 +267,13 @@ const AnimatedWallets = () => {
     },
     {
       title: 'Voucher',
-      amount: (Number(userData?.vpay_voucher) || 0).toLocaleString(),
+      amount: (Number(userData?.wallets?.vpay_voucher) || 0).toLocaleString(),
       list: 'Summary',
       onClickList: [() => router.push('/user/voucher/voucher-wallet-summary')],
     },
     {
       title: 'Super Wallet',
-      amount: (Number(userData?.super_wallet) || 0).toLocaleString(),
+      amount: (Number(userData?.wallets?.super_wallet) || 0).toLocaleString(),
       list: 'Summary',
       onClickList: [
         () =>
