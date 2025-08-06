@@ -7,6 +7,8 @@ import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 
+const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL
+
 export default function ConfirmAccount() {
   const { token } = useParams() // Get token from the URL
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>(
@@ -20,7 +22,7 @@ export default function ConfirmAccount() {
     const verifyEmail = async () => {
       try {
         const response = await fetch(
-          `http://localhost/user/verify_email/${token}`,
+          `${baseURL}user/verify_email/${token}`,
           {
             method: 'GET', 
             headers: { 'Content-Type': 'application/json' },

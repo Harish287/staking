@@ -1,6 +1,9 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit'
 import axios from 'axios'
 
+const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL
+
+
 interface KycData {
   first_name: string
   last_name: string
@@ -52,7 +55,7 @@ export const fetchKycData = createAsyncThunk(
   ) => {
     try {
       const response = await axios.get(
-        `http://localhost/kyc/application?user_id=${encodeURIComponent(user_id)}`,
+        `${baseURL}kyc/application?user_id=${encodeURIComponent(user_id)}`,
         {
           headers: {
             Accept: 'application/json',

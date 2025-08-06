@@ -6,6 +6,7 @@ interface ForgotPasswordState {
   error: string | null
   success: boolean
 }
+const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL
 
 const initialState: ForgotPasswordState = {
   loading: false,
@@ -18,7 +19,7 @@ export const forgotPassword = createAsyncThunk(
   async (email: string, { rejectWithValue }) => {
     try {
       const response = await axios.post(
-        'http://localhost/user/forgot-pass',
+        `${baseURL}user/forgot-pass`,
         new URLSearchParams({ email }), // sends as application/x-www-form-urlencoded
         {
           headers: {

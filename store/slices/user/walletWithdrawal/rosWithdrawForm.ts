@@ -2,6 +2,7 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import axios from 'axios'
 import qs from 'qs'
 
+
 interface WithdrawRosPayload {
   otp: string
   transaction_pin: string
@@ -32,7 +33,7 @@ export const withdrawRos = createAsyncThunk(
     try {
       const token = localStorage.getItem('token')
       const response = await axios.post(
-        'http://localhost/withdraw/ros',
+        `${baseURL}withdraw/ros`,
         qs.stringify(payload),
         {
           headers: {

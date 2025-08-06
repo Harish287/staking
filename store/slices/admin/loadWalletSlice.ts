@@ -2,6 +2,9 @@ import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import axios from 'axios'
 import qs from 'qs'
 
+const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL
+
+
 interface LoadWalletParams {
   user_id: string
   wallet_kind: string
@@ -27,7 +30,7 @@ export const loadWallet = async ({
     amount,
   })
 
-  const response = await axios.post('http://localhost/wallet/load', data, {
+  const response = await axios.post(`${baseURL}wallet/load`, data, {
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
       Authorization: `Bearer ${token}`,

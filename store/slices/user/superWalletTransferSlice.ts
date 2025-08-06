@@ -1,6 +1,9 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import axios from 'axios'
 
+const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL
+
+
 export const initiateSelfTransfer = createAsyncThunk(
   'wallet/initiateSelfTransfer',
   async (
@@ -26,7 +29,7 @@ export const initiateSelfTransfer = createAsyncThunk(
       data.append('amount', String(amount))
 
       const res = await axios.post(
-        'http://localhost/transfer/intiate/super/to/self',
+        `${baseURL}transfer/intiate/super/to/self`,
         data,
         {
           headers: {
@@ -67,7 +70,7 @@ export const initiateUplineDownlineTransfer = createAsyncThunk(
       data.append('amount', String(amount))
 
       const res = await axios.post(
-        'http://localhost/transfer/intiate/super/to/upline/downline',
+        `${baseURL}transfer/intiate/super/to/upline/downline`,
         data,
         {
           headers: {

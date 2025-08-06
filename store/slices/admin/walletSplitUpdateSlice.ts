@@ -1,6 +1,9 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import axios from 'axios'
 
+const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL
+
+
 export interface UpdateSplitConfigPayload {
   split_config_id: string
   kait_wallet: number
@@ -36,7 +39,7 @@ export const updateWalletSplit = createAsyncThunk(
       })
 
       const response = await axios.put(
-        'http://localhost/wallet/split_config/',
+        `${baseURL}wallet/split_config/`,
         formData,
         {
           headers: {

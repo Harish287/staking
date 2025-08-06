@@ -8,9 +8,8 @@ import { Button } from '@/components/ui/button'
 const NoAccessPage = () => {
   const router = useRouter()
 
-  // Handle redirect back to the homepage or other route
   const handleRedirect = () => {
-    router.push('/') // Redirect to homepage or any other route
+    router.push('/')
   }
 
   return (
