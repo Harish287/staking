@@ -48,14 +48,25 @@ export const fetchUserTree = createAsyncThunk<
           Accept: 'application/json',
         },
       })
+
+      if ((response.data as any)?.detail === 'No records found') {
+        return [] 
+      }
+
       return response.data
     } catch (error: any) {
+      // ✅ If 404 but message says "No records found", treat as empty data
+      if (error?.response?.status === 404 &&
+          error?.response?.data?.detail === 'No records found') {
+        return []
+      }
       return rejectWithValue(
         error?.response?.data?.message || error?.message || 'Failed to fetch user tree'
       )
     }
   }
 )
+
 
 const userTreeSlice = createSlice({
   name: 'userTree',

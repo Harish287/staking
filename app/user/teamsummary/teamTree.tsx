@@ -18,6 +18,7 @@ import {
   Grade as GradeIcon,
 } from '@mui/icons-material'
 import { User } from 'lucide-react'
+import toast from 'react-hot-toast'
 
 export interface TeamMember {
   user_id: string
@@ -149,24 +150,36 @@ export default function TeamTreeMUI({ team }: TeamTreeMUIProps) {
   const dispatch = useAppDispatch()
 
   const handleNodeClick = async (user_id: string) => {
-    const root_user_id = team[0]?.id
-    const token = localStorage.getItem('token') || ''
-    if (root_user_id && user_id && token) {
-      try {
-        setLoadingNodeId(user_id)
-        const response = await dispatch(
-          fetchUserTree({ root_user_id, filter_user_id: user_id, token }),
-        ).unwrap()
-        const children = buildTeamTree(response)
-        const updated = insertChildren(treeData, user_id, children)
-        setTreeData(updated)
-      } catch (err) {
-        console.error('Subtree fetch failed:', err)
-      } finally {
-        setLoadingNodeId(null)
+  const root_user_id = team[0]?.id
+  const token = localStorage.getItem('token') || ''
+  if (root_user_id && user_id && token) {
+    try {
+      setLoadingNodeId(user_id)
+      const response = await dispatch(
+        fetchUserTree({ root_user_id, filter_user_id: user_id, token }),
+      ).unwrap()
+
+      if (!response || response.length === 0) {
+        toast.error('No data found')
+        return
       }
+
+      const children = buildTeamTree(response)
+      if (children.length === 0) {
+        toast.error('No data found')
+        return
+      }
+
+      const updated = insertChildren(treeData, user_id, children)
+      setTreeData(updated)
+    } catch (err: any) {
+      console.error('Subtree fetch failed:', err)
+      toast.error('No data found')
+    } finally {
+      setLoadingNodeId(null)
     }
   }
+}
 
   const handleExpansionToggle = async (
     event: React.SyntheticEvent | null,

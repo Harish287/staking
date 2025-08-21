@@ -150,7 +150,7 @@ export const fetchUserData = createAsyncThunk<
       },
       club: response.club || 'Basic',
       total_staking: response.invested,
-      total_users:response.total_users,
+      total_users:response.total_members,
       team_staking: response.team_business,
       referral_code: response.user_id,
       sponsor_name: response.sponsor?.split('(')[0]?.trim() || '',

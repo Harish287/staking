@@ -121,6 +121,7 @@ const clubVolumeSlice = createSlice({
       .addCase(fetchClubVolume.pending, (state) => {
         state.loading = true
         state.error = null
+        state.items = [] 
       })
       .addCase(fetchClubVolume.fulfilled, (state, action) => {
         state.loading = false
@@ -133,8 +134,12 @@ const clubVolumeSlice = createSlice({
       .addCase(fetchClubVolume.rejected, (state, action) => {
         state.loading = false
         state.error = action.payload || 'Error fetching data'
+        state.items = [] 
+        state.total = 0
+        state.total_pages = 0
       })
   },
 })
+
 
 export default clubVolumeSlice.reducer

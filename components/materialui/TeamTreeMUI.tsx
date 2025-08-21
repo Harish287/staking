@@ -219,7 +219,6 @@
 // export default TeamTreeMUI
 
 
-
 'use client'
 
 import * as React from 'react'
@@ -236,6 +235,7 @@ import {
   Grade as GradeIcon,
 } from '@mui/icons-material'
 import { User } from 'lucide-react'
+import toast from 'react-hot-toast'
 
 interface TeamMember {
   name: string | null
@@ -254,6 +254,7 @@ interface TeamTreeMUIProps {
   onUserClick?: (user_id: string, user: TeamMember) => void
   fetchUserChildren: (user_id: string) => Promise<TeamMember[]>
 }
+
 
 const CustomTreeItem = styled(TreeItem)(({ theme }) => ({
   position: 'relative',
@@ -291,7 +292,6 @@ const TeamTreeMUI: React.FC<TeamTreeMUIProps> = ({
   const [loadingNode, setLoadingNode] = React.useState<string | null>(null)
 
   React.useEffect(() => {
-    // Initialize only once
     if (treeData.length === 0 && team.length > 0) {
       const ensureChildren = (nodes: TeamMember[]): TeamMember[] =>
         nodes.map((node) => ({
@@ -302,37 +302,64 @@ const TeamTreeMUI: React.FC<TeamTreeMUIProps> = ({
     }
   }, [team])
 
-  const handleToggle = async (nodeId: string, member: TeamMember) => {
-    const isExpanded = expandedItems.includes(nodeId)
+const handleToggle = async (nodeId: string, member: TeamMember) => {
+  const scrollY = window.scrollY;
+  const isExpanded = expandedItems.includes(nodeId);
 
-    if (!isExpanded) {
-      setExpandedItems((prev) => [...prev, nodeId])
+  const restoreScroll = () => {
+    window.scrollTo({ top: scrollY, behavior: 'auto' });
+  };
 
-      if (!loadedNodes.has(nodeId)) {
-        setLoadingNode(nodeId)
-        const children = await fetchUserChildren(member.id || '')
-        setLoadingNode(null)
+  if (!isExpanded) {
+    setExpandedItems((prev) => [...prev, nodeId]);
 
-        if (!children || children.length === 0) return
+    if (!loadedNodes.has(nodeId)) {
+      setLoadingNode(nodeId);
+
+      const prevScrollBehavior = document.documentElement.style.scrollBehavior;
+      document.documentElement.style.scrollBehavior = 'auto';
+
+      try {
+        const children = await fetchUserChildren(member.id || '');
+
+        if (!children || children.length === 0) {
+          toast.error('No data found');
+          return;
+        }
 
         const updateTree = (nodes: TeamMember[]): TeamMember[] =>
-          nodes.map((node) => {
-            if (node.id === member.id) {
-              return { ...node, children: children ?? [] }
-            } else if (node.children?.length) {
-              return { ...node, children: updateTree(node.children) }
-            }
-            return { ...node, children: node.children ?? [] }
-          })
+          nodes.map((node) =>
+            node.id === member.id
+              ? { ...node, children }
+              : node.children?.length
+              ? { ...node, children: updateTree(node.children) }
+              : node
+          );
 
-        const updated = updateTree(treeData)
-        setTreeData(updated)
-        setLoadedNodes((prev) => new Set(prev).add(nodeId))
+        setTreeData((prev) => updateTree(prev));
+        setLoadedNodes((prev) => new Set(prev).add(nodeId));
+      } catch (err: any) {
+        console.error('Subtree fetch failed:', err);
+        toast.error('No data found');
+      } finally {
+        setLoadingNode(null);
+        restoreScroll();
+        document.documentElement.style.scrollBehavior = prevScrollBehavior;
       }
     } else {
-      setExpandedItems((prev) => prev.filter((id) => id !== nodeId))
+      restoreScroll();
     }
+  } else {
+    setExpandedItems((prev) => prev.filter((id) => id !== nodeId));
+    restoreScroll();
   }
+};
+
+
+
+
+
+
 
   const renderTree = (member: TeamMember, parentId = ''): React.ReactNode => {
     const nodeId = parentId ? `${parentId}-${member.id}` : member.id || ''
@@ -372,10 +399,13 @@ const TeamTreeMUI: React.FC<TeamTreeMUIProps> = ({
         key={nodeId}
         itemId={nodeId}
         label={label}
+        tabIndex={-1}
         onClick={(e) => {
-          e.stopPropagation()
-          handleToggle(nodeId, member)
+          e.stopPropagation();
+          setSelectedItems([nodeId]); // <-- select this item
+          handleToggle(nodeId, member);
         }}
+
       >
         {expandedItems.includes(nodeId) &&
           (loadingNode === nodeId ? (
@@ -454,6 +484,7 @@ const TeamTreeMUI: React.FC<TeamTreeMUIProps> = ({
         )
     }
   }
+  const [selectedItems, setSelectedItems] = React.useState<string[]>([]);
 
   return (
     <div>
@@ -472,23 +503,50 @@ const TeamTreeMUI: React.FC<TeamTreeMUIProps> = ({
           <CircularProgress size={24} />
         </Box>
       ) : (
-        <SimpleTreeView
-          aria-label="Team Tree"
-          expandedItems={expandedItems}
-          slots={{
-            expandIcon: ExpandIcon,
-            collapseIcon: CollapseIcon,
-            endIcon: ExpandIcon,
-          }}
-          sx={{
-            overflowX: 'auto',
-            minHeight: 270,
-            flexGrow: 1,
-            width: '100%',
-          }}
-        >
-          {treeData.map((member, index) => renderTree(member, `${index}`))}
-        </SimpleTreeView>
+<SimpleTreeView
+  multiSelect // ✅ tells TS that selectedItems is string[]
+  aria-label="Team Tree"
+  expandedItems={expandedItems}
+  selectedItems={selectedItems}
+  onSelectedItemsChange={(event, ids) => setSelectedItems(ids ?? [])} // ✅ ids can be null, so fallback to []
+  onItemExpansionToggle={(event, itemId, isExpanded) => {
+    if (event) {
+      event.preventDefault?.();
+      event.stopPropagation?.();
+    }
+
+    const findMember = (nodes: TeamMember[], id: string): TeamMember | null => {
+      for (const node of nodes) {
+        if (node.id === id) return node;
+        if (node.children?.length) {
+          const found = findMember(node.children, id);
+          if (found) return found;
+        }
+      }
+      return null;
+    };
+
+    const member = findMember(treeData, itemId);
+    if (member) {
+      handleToggle(itemId, member);
+    }
+  }}
+  slots={{
+    expandIcon: ExpandIcon,
+    collapseIcon: CollapseIcon,
+    endIcon: ExpandIcon,
+  }}
+  sx={{
+    overflowX: 'auto',
+    minHeight: 270,
+    flexGrow: 1,
+    width: '100%',
+  }}
+>
+  {treeData.map((member, index) => renderTree(member, `${index}`))}
+</SimpleTreeView>
+
+
       )}
     </div>
   )

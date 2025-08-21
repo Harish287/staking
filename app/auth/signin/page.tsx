@@ -275,10 +275,10 @@ const LoginPage: React.FC = () => {
         {showErrorPopup && (
           <div className="fixed top-0 left-0 w-full h-full flex items-center justify-center bg-black bg-opacity-50">
             <div className="bg-white p-6 rounded-md shadow-lg text-center">
-              <h2 className="text-xl font-bold text-red-300">Login Failed</h2>
-              <p className="text-gray-700 mt-2">{loginError}</p>
+              <h2 className="text-xl font-bold text-violet-300">Login Failed</h2>
+              <p className="text-gray-700 mt-2">{loginError} Incorrect Email Or Password</p>
               <button
-                className="mt-4 bg-pink-600 text-white px-4 py-2 rounded-md hover:bg-pink-700"
+                className="mt-4 bg-violet-600 text-white px-4 py-2 rounded-md hover:bg-violet-700"
                 onClick={() => setShowErrorPopup(false)}
               >
                 Close

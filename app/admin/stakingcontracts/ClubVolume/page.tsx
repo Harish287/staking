@@ -235,27 +235,27 @@ const ClubVolume = () => {
     )
   }
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-100 flex items-center justify-center">
-        <div className="text-center">
-          <div className="relative">
-            <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-200 border-t-blue-600 mx-auto mb-4"></div>
-            <div
-              className="absolute inset-0 rounded-full h-16 w-16 border-4 border-purple-200 border-t-purple-600 animate-spin mx-auto"
-              style={{
-                animationDirection: 'reverse',
-                animationDuration: '1.5s',
-              }}
-            ></div>
-          </div>
-          <p className="text-gray-600 text-lg font-medium">
-            Loading club volume data...
-          </p>
-        </div>
-      </div>
-    )
-  }
+  // if (loading) {
+  //   return (
+  //     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-100 flex items-center justify-center">
+  //       <div className="text-center">
+  //         <div className="relative">
+  //           <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-200 border-t-blue-600 mx-auto mb-4"></div>
+  //           <div
+  //             className="absolute inset-0 rounded-full h-16 w-16 border-4 border-purple-200 border-t-purple-600 animate-spin mx-auto"
+  //             style={{
+  //               animationDirection: 'reverse',
+  //               animationDuration: '1.5s',
+  //             }}
+  //           ></div>
+  //         </div>
+  //         <p className="text-gray-600 text-lg font-medium">
+  //           Loading club volume data...
+  //         </p>
+  //       </div>
+  //     </div>
+  //   )
+  // }
 
   return (
     <div className="min-h-screen bg-gradient-to-r from-blue-500 to-purple-700">
@@ -456,7 +456,7 @@ const ClubVolume = () => {
           </Card>
 
           {/* Error State */}
-          {error && (
+          {/* {error && (
             <Card className="mb-6 border-red-200 bg-red-50">
               <CardContent className="p-6">
                 <div className="flex items-center space-x-3">
@@ -470,7 +470,7 @@ const ClubVolume = () => {
                 </div>
               </CardContent>
             </Card>
-          )}
+          )} */}
 
           {/* Main Table */}
           <Card className="shadow-2xl border-0 bg-white/90 backdrop-blur-sm overflow-hidden">
@@ -480,7 +480,14 @@ const ClubVolume = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="p-0">
-              {items.length === 0 ? (
+              {loading ? (
+                <div className="flex flex-col items-center justify-center py-20">
+                  <div className="w-16 h-16 border-4 border-blue-300 border-t-blue-600 rounded-full animate-spin"></div>
+                  <p className="mt-4 text-gray-600 font-medium">
+                    Loading members...
+                  </p>
+                </div>
+              ) : items.length === 0 ? (
                 <div className="text-center py-16">
                   <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center">
                     <Users className="w-12 h-12 text-blue-600" />
